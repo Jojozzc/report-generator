@@ -3,6 +3,11 @@ from docx.enum.table import WD_TABLE_ALIGNMENT
 import pandas
 import os
 
+def write_cell(cell, text:str):
+    cell.text = text
+    cell.paragraphs[0].paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
+
+
 if __name__ == '__main__':
     # file_path = './testData/EPK-BFJC-MM-3115-AZ(02)-RT-039.docx'
     input_file_path = './testData/气化数据库2.xlsx'
@@ -28,22 +33,22 @@ if __name__ == '__main__':
 
         doc = docx.Document(template_path)
 
-        target_path = os.path.join('./testData', '{}.docx'.format(order_id))
+        target_path = os.path.join('./testData', f'{order_id}.docx')
 
         doc.paragraphs[1].text = doc.paragraphs[1].text + '宁夏宝丰能源集团股份有限公司50万吨/年煤制烯烃项目配套甲醇工程'
         doc.paragraphs[2].text = doc.paragraphs[2].text + '气化1'
         table = doc.tables[0]
-        table.alignment = WD_TABLE_ALIGNMENT.CENTER
-        table.cell(0, 2).text = '南京英派克检测有限责任公司'
-        table.cell(0, 11).text = order_id
 
-        table.cell(1, 2).text = '中化六建'
-        table.cell(1, 11).text = '2022.12.02'
+        write_cell(table.cell(0, 2), '南京英派克检测有限责任公司')
+        write_cell(table.cell(0, 11), order_id)
 
-        table.cell(2, 2).text = 'RT'
-        table.cell(2, 8).text = 'NB/T47013.2-2015'
-        # table.cell(2, 14).text = 'III'
-        table.cell(2, 14).text = format(quality_level, '.0%')
+        write_cell(table.cell(1, 2), '中化六建')
+        write_cell(table.cell(1, 11), '2022.12.02')
+
+        write_cell(table.cell(2, 2), 'RT')
+        write_cell(table.cell(2, 8), 'NB/T47013.2-2015')
+
+        write_cell(table.cell(2, 14), format(quality_level, '.0%'))
 
 
         kind_count = 0
@@ -97,8 +102,8 @@ if __name__ == '__main__':
 
         if kind_count < 18:
             table.cell(kind_count + 5, 1).text = '以下空白'
+            cel = table.cell(kind_count + 5, 1)
             table.cell(kind_count + 5, 1).paragraphs[0].paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
-            table.cell(kind_count + 5, 1).paragraphs[0].style.font = '楷体'
 
         table.cell(18 + 5, 1).text = f'说明：共检测焊口{kind_count}道口，总计{sample_cnt}张底片。其中不合格焊{unqualified_kind_cnt}道，不合格底片{unqualified_sample_cnt}张。'
 
