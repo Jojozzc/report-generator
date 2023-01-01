@@ -1,10 +1,11 @@
 import docx
+from docx.enum.table import WD_TABLE_ALIGNMENT
 import pandas
-
+import os
 
 if __name__ == '__main__':
     # file_path = './testData/EPK-BFJC-MM-3115-AZ(02)-RT-039.docx'
-    input_file_path = './testData/气化数据库.xlsx'
+    input_file_path = './testData/气化数据库2.xlsx'
     template_path = './template/TEMPLATE.docx'
 
 
@@ -23,24 +24,68 @@ if __name__ == '__main__':
 
     for key in data_map.keys():
         values = data_map[key]
+        order_id = values[0][2]
+        quality_level = values[0][8]
+
+        doc = docx.Document(template_path)
+
+        target_path = os.path.join('./testData', '{}.docx'.format(order_id))
+
+        doc.paragraphs[1].text = doc.paragraphs[1].text + '宁夏宝丰能源集团股份有限公司50万吨/年煤制烯烃项目配套甲醇工程'
+        doc.paragraphs[2].text = doc.paragraphs[2].text + '气化1'
+        table = doc.tables[0]
+        table.alignment = WD_TABLE_ALIGNMENT.CENTER
+        table.cell(0, 2).text = '南京英派克检测有限责任公司'
+        table.cell(0, 11).text = order_id
+
+        table.cell(1, 2).text = '中化六建'
+        table.cell(1, 11).text = '2022.12.02'
+
+        table.cell(2, 2).text = 'RT'
+        table.cell(2, 8).text = 'NB/T47013.2-2015'
+        # table.cell(2, 14).text = 'III'
+        table.cell(2, 14).text = format(quality_level, '.0%')
+
+
+        # 数据从第5行开始写入
+        for i in range(len(values)):
+            row = values[i]
+            # 检件编号
+            table.cell(i + 5, 1).text = row[3]
+            table.cell(i + 5, 1).paragraphs[0].paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
+
+            # 焊口编号
+            table.cell(i + 5, 3).text = str(row[4])
+            table.cell(i + 5, 3).paragraphs[0].paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
+
+
+            # 材质
+            table.cell(i + 5, 5).text = str(row[7])
+            table.cell(i + 5, 5).paragraphs[0].paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
+
+
+            # 规格
+            table.cell(i + 5, 7).text = str(row[6])
+            table.cell(i + 5, 7).paragraphs[0].paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
+
+            # 底片规格、数量
+            table.cell(i + 5, 9).text = '{}/{}'.format(row[10], row[11])
+            table.cell(i + 5, 9).paragraphs[0].paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
+
+            # 检测结果(合格)
+            table.cell(i + 5, 13).text = str(row[12])
+            table.cell(i + 5, 13).paragraphs[0].paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
+
+            # 检测结果(不合格)
+            table.cell(i + 5, 15).text = str(row[11] - row[12])
+            table.cell(i + 5, 15).paragraphs[0].paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
 
 
 
-
-    doc = docx.Document(template_path)
-    doc.paragraphs[1].text = doc.paragraphs[1].text + '宁夏宝丰能源集团股份有限公司50万吨/年煤制烯烃项目配套甲醇工程'
-    doc.paragraphs[2].text = doc.paragraphs[2].text + '气化1'
-    table = doc.tables[0]
-    table.cell(0, 2).text = '南京英派克检测有限责任公司'
-    table.cell(0, 11).text = 'BFJC-QH-3117-AZ(02)-RT-01408'
-
-    table.cell(1, 2).text = '中化六建'
-    table.cell(1, 11).text = '2022.12.02'
+        doc.save(target_path)
 
 
-    table.cell(2, 2).text = 'RT'
-    table.cell(2, 8).text = 'NB/T47013.2-2015'
-    table.cell(2, 14).text = 'III'
+
 
 
 
@@ -55,6 +100,5 @@ if __name__ == '__main__':
     # table.cell(2, 3).text = 'NB/T47013.2-2015'
     # table.cell(2, 5).text = 'III'
 
-    doc.save('./testData/testDoc.docx')
 
     pass
