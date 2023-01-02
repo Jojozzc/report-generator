@@ -6,7 +6,6 @@ from tkinter import filedialog
 def on_submit():
     submit_button.config(text='请稍后')
     submit_button.config(state=tk.DISABLED)
-    input_file_path = './testData/气化数据库2.xlsx'
     template_path = './template/TEMPLATE.docx'
 
     write_processor.process(template_path, input_file_select,
