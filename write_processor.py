@@ -81,10 +81,10 @@ def process(template_path: str, input_file_path: str, title1: str, title2: str, 
             unqualified_sample_cnt = unqualified_sample_cnt + unqualified_cnt
             kind_count = kind_count + 1
 
-        if kind_count < 18:
+        if kind_count < 22:
             write_cell(table.cell(kind_count + base_start, 1), '以下空白')
 
-        table.cell(18 + base_start,
+        table.cell(22 + base_start,
                    1).text = f'说明：共检测焊口{kind_count}道口，总计{sample_cnt}张底片。其中不合格焊{unqualified_kind_cnt}道，不合格底片{unqualified_sample_cnt}张。'
 
         doc.save(target_path)
