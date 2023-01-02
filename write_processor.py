@@ -102,7 +102,7 @@ def process(template_path: str, input_file_path: str, title1: str, title2: str, 
 
             doc.save(target_path)
         except Exception as e:
-            print(f'Error while process:{key}')
+            print(f'数据有误,请检查：委托单号={key}')
             print(e)
 
 
