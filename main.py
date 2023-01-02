@@ -5,13 +5,19 @@ from tkinter import filedialog
 
 def on_submit():
     submit_button.config(text='请稍后')
+    hint_label.config(text='执行中，请稍后')
     submit_button.config(state=tk.DISABLED)
     template_path = './template/TEMPLATE.docx'
-
-    write_processor.process(template_path, input_file_select,
-                            title1_input.get(),
-                            title2_input.get(), company_input.get(), customer_input.get(), method_input.get(),
-                            standard_input.get(), output_dir)
+    try:
+        write_processor.process(template_path, input_file_select,
+                                title1_input.get(),
+                                title2_input.get(), company_input.get(), customer_input.get(), method_input.get(),
+                                standard_input.get(), output_dir)
+        hint_label.config(text='执行成功！')
+    except Exception as e:
+        print(f'执行错误！{e}')
+        print(e)
+        hint_label.config(text='执行出错')
     submit_button.config(text='提交')
     submit_button.config(state=tk.NORMAL)
 
@@ -58,6 +64,7 @@ if __name__ == '__main__':
 
     output_button = tk.Button(root_window, text='请选择输出文件夹', command=on_select_out_put_dir)
     output_display = tk.Label(root_window, text='未选择')
+    hint_label = tk.Label(text='')
 
     title1_label.pack()
     title1_input.pack()
@@ -76,6 +83,7 @@ if __name__ == '__main__':
     file_select_display.pack()
     output_button.pack()
     output_display.pack()
+    hint_label.pack()
     submit_button = tk.Button(root_window, text="提交",
                               command=on_submit)
     submit_button.pack(side="bottom")
