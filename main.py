@@ -78,7 +78,7 @@ if __name__ == '__main__':
     output_button.pack()
     output_display.pack()
     submit_button = tk.Button(root_window, text="提交",
-                              command=lambda: on_submit())
+                              command=on_submit)
     submit_button.pack(side="bottom")
 
     root_window.mainloop()
