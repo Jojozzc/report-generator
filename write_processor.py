@@ -6,7 +6,7 @@ from RawData import RawData
 
 TABLE_MAPPING = {
     "complete_date": 1,
-    "order_id" : 2,
+    "order_id": 2,
     "sample_no": 3,
     "kind_no": 4,
     "material": 7,
