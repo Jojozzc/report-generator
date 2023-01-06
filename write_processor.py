@@ -23,13 +23,24 @@ def write_cell(cell, text: str):
     cell.paragraphs[0].paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
 
 
+'''
+:param callback (total_cnt, fin_cnt, fail_cnt)
+'''
 def process(template_path: str, input_file_path: str, title1: str, title2: str, company_name: str, customer: str,
-            method: str, standard: str, target_dir: str):
+            method: str, standard: str, target_dir: str, callback):
     base_start = 5
     raw_data_map = read_raw_data(input_file_path)
 
+    total_cnt = len(raw_data_map.keys())
+    fin_cnt = 0
+    fail_cnt = 0
+    problem_cnt = 0
+    callback(total_cnt, fin_cnt, fail_cnt, problem_cnt)
+
     for key in raw_data_map.keys():
+        has_problem = False
         try:
+            callback(total_cnt, fin_cnt, fail_cnt, problem_cnt)
             values = raw_data_map[key]
             order_id = key
             quality_level = values[0].quality_level
@@ -85,6 +96,7 @@ def process(template_path: str, input_file_path: str, title1: str, title2: str, 
                     write_cell(table.cell(i + base_start, 9), f'{sample_specification}/{raw_data.sample_cnt}张')
                 else:
                     print(f'数据有误(张数)请检查：委托单号={order_id},检件编号={raw_data.sample_no}')
+                    has_problem = True
                     write_cell(table.cell(i + base_start, 9), f'{sample_specification}')
 
                 # 检测结果(合格)
@@ -104,6 +116,7 @@ def process(template_path: str, input_file_path: str, title1: str, title2: str, 
                         write_cell(table.cell(i + base_start, 15), '/')
                 else:
                     print(f'数据有误(张数或合格数量)请检查：委托单号={order_id},检件编号={raw_data.sample_no}')
+                    has_problem = True
 
                 kind_count = kind_count + 1
 
@@ -114,9 +127,17 @@ def process(template_path: str, input_file_path: str, title1: str, title2: str, 
                        1).text = f'说明：共检测焊口{kind_count}道口，总计{sample_cnt}张底片。其中不合格焊{unqualified_kind_cnt}道，不合格底片{unqualified_sample_cnt}张。'
 
             doc.save(target_path)
+            if has_problem:
+                problem_cnt = problem_cnt + 1
         except Exception as e:
             print(f'数据有误,请检查：委托单号={key}')
             print(e)
+            fail_cnt = fail_cnt + 1
+        finally:
+            fin_cnt = fin_cnt + 1
+
+    callback(total_cnt, fin_cnt, fail_cnt, problem_cnt)
+
 
 
 def read_raw_data(input_file_path: str):
