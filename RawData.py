@@ -23,7 +23,7 @@ class RawData:
     qualified_sample_cnt: int = None
 
     # 合格级别
-    quality_level = None
+    quality_level: str = None
 
     def __init__(self,
                  complete_date: str,
@@ -34,7 +34,7 @@ class RawData:
                  sample_specification: str,
                  sample_cnt: int,
                  qualified_sample_cnt: int,
-                 quality_level):
+                 quality_level: str):
         self.complete_date = complete_date
         self.sample_no = sample_no
         self.kind_no = kind_no

@@ -4,6 +4,19 @@ import pandas
 import os
 from RawData import RawData
 
+TABLE_MAPPING = {
+    "complete_date": 1,
+    "order_id" : 2,
+    "sample_no": 3,
+    "kind_no": 4,
+    "material": 7,
+    "specification": 6,
+    "sample_specification": 11,
+    "sample_cnt": 12,
+    "qualified_sample_cnt": 13,
+    "quality_level": 8
+}
+
 
 def write_cell(cell, text: str):
     cell.text = text
@@ -39,7 +52,7 @@ def process(template_path: str, input_file_path: str, title1: str, title2: str, 
             write_cell(table.cell(2, 2), method)
             write_cell(table.cell(2, 8), standard)
 
-            write_cell(table.cell(2, 14), format(quality_level, '.0%'))
+            write_cell(table.cell(2, 14), quality_level)
 
             kind_count = 0
             unqualified_kind_cnt = 0
@@ -112,27 +125,31 @@ def read_raw_data(input_file_path: str):
 
     for i in range(raw_datas.shape[0]):
         row = raw_datas.iloc[i]
-        order_id = row[2]
+        order_id = row[TABLE_MAPPING['order_id']]
         if order_id not in data_map:
             data_map[order_id] = []
 
-        sample_cnt = None
-        qualified_sample_cnt = None
-
-        if str(row[11]).isdigit():
-            sample_cnt = int(row[11])
-
-        if str(row[12]).isdigit():
-            qualified_sample_cnt = int(row[12])
-
-        raw_data = RawData(wrapper_str(row[1]), wrapper_str(row[3]), wrapper_str(row[4]), wrapper_str(row[7]), wrapper_str(row[6]), wrapper_str(row[10]), sample_cnt,
-                           qualified_sample_cnt, row[8])
+        raw_data = RawData(complete_date=wrap_str(row[TABLE_MAPPING['complete_date']]),
+                           sample_no=wrap_str(row[TABLE_MAPPING['sample_no']]),
+                           kind_no=wrap_str(row[TABLE_MAPPING['kind_no']]),
+                           material=wrap_str(row[TABLE_MAPPING['material']]),
+                           specification=wrap_str(row[TABLE_MAPPING['specification']]),
+                           sample_specification=wrap_str(row[TABLE_MAPPING['sample_specification']]),
+                           sample_cnt=wrap_int(row[TABLE_MAPPING['sample_cnt']]),
+                           qualified_sample_cnt=wrap_int(row[TABLE_MAPPING['qualified_sample_cnt']]),
+                           quality_level=wrap_str(row[TABLE_MAPPING['quality_level']]))
         data_map[order_id].append(raw_data)
 
     return data_map
 
 
-def wrapper_str(obj):
-    if str(obj) == 'nan' or str(obj) == None:
+def wrap_str(obj):
+    if obj is None or str(obj) == 'nan' or str(obj) == 'None':
         return None
     return str(obj)
+
+
+def wrap_int(obj):
+    if str(obj).isdigit():
+        return int(obj)
+    return None
