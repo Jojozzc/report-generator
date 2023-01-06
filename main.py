@@ -1,8 +1,34 @@
+import sys
+
 import write_processor
 import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
 import threading
+import datetime
+
+
+class AppStdout:
+    backup_stdout = None
+    backup_stderr = None
+    text_ui: tk.Text = None
+
+    def __init__(self, text_ui):
+        self.text_ui = text_ui
+        self.backup_stdout = sys.stdout
+        self.backup_stderr = sys.stderr
+        sys.stdout = self
+        sys.stderr = self
+
+    def write(self, info):
+        self.text_ui.insert('end', info)
+        self.text_ui.update()
+        self.text_ui.see(tk.END)
+
+    def close(self):
+        sys.stdout = self.backup_stdout
+        sys.stderr = self.backup_stderr
+
 
 def process_callback(total_cnt, fin_cnt, fail_cnt, problem_cnt):
     progress_hint_label.config(text=f'({fin_cnt}/{total_cnt}) 失败文件数:{fail_cnt},需要关注的文件数:{problem_cnt}')
@@ -14,6 +40,7 @@ def process_callback(total_cnt, fin_cnt, fail_cnt, problem_cnt):
         cnt_val = int(fin_cnt / total_cnt * 100)
         cnt_val = min(cnt_val, 99)
         progressbar['value'] = cnt_val
+    root_window.update()
 
 
 def async_process(template_path: str, input_file_path: str, title1: str, title2: str, company_name: str, customer: str,
@@ -23,11 +50,14 @@ def async_process(template_path: str, input_file_path: str, title1: str, title2:
     submit_button.config(text='提交')
     submit_button.config(state=tk.NORMAL)
     hint_label.config(text='执行成功！')
-
+    print(f'---执行完成 {datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}---')
     root_window.update()
 
 
 def on_submit():
+
+    std_output_text.delete(1.0, tk.END)
+    print(f'---开始执行 {datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}---')
     submit_button.config(text='请稍后')
     hint_label.config(text='执行中，请稍后')
     progress_hint_label.config(text='')
@@ -59,20 +89,18 @@ def on_open_docx_file():
     global input_file_select
     input_file_select = filedialog.askopenfilename(title='选择输入文件', filetypes=[('excel表格', '*.xlsx')])
     file_select_display.config(text=f'已选择:{input_file_select}')
-    print(f'input_file_select={input_file_select}')
 
 
 def on_select_out_put_dir():
     global output_dir
     output_dir = filedialog.askdirectory(title='选择输出文件夹')
     output_display.config(text=f'已选择:{output_dir}')
-    print(f'output_dir={output_dir}')
 
 
 if __name__ == '__main__':
     root_window = tk.Tk()
     root_window.title('文档自动生成器')
-    root_window.geometry('1000x500')
+    root_window.geometry('1000x700')
 
     title1_label = tk.Label(root_window, text='请输入工程名称:')
     title1_input = tk.Entry(root_window, textvariable=tk.StringVar(value='宁夏宝丰能源集团股份有限公司50万吨/年煤制烯烃项目配套甲醇工程'))
@@ -101,7 +129,7 @@ if __name__ == '__main__':
     progressbar = ttk.Progressbar(root_window)
     progress_hint_label = tk.Label(root_window, text='')
     hint_label = tk.Label(root_window, text='')
-    # output_text = tk.Text()
+    std_output_text = tk.Text(root_window, height=10, width=100)
 
     title1_label.pack()
     title1_input.pack()
@@ -123,9 +151,14 @@ if __name__ == '__main__':
     progressbar.pack()
     progress_hint_label.pack()
     hint_label.pack()
-    # output_text.pack()
+
     submit_button = tk.Button(root_window, text="提交",
                               command=on_submit)
-    submit_button.pack(side="bottom")
+    # submit_button.pack(side="bottom")
+    submit_button.pack()
+    std_output_text.pack()
+    app_std_out = AppStdout(std_output_text)
 
     root_window.mainloop()
+
+    app_std_out.close()
