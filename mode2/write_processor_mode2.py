@@ -2,19 +2,19 @@ import docx
 from docx.enum.table import WD_TABLE_ALIGNMENT
 import pandas
 import os
-from RawData import RawData
+from mode2.RawDataMode2 import RawDataMode2
 
 TABLE_MAPPING = {
     "complete_date": 1,
     "order_id": 2,
     "sample_no": 3,
-    "kind_no": 4,
-    "material": 7,
-    "specification": 6,
-    "sample_specification": 11,
-    "sample_cnt": 12,
-    "qualified_sample_cnt": 13,
-    "quality_level": 8
+    "line_no": 4,
+    "kind_no": 5,
+    "emp_id": 6,
+    "material": 8,
+    "specification": 7,
+    "ret_cnt": 11,
+    "qualified_sample_cnt": 12,
 }
 
 
@@ -22,13 +22,17 @@ def write_cell(cell, text: str):
     cell.text = text
     cell.paragraphs[0].paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
 
+def write_cell_para(cell, para_idx: int,text: str):
+    cell.paragraphs[para_idx].text = text
+    cell.paragraphs[para_idx].paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
+
 
 '''
 :param callback (total_cnt, fin_cnt, fail_cnt)
 '''
-def process(template_path: str, input_file_path: str, title1: str, title2: str, company_name: str, customer: str,
-            method: str, standard: str, target_dir: str, callback):
-    base_start = 5
+def process(template_path: str, input_file_path: str, title1: str, title2: str, customer: str,
+            method: str, target_dir: str, callback):
+    base_start = 3
     raw_data_map = read_raw_data(input_file_path)
 
     total_cnt = len(raw_data_map.keys())
@@ -43,39 +47,32 @@ def process(template_path: str, input_file_path: str, title1: str, title2: str, 
             callback(total_cnt, fin_cnt, fail_cnt, problem_cnt)
             values = raw_data_map[key]
             order_id = key
-            quality_level = values[0].quality_level
             complete_date = values[0].complete_date
 
             doc = docx.Document(template_path)
 
             target_path = os.path.join(target_dir, f'{order_id}.docx')
 
-            doc.paragraphs[1].text = doc.paragraphs[1].text + title1
-            doc.paragraphs[2].text = doc.paragraphs[2].text + title2
             table = doc.tables[0]
 
-            write_cell(table.cell(0, 2), company_name)
-            write_cell(table.cell(0, 11), order_id)
+            write_cell_para(table.cell(0, 11), 0, "工程名称:" + title1)
+            write_cell_para(table.cell(0, 11), 1, "单位工程名称:" + title2)
+
+            write_cell(table.cell(1, 11), order_id)
 
             write_cell(table.cell(1, 2), customer)
-            write_cell(table.cell(1, 11), complete_date)
 
-            write_cell(table.cell(2, 2), method)
-            write_cell(table.cell(2, 8), standard)
+            write_cell(table.cell(1, 9), method)
 
-            write_cell(table.cell(2, 14), quality_level)
 
-            kind_count = 0
-            unqualified_kind_cnt = 0
-
-            sample_cnt = 0
-            unqualified_sample_cnt = 0
-
-            # 数据从第5行开始写入
+            # 数据从第4行开始写入
             for i in range(len(values)):
-                raw_data: RawData = values[i]
+                raw_data: RawDataMode2 = values[i]
 
-                # 检件编号
+                # 委托编号
+                write_cell(table.cell(i + base_start, 1), raw_data.sample_no)
+
+                # 检测批号
                 write_cell(table.cell(i + base_start, 1), raw_data.sample_no)
 
                 # 焊口编号
@@ -86,45 +83,6 @@ def process(template_path: str, input_file_path: str, title1: str, title2: str, 
 
                 # 规格
                 write_cell(table.cell(i + base_start, 7), raw_data.specification)
-
-                sample_specification = ''
-                if raw_data.sample_specification is not None:
-                    sample_specification = raw_data.sample_specification
-                # 底片规格、数量
-                if raw_data.sample_cnt is not None:
-                    sample_cnt = sample_cnt + raw_data.sample_cnt
-                    write_cell(table.cell(i + base_start, 9), f'{sample_specification}/{raw_data.sample_cnt}张')
-                else:
-                    print(f'数据有误(张数)请检查：委托单号={order_id},检件编号={raw_data.sample_no}')
-                    has_problem = True
-                    write_cell(table.cell(i + base_start, 9), f'{sample_specification}')
-
-                # 检测结果(合格)
-                if raw_data.qualified_sample_cnt is not None:
-                    write_cell(table.cell(i + base_start, 13), f'{raw_data.qualified_sample_cnt}张')
-                else:
-                    write_cell(table.cell(i + base_start, 13), '/')
-
-                # 检测结果(不合格)
-                if raw_data.sample_cnt is not None and raw_data.qualified_sample_cnt is not None:
-                    unqualified_cnt = raw_data.sample_cnt - raw_data.qualified_sample_cnt
-                    if unqualified_cnt > 0:
-                        unqualified_sample_cnt = unqualified_sample_cnt + unqualified_cnt
-                        unqualified_kind_cnt = unqualified_kind_cnt + 1
-                        write_cell(table.cell(i + base_start, 15), f'{unqualified_cnt}张')
-                    else:
-                        write_cell(table.cell(i + base_start, 15), '/')
-                else:
-                    print(f'数据有误(张数或合格数量)请检查：委托单号={order_id},检件编号={raw_data.sample_no}')
-                    has_problem = True
-
-                kind_count = kind_count + 1
-
-            if kind_count < 22:
-                write_cell(table.cell(kind_count + base_start, 1), '以下空白')
-
-            table.cell(22 + base_start,
-                       1).text = f'说明：共检测焊口{kind_count}道口，总计{sample_cnt}张底片。其中不合格焊{unqualified_kind_cnt}道，不合格底片{unqualified_sample_cnt}张。'
 
             doc.save(target_path)
             if has_problem:
@@ -146,19 +104,19 @@ def read_raw_data(input_file_path: str):
 
     for i in range(raw_datas.shape[0]):
         row = raw_datas.iloc[i]
-        order_id = row[TABLE_MAPPING['order_id']]
+        order_id = wrap_int_str(row[TABLE_MAPPING['order_id']])
         if order_id not in data_map:
             data_map[order_id] = []
 
-        raw_data = RawData(complete_date=wrap_str(row[TABLE_MAPPING['complete_date']]),
+        raw_data = RawDataMode2(complete_date=wrap_str(row[TABLE_MAPPING['complete_date']]),
                            sample_no=wrap_str(row[TABLE_MAPPING['sample_no']]),
+                           line_no=wrap_str(row[TABLE_MAPPING['line_no']]),
                            kind_no=wrap_str(row[TABLE_MAPPING['kind_no']]),
+                           emp_id=wrap_str(row[TABLE_MAPPING['emp_id']]),
+                           ret_cnt=wrap_int(row[TABLE_MAPPING['ret_cnt']]),
                            material=wrap_str(row[TABLE_MAPPING['material']]),
                            specification=wrap_str(row[TABLE_MAPPING['specification']]),
-                           sample_specification=wrap_str(row[TABLE_MAPPING['sample_specification']]),
-                           sample_cnt=wrap_int(row[TABLE_MAPPING['sample_cnt']]),
-                           qualified_sample_cnt=wrap_int(row[TABLE_MAPPING['qualified_sample_cnt']]),
-                           quality_level=wrap_str(row[TABLE_MAPPING['quality_level']]))
+                           qualified_sample_cnt=wrap_int(row[TABLE_MAPPING['qualified_sample_cnt']]))
         data_map[order_id].append(raw_data)
 
     return data_map
@@ -174,3 +132,19 @@ def wrap_int(obj):
     if str(obj).isdigit():
         return int(obj)
     return None
+
+
+def wrap_int_str(obj):
+    if is_float(obj):
+        return str(int(obj))
+    return str(obj)
+
+
+def is_float(obj):
+    try:
+        if obj is None or str(obj) == 'nan' or str(obj) == 'None':
+            return False
+        float(obj)
+    except:
+        return False
+    return True

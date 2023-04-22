@@ -1,11 +1,20 @@
 class RawDataMode2:
     complete_date: str = None
 
-    # 检件编号
+    # 委托单编号
     sample_no: str = None
+
+    # 单线号
+    line_no: str = None
 
     # 焊口编号
     kind_no: str = None
+
+    # 焊工编号
+    emp_id: str = None
+
+    # 返修张/处数
+    ret_cnt: int = None
 
     # 材质
     material: str = None
@@ -13,34 +22,27 @@ class RawDataMode2:
     # 规格
     specification: str = None
 
-    # 底片规格
-    sample_specification: str = None
-
-    # 底片数量
-    sample_cnt: int = None
-
     # 合格数量
     qualified_sample_cnt: int = None
 
-    # 合格级别
-    quality_level: str = None
+
 
     def __init__(self,
                  complete_date: str,
                  sample_no: str,
+                 line_no: str,
                  kind_no: str,
+                 emp_id: str,
+                 ret_cnt: int,
                  material: str,
                  specification: str,
-                 sample_specification: str,
-                 sample_cnt: int,
-                 qualified_sample_cnt: int,
-                 quality_level: str):
+                 qualified_sample_cnt: int):
         self.complete_date = complete_date
         self.sample_no = sample_no
+        self.line_no = line_no
         self.kind_no = kind_no
+        self.emp_id = emp_id
+        self.ret_cnt = ret_cnt
         self.material = material
         self.specification = specification
-        self.sample_specification = sample_specification
-        self.sample_cnt = sample_cnt
         self.qualified_sample_cnt = qualified_sample_cnt
-        self.quality_level = quality_level

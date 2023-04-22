@@ -1,6 +1,6 @@
 import sys
 
-import write_processor
+from mode2 import write_processor_mode2
 import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
@@ -43,13 +43,19 @@ def process_callback(total_cnt, fin_cnt, fail_cnt, problem_cnt):
     root_window.update()
 
 
-def async_process(template_path: str, input_file_path: str, title1: str, title2: str, company_name: str, customer: str,
-                  method: str, standard: str, target_dir: str):
-    write_processor.process(template_path, input_file_path, title1, title2, company_name, customer, method, standard,
+def async_process(template_path: str, input_file_path: str, title1: str, title2: str, customer: str,
+                  method: str, target_dir: str):
+    try:
+        write_processor_mode2.process(template_path, input_file_path, title1, title2, customer, method,
                             target_dir, process_callback)
-    submit_button.config(text='提交')
-    submit_button.config(state=tk.NORMAL)
-    hint_label.config(text='执行成功！')
+        hint_label.config(text='执行成功！')
+    except Exception as e:
+        hint_label.config(text='执行失败！错误:' + e)
+    else:
+        hint_label.config(text='执行失败！')
+    finally:
+        submit_button.config(text='提交')
+        submit_button.config(state=tk.NORMAL)
     print(f'---执行完成 {datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}---')
     root_window.update()
 
@@ -62,7 +68,7 @@ def on_submit():
     hint_label.config(text='执行中，请稍后')
     progress_hint_label.config(text='')
     submit_button.config(state=tk.DISABLED)
-    template_path = './template/TEMPLATE.docx'
+    template_path = './template/TEMPLATE_MODE2.docx'
     progressbar['maximum'] = 100
     progressbar['value'] = 0
     root_window.update()
@@ -70,10 +76,9 @@ def on_submit():
         work_thread = threading.Thread(name='Processor', target=async_process, args=(template_path, input_file_select,
                                                                                      title1_input.get(),
                                                                                      title2_input.get(),
-                                                                                     company_input.get(),
                                                                                      customer_input.get(),
                                                                                      method_input.get(),
-                                                                                     standard_input.get(), output_dir))
+                                                                                     output_dir))
         work_thread.start()
         hint_label.config(text='提交成功！')
     except Exception as e:
@@ -103,22 +108,17 @@ if __name__ == '__main__':
     root_window.geometry('1000x700')
 
     title1_label = tk.Label(root_window, text='请输入工程名称:')
-    title1_input = tk.Entry(root_window, textvariable=tk.StringVar(value='宁夏宝丰能源集团股份有限公司50万吨/年煤制烯烃项目配套甲醇工程'))
+    title1_input = tk.Entry(root_window, textvariable=tk.StringVar(value='川西气田雷口坡组气藏开发建设项目脱硫站工程5#脱硫站'))
 
     title2_label = tk.Label(root_window, text='请输入单位工程名称:')
-    title2_input = tk.Entry(root_window, textvariable=tk.StringVar(value='气化1'))
-
-    company_label = tk.Label(root_window, text='请输入检测单位:')
-    company_input = tk.Entry(root_window, textvariable=tk.StringVar(value='南京英派克检测有限责任公司'))
+    title2_input = tk.Entry(root_window, textvariable=tk.StringVar(value='测试'))
 
     customer_label = tk.Label(root_window, text='请输入委托单位:')
-    customer_input = tk.Entry(root_window, textvariable=tk.StringVar(value='中化六建'))
+    customer_input = tk.Entry(root_window, textvariable=tk.StringVar(value='中国石化第四建设有限公司'))
 
     method_label = tk.Label(root_window, text='请输入检测方法:')
     method_input = tk.Entry(root_window, textvariable=tk.StringVar(value='RT'))
 
-    standard_label = tk.Label(root_window, text='请输入检测标准:')
-    standard_input = tk.Entry(root_window, textvariable=tk.StringVar(value='NB/T47013.2-2015'))
 
     file_select_button = tk.Button(root_window, text='请选择输入文件', command=on_open_docx_file)
     file_select_display = tk.Label(root_window, text='未选择')
@@ -135,14 +135,10 @@ if __name__ == '__main__':
     title1_input.pack()
     title2_label.pack()
     title2_input.pack()
-    company_label.pack()
-    company_input.pack()
     customer_label.pack()
     customer_input.pack()
     method_label.pack()
     method_input.pack()
-    standard_label.pack()
-    standard_input.pack()
 
     file_select_button.pack()
     file_select_display.pack()
