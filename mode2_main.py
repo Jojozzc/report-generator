@@ -109,7 +109,7 @@ if __name__ == '__main__':
     title1_input = tk.Entry(root_window, textvariable=tk.StringVar(value='川西气田雷口坡组气藏开发建设项目脱硫站工程5#脱硫站'))
 
     title2_label = tk.Label(root_window, text='请输入单位工程名称:')
-    title2_input = tk.Entry(root_window, textvariable=tk.StringVar(value='测试'))
+    title2_input = tk.Entry(root_window, textvariable=tk.StringVar(value=''))
 
     customer_label = tk.Label(root_window, text='请输入委托单位:')
     customer_input = tk.Entry(root_window, textvariable=tk.StringVar(value='中国石化第四建设有限公司'))
