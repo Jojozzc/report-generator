@@ -67,9 +67,10 @@ def process(template_path: str, input_file_path: str, title1: str, title2: str, 
 
             date_cn = get_YYYYmmdd_cn(complete_date)
 
+            last_idx = len(table.rows) - 1
             if date_cn is not None:
-                write_cell_para(table.cell(26, 1), 3, f'日期：  {date_cn}')
-                write_cell_para(table.cell(26, 8), 3, f'日期：  {date_cn}')
+                write_cell_para(table.cell(last_idx, 1), 3, f'日期：  {date_cn}')
+                write_cell_para(table.cell(last_idx, 8), 3, f'日期：  {date_cn}')
             else:
                 has_problem = True
                 print(f'日期有误，通知单号:{key}')
