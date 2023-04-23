@@ -54,9 +54,9 @@ def process(template_path: str, input_file_path: str, title1: str, title2: str, 
             target_path = os.path.join(target_dir, f'{order_id}.docx')
 
             table = doc.tables[0]
-
-            write_cell_para(table.cell(0, 11), 0, "工程名称:" + title1)
-            write_cell_para(table.cell(0, 11), 1, "单位工程名称:" + title2)
+            write_cell_para(table.cell(0, 11), 0, f"工程名称:{title1}\n单位工程名称:{title2}")
+            # write_cell_para(table.cell(0, 11), 0, "工程名称:" + title1)
+            # write_cell_para(table.cell(0, 11), 1, "单位工程名称:" + title2)
 
             write_cell(table.cell(1, 11), order_id)
 
@@ -96,7 +96,7 @@ def process(template_path: str, input_file_path: str, title1: str, title2: str, 
                 write_cell(table.cell(i + base_start, 9), raw_data.emp_id)
 
                 # 返修张/处数
-                write_cell(table.cell(i + base_start, 10), wrap_str(raw_data.ret_cnt))
+                write_cell(table.cell(i + base_start, 11), wrap_str(raw_data.ret_cnt))
 
             doc.save(target_path)
             if has_problem:
