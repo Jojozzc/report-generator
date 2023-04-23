@@ -3,6 +3,7 @@ from docx.enum.table import WD_TABLE_ALIGNMENT
 import pandas
 import os
 from mode2.RawDataMode2 import RawDataMode2
+import datetime
 
 TABLE_MAPPING = {
     "complete_date": 1,
@@ -24,7 +25,6 @@ def write_cell(cell, text: str):
 
 def write_cell_para(cell, para_idx: int,text: str):
     cell.paragraphs[para_idx].text = text
-    cell.paragraphs[para_idx].paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
 
 
 '''
@@ -63,6 +63,16 @@ def process(template_path: str, input_file_path: str, title1: str, title2: str, 
             write_cell(table.cell(1, 2), customer)
 
             write_cell(table.cell(1, 9), method)
+
+
+            date_cn = get_YYYYmmdd_cn(complete_date)
+
+            if date_cn is not None:
+                write_cell_para(table.cell(26, 1), 3, f'日期：  {date_cn}')
+                write_cell_para(table.cell(26, 8), 3, f'日期：  {date_cn}')
+            else:
+                has_problem = True
+                print(f'日期有误，通知单号:{key}')
 
 
             # 数据从第4行开始写入
@@ -158,3 +168,12 @@ def is_float(obj):
     except:
         return False
     return True
+
+
+def get_YYYYmmdd_cn(date_str_by_dot: str):
+    try:
+        return datetime.datetime.strptime(date_str_by_dot, '%Y.%m.%d').strftime('%Y年%m月%d日'.encode('unicode_escape').decode('utf8')).encode('utf-8').decode('unicode_escape')
+    except BaseException as e:
+        print(f'时间有误:{date_str_by_dot}')
+        print(e)
+        return None
