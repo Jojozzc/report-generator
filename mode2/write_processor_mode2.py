@@ -90,10 +90,10 @@ def process(template_path: str, input_file_path: str, title1: str, title2: str, 
                 write_cell(table.cell(i + base_start, 4), raw_data.line_no)
 
                 # 焊口编号
-                write_cell(table.cell(i + base_start, 5), raw_data.kind_no)
+                write_cell(table.cell(i + base_start, 8), raw_data.kind_no)
 
                 # 焊工号
-                write_cell(table.cell(i + base_start, 8), raw_data.emp_id)
+                write_cell(table.cell(i + base_start, 9), raw_data.emp_id)
 
                 # 返修张/处数
                 write_cell(table.cell(i + base_start, 10), wrap_str(raw_data.ret_cnt))
