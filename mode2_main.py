@@ -49,10 +49,8 @@ def async_process(template_path: str, input_file_path: str, title1: str, title2:
         write_processor_mode2.process(template_path, input_file_path, title1, title2, customer, method,
                             target_dir, process_callback)
         hint_label.config(text='执行成功！')
-    except Exception as e:
-        hint_label.config(text='执行失败！错误:' + e)
-    else:
-        hint_label.config(text='执行失败！')
+    except BaseException as e:
+        hint_label.config(text='执行失败！错误:' + str(e))
     finally:
         submit_button.config(text='提交')
         submit_button.config(state=tk.NORMAL)

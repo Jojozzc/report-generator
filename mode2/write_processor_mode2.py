@@ -73,22 +73,25 @@ def process(template_path: str, input_file_path: str, title1: str, title2: str, 
                 write_cell(table.cell(i + base_start, 1), raw_data.sample_no)
 
                 # 检测批号
-                write_cell(table.cell(i + base_start, 1), raw_data.sample_no)
+                write_cell(table.cell(i + base_start, 3), '/')
+
+                # 单线号
+                write_cell(table.cell(i + base_start, 4), raw_data.line_no)
 
                 # 焊口编号
-                write_cell(table.cell(i + base_start, 3), raw_data.kind_no)
+                write_cell(table.cell(i + base_start, 5), raw_data.kind_no)
 
-                # 材质
-                write_cell(table.cell(i + base_start, 5), raw_data.material)
+                # 焊工号
+                write_cell(table.cell(i + base_start, 8), raw_data.emp_id)
 
-                # 规格
-                write_cell(table.cell(i + base_start, 7), raw_data.specification)
+                # 返修张/处数
+                write_cell(table.cell(i + base_start, 10), wrap_str(raw_data.ret_cnt))
 
             doc.save(target_path)
             if has_problem:
                 problem_cnt = problem_cnt + 1
         except Exception as e:
-            print(f'数据有误,请检查：委托单号={key}')
+            print(f'数据有误,请检查：通知单号={key}')
             print(e)
             fail_cnt = fail_cnt + 1
         finally:
@@ -105,6 +108,11 @@ def read_raw_data(input_file_path: str):
     for i in range(raw_datas.shape[0]):
         row = raw_datas.iloc[i]
         order_id = wrap_int_str(row[TABLE_MAPPING['order_id']])
+
+        if order_id is None:
+            print(f'非法的通知单号:${order_id},请检查')
+            continue
+
         if order_id not in data_map:
             data_map[order_id] = []
 
@@ -135,6 +143,8 @@ def wrap_int(obj):
 
 
 def wrap_int_str(obj):
+    if obj is None or str(obj) == 'nan' or str(obj) == 'None':
+        return None
     if is_float(obj):
         return str(int(obj))
     return str(obj)
