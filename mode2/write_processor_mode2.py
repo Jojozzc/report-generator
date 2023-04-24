@@ -20,10 +20,15 @@ TABLE_MAPPING = {
 
 
 def write_cell(cell, text: str):
+    if text is None:
+        text = ''
     cell.text = text
     cell.paragraphs[0].paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
 
 def write_cell_para(cell, para_idx: int,text: str):
+    if cell.paragraphs is None:
+        print(f'模板格式有误，请检查，待输入文字:{text}')
+        return
     cell.paragraphs[para_idx].text = text
 
 
@@ -96,6 +101,9 @@ def process(template_path: str, input_file_path: str, title1: str, title2: str, 
                 write_cell(table.cell(i + base_start, 9), raw_data.emp_id)
 
                 # 返修张/处数
+                ret_cnt_str = wrap_str(raw_data.ret_cnt)
+                if ret_cnt_str is None:
+                    ret_cnt_str = '/'
                 write_cell(table.cell(i + base_start, 11), wrap_str(raw_data.ret_cnt))
 
             doc.save(target_path)
