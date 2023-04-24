@@ -4,6 +4,7 @@ import pandas
 import os
 from mode2.RawDataMode2 import RawDataMode2
 import datetime
+from docx.oxml.ns import qn
 
 TABLE_MAPPING = {
     "complete_date": 1,
@@ -44,6 +45,9 @@ def process(template_path: str, input_file_path: str, title1: str, title2: str, 
     fin_cnt = 0
     fail_cnt = 0
     problem_cnt = 0
+
+    cur_write_idx = 0
+
     callback(total_cnt, fin_cnt, fail_cnt, problem_cnt)
 
     for key in raw_data_map.keys():
@@ -55,6 +59,8 @@ def process(template_path: str, input_file_path: str, title1: str, title2: str, 
             complete_date = values[0].complete_date
 
             doc = docx.Document(template_path)
+            doc.styles['Normal'].font.name='楷体'
+            doc.styles['Normal']._element.rPr.rFonts.set(qn('w:eastAsia'), u'楷体')
 
             target_path = os.path.join(target_dir, f'{order_id}.docx')
 
@@ -107,6 +113,10 @@ def process(template_path: str, input_file_path: str, title1: str, title2: str, 
                     ret_cnt_str = '/'
                 write_cell(table.cell(i + base_start, 13), wrap_str(raw_data.ret_cnt))
                 write_cell(table.cell(i + base_start, 13), ret_cnt_str)
+                cur_write_idx = i
+
+            if cur_write_idx + base_start < last_idx - 2:
+                write_cell(table.cell(cur_write_idx + 1 + base_start, 0), '以下空白')
 
             doc.save(target_path)
             if has_problem:
