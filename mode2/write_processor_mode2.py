@@ -4,6 +4,7 @@ import pandas
 import os
 from mode2.RawDataMode2 import RawDataMode2
 import datetime
+from docx.oxml.ns import qn
 
 TABLE_MAPPING = {
     "complete_date": 1,
@@ -15,7 +16,7 @@ TABLE_MAPPING = {
     "material": 8,
     "specification": 7,
     "ret_cnt": 11,
-    "qualified_sample_cnt": 12,
+    "check_result": 10,
 }
 
 
@@ -44,6 +45,9 @@ def process(template_path: str, input_file_path: str, title1: str, title2: str, 
     fin_cnt = 0
     fail_cnt = 0
     problem_cnt = 0
+
+    cur_write_idx = 0
+
     callback(total_cnt, fin_cnt, fail_cnt, problem_cnt)
 
     for key in raw_data_map.keys():
@@ -55,6 +59,8 @@ def process(template_path: str, input_file_path: str, title1: str, title2: str, 
             complete_date = values[0].complete_date
 
             doc = docx.Document(template_path)
+            doc.styles['Normal'].font.name='楷体'
+            doc.styles['Normal']._element.rPr.rFonts.set(qn('w:eastAsia'), u'楷体')
 
             target_path = os.path.join(target_dir, f'{order_id}.docx')
 
@@ -84,19 +90,22 @@ def process(template_path: str, input_file_path: str, title1: str, title2: str, 
                 raw_data: RawDataMode2 = values[i]
 
                 # 委托编号
-                write_cell(table.cell(i + base_start, 1), raw_data.sample_no)
+                write_cell(table.cell(i + base_start, 0), raw_data.sample_no)
 
                 # 检测批号
-                write_cell(table.cell(i + base_start, 3), '/')
+                write_cell(table.cell(i + base_start, 1), '/')
 
                 # 单线号
                 write_cell(table.cell(i + base_start, 4), raw_data.line_no)
 
                 # 焊口编号
-                write_cell(table.cell(i + base_start, 9), raw_data.kind_no)
+                write_cell(table.cell(i + base_start, 7), raw_data.kind_no)
 
                 # 焊工号
-                write_cell(table.cell(i + base_start, 12), raw_data.emp_id)
+                write_cell(table.cell(i + base_start, 10), raw_data.emp_id)
+
+                # 检测结果
+                write_cell(table.cell(i + base_start, 11), raw_data.check_result)
 
                 # 返修张/处数
                 ret_cnt_str = wrap_str(raw_data.ret_cnt)
@@ -104,6 +113,10 @@ def process(template_path: str, input_file_path: str, title1: str, title2: str, 
                     ret_cnt_str = '/'
                 write_cell(table.cell(i + base_start, 13), wrap_str(raw_data.ret_cnt))
                 write_cell(table.cell(i + base_start, 13), ret_cnt_str)
+                cur_write_idx = i
+
+            if cur_write_idx + base_start < last_idx - 2:
+                write_cell(table.cell(cur_write_idx + 1 + base_start, 0), '以下空白')
 
             doc.save(target_path)
             if has_problem:
@@ -142,7 +155,8 @@ def read_raw_data(input_file_path: str):
                            ret_cnt=wrap_int(row[TABLE_MAPPING['ret_cnt']]),
                            material=wrap_str(row[TABLE_MAPPING['material']]),
                            specification=wrap_str(row[TABLE_MAPPING['specification']]),
-                           qualified_sample_cnt=wrap_int(row[TABLE_MAPPING['qualified_sample_cnt']]))
+                           check_result=wrap_str(row[TABLE_MAPPING['check_result']]),
+                                )
         data_map[order_id].append(raw_data)
 
     return data_map
