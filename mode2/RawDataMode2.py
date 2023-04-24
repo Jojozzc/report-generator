@@ -22,8 +22,9 @@ class RawDataMode2:
     # 规格
     specification: str = None
 
-    # 合格数量
-    qualified_sample_cnt: int = None
+
+    # 检测结果
+    check_result: str = None
 
 
 
@@ -36,7 +37,8 @@ class RawDataMode2:
                  ret_cnt: int,
                  material: str,
                  specification: str,
-                 qualified_sample_cnt: int):
+                 check_result: str,
+                 ):
         self.complete_date = complete_date
         self.sample_no = sample_no
         self.line_no = line_no
@@ -45,4 +47,4 @@ class RawDataMode2:
         self.ret_cnt = ret_cnt
         self.material = material
         self.specification = specification
-        self.qualified_sample_cnt = qualified_sample_cnt
+        self.check_result = check_result

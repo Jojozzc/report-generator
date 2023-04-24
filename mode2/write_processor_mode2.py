@@ -15,7 +15,7 @@ TABLE_MAPPING = {
     "material": 8,
     "specification": 7,
     "ret_cnt": 11,
-    "qualified_sample_cnt": 12,
+    "check_result": 10,
 }
 
 
@@ -84,19 +84,22 @@ def process(template_path: str, input_file_path: str, title1: str, title2: str, 
                 raw_data: RawDataMode2 = values[i]
 
                 # 委托编号
-                write_cell(table.cell(i + base_start, 1), raw_data.sample_no)
+                write_cell(table.cell(i + base_start, 0), raw_data.sample_no)
 
                 # 检测批号
-                write_cell(table.cell(i + base_start, 3), '/')
+                write_cell(table.cell(i + base_start, 1), '/')
 
                 # 单线号
                 write_cell(table.cell(i + base_start, 4), raw_data.line_no)
 
                 # 焊口编号
-                write_cell(table.cell(i + base_start, 9), raw_data.kind_no)
+                write_cell(table.cell(i + base_start, 7), raw_data.kind_no)
 
                 # 焊工号
-                write_cell(table.cell(i + base_start, 12), raw_data.emp_id)
+                write_cell(table.cell(i + base_start, 10), raw_data.emp_id)
+
+                # 检测结果
+                write_cell(table.cell(i + base_start, 11), raw_data.check_result)
 
                 # 返修张/处数
                 ret_cnt_str = wrap_str(raw_data.ret_cnt)
@@ -142,7 +145,8 @@ def read_raw_data(input_file_path: str):
                            ret_cnt=wrap_int(row[TABLE_MAPPING['ret_cnt']]),
                            material=wrap_str(row[TABLE_MAPPING['material']]),
                            specification=wrap_str(row[TABLE_MAPPING['specification']]),
-                           qualified_sample_cnt=wrap_int(row[TABLE_MAPPING['qualified_sample_cnt']]))
+                           check_result=wrap_str(row[TABLE_MAPPING['check_result']]),
+                                )
         data_map[order_id].append(raw_data)
 
     return data_map
