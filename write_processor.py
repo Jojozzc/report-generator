@@ -55,7 +55,7 @@ def process(template_path: str, input_file_path: str, title1: str, title2: str, 
             table = doc.tables[0]
 
             write_cell(table.cell(0, 2), company_name)
-            write_cell(table.cell(0, 11), order_id)
+            write_cell(table.cell(0, 12), order_id)
 
             write_cell(table.cell(1, 2), customer)
             write_cell(table.cell(1, 11), complete_date)

@@ -59,13 +59,13 @@ def process(template_path: str, input_file_path: str, title1: str, title2: str, 
             target_path = os.path.join(target_dir, f'{order_id}.docx')
 
             table = doc.tables[0]
-            write_cell_para(table.cell(0, 11), 0, f"工程名称:{title1}\n单位工程名称:{title2}")
+            write_cell_para(table.cell(0, 12), 0, f"工程名称:{title1}\n单位工程名称:{title2}")
 
-            write_cell(table.cell(1, 11), order_id)
+            write_cell(table.cell(1, 12), order_id)  # 通知单号
 
-            write_cell(table.cell(1, 2), customer)
+            write_cell(table.cell(1, 2), customer)  # 委托单位
 
-            write_cell(table.cell(1, 9), method)
+            write_cell(table.cell(1, 6), method)  # 检测方法
 
 
             date_cn = get_YYYYmmdd_cn(complete_date)
@@ -93,16 +93,17 @@ def process(template_path: str, input_file_path: str, title1: str, title2: str, 
                 write_cell(table.cell(i + base_start, 4), raw_data.line_no)
 
                 # 焊口编号
-                write_cell(table.cell(i + base_start, 8), raw_data.kind_no)
+                write_cell(table.cell(i + base_start, 9), raw_data.kind_no)
 
                 # 焊工号
-                write_cell(table.cell(i + base_start, 9), raw_data.emp_id)
+                write_cell(table.cell(i + base_start, 12), raw_data.emp_id)
 
                 # 返修张/处数
                 ret_cnt_str = wrap_str(raw_data.ret_cnt)
                 if ret_cnt_str is None:
                     ret_cnt_str = '/'
-                write_cell(table.cell(i + base_start, 11), wrap_str(raw_data.ret_cnt))
+                write_cell(table.cell(i + base_start, 13), wrap_str(raw_data.ret_cnt))
+                write_cell(table.cell(i + base_start, 13), ret_cnt_str)
 
             doc.save(target_path)
             if has_problem:
@@ -155,6 +156,8 @@ def wrap_str(obj):
 
 def wrap_int(obj):
     if str(obj).isdigit():
+        return int(obj)
+    if is_float(obj):
         return int(obj)
     return None
 
