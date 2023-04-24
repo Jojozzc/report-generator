@@ -60,8 +60,6 @@ def process(template_path: str, input_file_path: str, title1: str, title2: str, 
 
             table = doc.tables[0]
             write_cell_para(table.cell(0, 11), 0, f"工程名称:{title1}\n单位工程名称:{title2}")
-            # write_cell_para(table.cell(0, 11), 0, "工程名称:" + title1)
-            # write_cell_para(table.cell(0, 11), 1, "单位工程名称:" + title2)
 
             write_cell(table.cell(1, 11), order_id)
 
