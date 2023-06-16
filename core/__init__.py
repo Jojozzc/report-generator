@@ -26,8 +26,9 @@ class AbcReportGenerator(metaclass=ABCMeta):
     # args: number([0:N)), totalCount(N), success:bool, exception: BaseException
     on_finsh_one = None
 
-    def __init__(self, template_path: str):
+    def __init__(self, template_path: str, on_finish_one):
         self.template_path = template_path
+        self.on_finsh_one = on_finish_one
 
     def execute(self, file_path: str, target_dir: str, sheet: str = DEFAULT_SHEET_NAME, global_data: dict = None):
         data_list = self.read(file_path, sheet)
