@@ -26,14 +26,10 @@ class AbcReportGenerator(metaclass=ABCMeta):
     # args: number([0:N)), totalCount(N), success:bool, exception: BaseException
     on_finsh_one = None
 
-    def __init__(self, template_path, key_col_mapping, divide_key, key_value_cast, on_finish_one):
+    def __init__(self, template_path: str):
         self.template_path = template_path
-        self.key_col_mapping = key_col_mapping
-        self.divide_key = divide_key
-        self.key_value_cast = key_value_cast
-        self.on_finsh_one = on_finish_one
 
-    def execute(self, file_path: str, target_dir: str, sheet: str = DEFAULT_SHEET_NAME, global_data: dict=None):
+    def execute(self, file_path: str, target_dir: str, sheet: str = DEFAULT_SHEET_NAME, global_data: dict = None):
         data_list = self.read(file_path, sheet)
         raw_data_map = {}
         for raw_data in data_list:
