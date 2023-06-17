@@ -7,21 +7,32 @@ from typing import List, Dict
 
 from docx import Document
 
-"""
-    Abstract report generator.
-"""
+from .util import excelTitleToIndex
 
 DEFAULT_SHEET_NAME = 'Sheet1'
 
 
+class FiledProperty():
+    """
+    value_cast is a function: val = value_cast(value)
+    """
+    column_title: str
+    value_cast= None
+
+
 class AbcReportGenerator(metaclass=ABCMeta):
+    """
+    Abstract excel to words report generator
+    Input: one excel file
+    Output: multi word files
+    """
+
     template_path = None
-    key_col_mapping: dict = None
+    filed_mapping: Dict[str, FiledProperty] = None
     divide_key = None
 
     # key -> cast
-    # cast is a function val = convert(value)
-    key_value_cast: dict = None
+    #
 
     # args: number([0:N)), totalCount(N), success:bool, exception: BaseException
     on_finsh_one = None
@@ -68,8 +79,10 @@ class AbcReportGenerator(metaclass=ABCMeta):
             row = raw_datas.iloc[i]
             raw_data = {}
 
-            for k, col_idx in self.key_col_mapping:
-                val = self._castValue(row[col_idx], self.key_value_cast[k])
+            for k, filed_property in self.filed_mapping:
+                filed_property: FiledProperty
+                col_idx = excelTitleToIndex(filed_property.column_title)
+                val = self._castValue(row[col_idx], filed_property.value_cast)
                 raw_data[k] = val
 
             data_list.append(raw_data)
