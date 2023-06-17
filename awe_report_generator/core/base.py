@@ -7,9 +7,8 @@ from typing import List, Dict
 
 from docx import Document
 
+from . import DEFAULT_SHEET_NAME
 from .util import excel_title_to_index
-
-DEFAULT_SHEET_NAME = 'Sheet1'
 
 
 class FiledProperty():
@@ -28,6 +27,10 @@ class FiledProperty():
         self.desc = desc
 
 
+def default_on_finish_one(number: int, total_cnt: int, success: bool, exception: BaseException):
+    pass
+
+
 class ReportGenerator(metaclass=ABCMeta):
     """
     Abstract excel to words report generator
@@ -35,19 +38,22 @@ class ReportGenerator(metaclass=ABCMeta):
     Output: multi word files
     """
 
-    template_path = None
-    filed_mapping: Dict[str, FiledProperty] = None
-    divide_key = None
-
     # key -> cast
     #
 
     # args: number([0:N)), totalCount(N), success:bool, exception: BaseException
-    on_finsh_one = None
 
-    def __init__(self, template_path: str, on_finish_one):
+    def __init__(self, template_path: str, filed_mapping: Dict[str, FiledProperty], divide_key: str, on_finish_one=default_on_finish_one):
+        """
+        :param template_path: path to template docx file
+        :param filed_mapping:
+        :param divide_key: unique key
+        :param on_finish_one: callback, on_finish_one(number: int, total_cnt: int, success: bool, exception: BaseException)
+        """
         super().__init__()
         self.template_path = template_path
+        self.filed_mapping = filed_mapping
+        self.divide_key = divide_key
         self.on_finsh_one = on_finish_one
 
     def execute(self, file_path: str, target_dir: str, sheet: str = DEFAULT_SHEET_NAME, global_data: dict = None):

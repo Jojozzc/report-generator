@@ -2,9 +2,7 @@ import sys
 import click
 from tqdm import tqdm
 
-from core import ReportGenerator
-
-from biz.radio import (
+from awe_report_generator.biz.radio import (
     RadioCheckGenerator
 )
 

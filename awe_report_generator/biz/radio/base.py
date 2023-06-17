@@ -1,10 +1,10 @@
 from docx import Document
 
-from core import (
+from awe_report_generator.core.base import (
     ReportGenerator,
     FiledProperty,
 )
-from core.util import cast_util
+from awe_report_generator.core.util import cast_util
 
 
 class RadioCheckGenerator(ReportGenerator):
@@ -28,6 +28,14 @@ class RadioCheckGenerator(ReportGenerator):
         }
 
     def _process(self, data_list: list, template_doc: Document, global_data: dict) -> Document:
+        """
+        :param global_data:
+        :return:
+        """
+        if global_data is None:
+            raise ValueError('global_data is None')
+        table = template_doc.tables[0]
+
         return template_doc
 
     def _save(self, doc: Document, file_path: str):
