@@ -42,7 +42,7 @@ class ColumnCellsResource(metaclass=ABCMeta):
         table = doc.tables[self.table_index]
         row = table.rows[self.table_data_start_row + cur_index]
         cell = row.cells[self.column]
-        cell.text = val
+        cell.text = str(val)
         if self.style is not None:
             cell.paragraphs[0].paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
 
@@ -82,12 +82,44 @@ class MappingColumnCellsResource(ColumnCellsResource):
         return None
 
 
+class SimpleCalculationColumnCellsResource(ColumnCellsResource):
+    def __init__(self, table_index: int, table_data_start_row, column: int, mapping_data_key_1: str, mapping_data_key_2: str, operation:str):
+        """
+
+        :param mapping_data_key_1: must be key of number
+        :param mapping_data_key_2: must be key of number
+        :param operation: +/-
+        """
+        super().__init__(table_index, table_data_start_row, column)
+        self.mapping_data_key_1 = mapping_data_key_1
+        self.mapping_data_key_2 = mapping_data_key_2
+        self.operation = operation
+
+    def get_value(self, data: dict, global_data: dict):
+        if global_data is None:
+            return None
+
+        if self.mapping_data_key_1 not in data:
+            return None
+
+        if self.mapping_data_key_2 not in data:
+            return None
+
+        if self.operation == '+':
+            return data[self.mapping_data_key_1] + data[self.mapping_data_key_2]
+        elif self.operation == '-':
+            return data[self.mapping_data_key_1] - data[self.mapping_data_key_2]
+        else:
+            raise ValueError(f'Unknown operation:{self.operation}')
+
+
+
 class SimpleTableDocGenerator(ReportGenerator):
 
     def __init__(self, template_path: str, filed_mapping: Dict[str, ExcelFiledProperty], divide_key: str, on_finish_one,
                  header_resource: HeaderResource, column_cell_resource_list: List[ColumnCellsResource],
-                 cell_resource_list: List[CellResource]):
-        super().__init__(template_path, filed_mapping, divide_key, on_finish_one)
+                 cell_resource_list: List[CellResource], doc_global_data_param_list=None):
+        super().__init__(template_path, filed_mapping, divide_key, on_finish_one, doc_global_data_param_list)
         self.header_resource = header_resource
         self.column_cell_resource_list = column_cell_resource_list
         self.cell_resource_list = cell_resource_list

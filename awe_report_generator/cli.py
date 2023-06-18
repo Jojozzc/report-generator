@@ -9,7 +9,7 @@ from awe_report_generator.biz.rt.base import RTHeaderResource
 from awe_report_generator.core.base import ExcelFiledProperty
 
 from awe_report_generator.core.simple_table_doc_generator import (
-    SimpleTableDocGenerator, MappingColumnCellsResource
+    SimpleTableDocGenerator, MappingColumnCellsResource, SimpleCalculationColumnCellsResource
 )
 from awe_report_generator.core.util import cast_util
 
@@ -60,6 +60,7 @@ def run(template_path: str, file_path: str, sheet: str, target_dir: str, mode: s
             MappingColumnCellsResource(table_index=0, table_data_start_row=5, column=5, mapping_data_key='specification'),
             MappingColumnCellsResource(table_index=0, table_data_start_row=5, column=9, mapping_data_key='baseSpecificationAndCnt'),
             MappingColumnCellsResource(table_index=0, table_data_start_row=5, column=12, mapping_data_key='okCount'),
+            SimpleCalculationColumnCellsResource(table_index=0, table_data_start_row=5, column=14, mapping_data_key_1='checkCount', mapping_data_key_2='okCount', operation='-'),
         ]
 
 

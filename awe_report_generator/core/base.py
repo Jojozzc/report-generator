@@ -1,4 +1,5 @@
 import os.path
+import traceback
 from abc import ABCMeta, abstractmethod
 
 import docx
@@ -93,6 +94,7 @@ class ReportGenerator(metaclass=ABCMeta):
                 self._save(doc, file_path=save_path)
                 callback(p, len(raw_data_map.keys()), True, None)
             except BaseException as e:
+                traceback.print_exc()
                 callback(p, len(raw_data_map.keys()), False, e)
             finally:
                 p = p + 1
