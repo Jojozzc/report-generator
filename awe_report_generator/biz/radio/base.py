@@ -9,7 +9,7 @@ from awe_report_generator.core.util import cast_util
 
 class RadioCheckGenerator(ReportGenerator):
     def __init__(self, template_path: str, on_finish_one):
-        super().__init__(template_path, on_finish_one)
+        super().__init__(template_path)
         self.divide_key = 'orderId'
         self.filed_mapping = {
             "orderDate": ExcelFiledProperty('A', cast_util.wrap_str, '委托日期'),

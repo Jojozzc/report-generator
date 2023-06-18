@@ -8,7 +8,7 @@ from awe_report_generator.core.util import cast_util
 
 
 class RadioCheckGenerator(ReportGenerator):
-    def __init__(self, template_path: str, on_finish_one):
+    def __init__(self, template_path: str):
         divide_key = 'orderId'
         filed_mapping = {
             "orderDate": ExcelFiledProperty('A', cast_util.wrap_str, '委托日期'),
@@ -25,7 +25,7 @@ class RadioCheckGenerator(ReportGenerator):
             "method": ExcelFiledProperty('R', cast_util.wrap_str, '焊接方法'),
             "lineNo": ExcelFiledProperty('T', cast_util.wrap_str, '单线号'),
         }
-        super().__init__(template_path, filed_mapping, divide_key, on_finish_one)
+        super().__init__(template_path, filed_mapping, divide_key)
 
 
     def _process(self, data_list: list, template_doc: Document, global_param: dict) -> Document:

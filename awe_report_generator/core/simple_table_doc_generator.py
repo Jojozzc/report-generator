@@ -160,10 +160,10 @@ class SimpleCalculationColumnCellsResource(ColumnCellsResource):
 
 class SimpleTableDocGenerator(ReportGenerator):
 
-    def __init__(self, template_path: str, filed_mapping: Dict[str, ExcelFiledProperty], divide_key: str, on_finish_one,
+    def __init__(self, template_path: str, filed_mapping: Dict[str, ExcelFiledProperty], divide_key: str,
                  header_resource: HeaderResource, column_cell_resource_list: List[ColumnCellsResource],
                  cell_resource_list: List[CellResource], doc_global_data_param_config_list=None):
-        super().__init__(template_path, filed_mapping, divide_key, on_finish_one, doc_global_data_param_config_list)
+        super().__init__(template_path, filed_mapping, divide_key, doc_global_data_param_config_list)
         self.header_resource = header_resource
         self.column_cell_resource_list = column_cell_resource_list
         self.cell_resource_list = cell_resource_list

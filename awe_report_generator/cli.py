@@ -36,8 +36,8 @@ def run(template_path: str, file_path: str, sheet: str, target_dir: str, mode: s
         pbar.update(1)
 
     global_param_dict = None
-    if mode == 'radio':
-        report_generator = RadioCheckGenerator(template_path=template_path, on_finish_one=on_finish_one)
+    if mode == 'ray':
+        report_generator = RadioCheckGenerator(template_path=template_path)
     elif mode == 'rt':
         divide_key = 'orderId'
         filed_mapping = {
@@ -79,11 +79,11 @@ def run(template_path: str, file_path: str, sheet: str, target_dir: str, mode: s
         ]
 
         global_param_dict = json.loads(global_param)
-        report_generator = SimpleTableDocGenerator(template_path=template_path, filed_mapping=filed_mapping, divide_key=divide_key, on_finish_one=on_finish_one, header_resource=RTHeaderResource(), column_cell_resource_list=column_cell_resource_list, cell_resource_list=cell_resource_list, doc_global_data_param_config_list=doc_global_data_param_config_list)
+        report_generator = SimpleTableDocGenerator(template_path=template_path, filed_mapping=filed_mapping, divide_key=divide_key, header_resource=RTHeaderResource(), column_cell_resource_list=column_cell_resource_list, cell_resource_list=cell_resource_list, doc_global_data_param_config_list=doc_global_data_param_config_list)
     if report_generator is None:
         sys.exit(f'Unknown mode:{mode}')
 
-    report_generator.execute(file_path=file_path, target_dir=target_dir, sheet=sheet, global_param=global_param_dict)
+    report_generator.execute(file_path=file_path, target_dir=target_dir, sheet=sheet, global_param=global_param_dict, on_finish_one=on_finish_one)
 
 
 if __name__ == '__main__':

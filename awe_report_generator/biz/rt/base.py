@@ -3,7 +3,7 @@ from typing import List, Dict
 
 from docx import Document
 
-from awe_report_generator.core.simple_table_doc_generator import HeaderResource
+from awe_report_generator.core.simple_table_doc_generator import HeaderResource, CellResource
 
 
 class RTHeaderResource(HeaderResource, ABC):
@@ -14,3 +14,6 @@ class RTHeaderResource(HeaderResource, ABC):
         doc.paragraphs[2].add_run(self.get_one_value(data_list, 'unitName'))
 
 
+class DescCellResource(CellResource):
+    def get_value(self, data_list: List[dict], global_data: dict):
+        pass

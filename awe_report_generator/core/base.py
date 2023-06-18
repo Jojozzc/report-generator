@@ -36,7 +36,7 @@ class DocGlobalParamConfig:
         self.default_value = default_value
 
 
-def default_on_finish_one(number: int, total_cnt: int, success: bool, exception: BaseException):
+def default_on_finish_one(number: int, total_cnt: int, success: bool, exception):
     pass
 
 
@@ -53,22 +53,22 @@ class ReportGenerator(metaclass=ABCMeta):
     # args: number([0:N)), totalCount(N), success:bool, exception: BaseException
 
     def __init__(self, template_path: str, filed_mapping: Dict[str, ExcelFiledProperty], divide_key: str,
-                 on_finish_one=default_on_finish_one,
-                 doc_global_data_param_config_list=None):
+                 doc_global_data_param_config_list: List[DocGlobalParamConfig]=None):
         """
         :param template_path: path to template docx file
         :param filed_mapping:
         :param divide_key: unique key
-        :param on_finish_one: callback, on_finish_one(number: int, total_cnt: int, success: bool, exception: BaseException)
         """
         super().__init__()
         self.template_path = template_path
         self.filed_mapping = filed_mapping
         self.divide_key = divide_key
-        self.on_finsh_one = on_finish_one
         self.doc_global_data_param_config_list = doc_global_data_param_config_list
 
-    def execute(self, file_path: str, target_dir: str, sheet: str = DEFAULT_SHEET_NAME, global_param: dict = None):
+    def execute(self, file_path: str, target_dir: str, sheet: str = DEFAULT_SHEET_NAME, global_param: dict = None, on_finish_one=default_on_finish_one):
+        """
+        :param on_finish_one: callback, on_finish_one(number: int, total_cnt: int, success: bool, exception: BaseException)
+        """
         if global_param is None:
             global_param = {}
         self._check_and_set_default_global_param(global_param)
@@ -82,12 +82,12 @@ class ReportGenerator(metaclass=ABCMeta):
                 raw_data_map[u_val] = []
             raw_data_map[u_val].append(raw_data)
 
-        p = 0
+        p = 1
 
-        callback = self.on_finsh_one
+        callback = on_finish_one
 
         if callback is None:
-            callback = lambda number, total_cnt, success, exception: None
+            callback = default_on_finish_one
 
         for key, sub_data_list in raw_data_map.items():
             try:
