@@ -1,7 +1,7 @@
 from typing import List
 
 from PyQt5.QtWidgets import (QWidget,
-                             QVBoxLayout,
+                             QGridLayout,
                              QPushButton,
                              )
 
@@ -18,8 +18,8 @@ class HomePageQWidget(QWidget):
         self.initUI()
 
     def initUI(self):
-        vbox = QVBoxLayout()
-        vbox.setSpacing(0)
+        grid = QGridLayout()
+        grid.setSpacing(0)
 
         for processor_ui_config in self.processor_ui_config_list:
             btn = self.build_button(processor_ui_config)
@@ -27,11 +27,11 @@ class HomePageQWidget(QWidget):
 
             self.processor_widget_list.append(processor_widget)
             btn.clicked.connect(processor_widget.show)
-            vbox.addWidget(btn)
+            grid.addWidget(btn)
 
-        self.setLayout(vbox)
-        self.setGeometry(300, 300, 600, 300)
-        self.setWindowTitle('表面结果生成器')
+        self.setLayout(grid)
+        self.setGeometry(300, 300, 600, 100)
+        self.setWindowTitle('文档自动生成器')
 
     def build_button(self, processor_ui_config: ProcessorUIConfig):
         btn = QPushButton(processor_ui_config.name, self)
