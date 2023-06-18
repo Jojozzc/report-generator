@@ -19,6 +19,14 @@ class HeaderResource(metaclass=ABCMeta):
     def set(self, doc: Document, data_list: List[Dict], global_data: dict):
         pass
 
+    def get_one_value(self, data_list, key):
+        if data_list is None:
+            return None
+        for data in data_list:
+            if key in data:
+                return data[key]
+        return None
+
 
 class ColumnCellsResource(metaclass=ABCMeta):
     """
@@ -52,10 +60,11 @@ class CellResource(metaclass=ABCMeta):
     用于处理表格内某一个cell数据
     """
 
-    def __init__(self, table_index: int, row: int, column: int):
+    def __init__(self, table_index: int, row: int, column: int, style: DocCellStyle = DocCellStyle()):
         self.table_index = table_index
         self.row = row
         self.column = column
+        self.style = style
 
     @abstractmethod
     def get_value(self, data_list: List[dict], global_data: dict):
@@ -67,7 +76,9 @@ class CellResource(metaclass=ABCMeta):
             return
         table = doc.tables[self.table_index]
         cell = table.cell(self.row, self.column)
-        cell.text = val
+        cell.text = str(val)
+        if self.style is not None:
+            cell.paragraphs[0].paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
 
 
 class MappingColumnCellsResource(ColumnCellsResource):
@@ -82,8 +93,42 @@ class MappingColumnCellsResource(ColumnCellsResource):
         return None
 
 
+class GlobalParamMappingCellResource(CellResource):
+
+    def __init__(self, table_index: int, row: int, column: int, mapping_key: str):
+        super().__init__(table_index, row, column)
+        self.mapping_key = mapping_key
+
+    def get_value(self, data_list: List[dict], global_data: dict):
+        if global_data is None:
+            return None
+        if self.mapping_key in global_data:
+            return global_data[self.mapping_key]
+        return None
+
+
+class DataListMappingCellResource(CellResource):
+
+    def __init__(self, table_index: int, row: int, column: int, mapping_key: str):
+        super().__init__(table_index, row, column)
+        self.mapping_key = mapping_key
+
+    def get_value(self, data_list: List[dict], global_data: dict):
+        val = self._get_one_value(data_list, self.mapping_key)
+        return val
+
+    def _get_one_value(self, data_list, key):
+        if data_list is None:
+            return None
+        for data in data_list:
+            if key in data:
+                return data[key]
+        return None
+
+
 class SimpleCalculationColumnCellsResource(ColumnCellsResource):
-    def __init__(self, table_index: int, table_data_start_row, column: int, mapping_data_key_1: str, mapping_data_key_2: str, operation:str):
+    def __init__(self, table_index: int, table_data_start_row, column: int, mapping_data_key_1: str,
+                 mapping_data_key_2: str, operation: str):
         """
 
         :param mapping_data_key_1: must be key of number
@@ -113,13 +158,12 @@ class SimpleCalculationColumnCellsResource(ColumnCellsResource):
             raise ValueError(f'Unknown operation:{self.operation}')
 
 
-
 class SimpleTableDocGenerator(ReportGenerator):
 
     def __init__(self, template_path: str, filed_mapping: Dict[str, ExcelFiledProperty], divide_key: str, on_finish_one,
                  header_resource: HeaderResource, column_cell_resource_list: List[ColumnCellsResource],
-                 cell_resource_list: List[CellResource], doc_global_data_param_list=None):
-        super().__init__(template_path, filed_mapping, divide_key, on_finish_one, doc_global_data_param_list)
+                 cell_resource_list: List[CellResource], doc_global_data_param_config_list=None):
+        super().__init__(template_path, filed_mapping, divide_key, on_finish_one, doc_global_data_param_config_list)
         self.header_resource = header_resource
         self.column_cell_resource_list = column_cell_resource_list
         self.cell_resource_list = cell_resource_list
@@ -131,16 +175,16 @@ class SimpleTableDocGenerator(ReportGenerator):
     # start of data list
     data_start_row_of_table: int
 
-    def _process(self, data_list: list, template_doc: Document, global_data: dict) -> Document:
+    def _process(self, data_list: list, template_doc: Document, global_param: dict) -> Document:
         if self.header_resource is not None:
-            self.header_resource.set(doc=template_doc, data_list=data_list, global_data=global_data)
+            self.header_resource.set(doc=template_doc, data_list=data_list, global_data=global_param)
         if self.column_cell_resource_list is not None:
             for i in range(len(data_list)):
                 data = data_list[i]
                 for col_res in self.column_cell_resource_list:
-                    col_res.set(i, template_doc, data, global_data)
+                    col_res.set(i, template_doc, data, global_param)
         if self.cell_resource_list is not None:
             for cell_res in self.cell_resource_list:
-                cell_res.set(template_doc, data_list, global_data)
+                cell_res.set(template_doc, data_list, global_param)
 
         return template_doc

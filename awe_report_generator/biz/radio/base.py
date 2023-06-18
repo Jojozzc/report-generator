@@ -27,12 +27,12 @@ class RadioCheckGenerator(ReportGenerator):
             "lineNo": ExcelFiledProperty('T', cast_util.wrap_str, '单线号'),
         }
 
-    def _process(self, data_list: list, template_doc: Document, global_data: dict) -> Document:
+    def _process(self, data_list: list, template_doc: Document, global_param: dict) -> Document:
         """
-        :param global_data:
+        :param global_param:
         :return:
         """
-        if global_data is None:
+        if global_param is None:
             raise ValueError('global_data is None')
         table = template_doc.tables[0]
 

@@ -1,15 +1,16 @@
 import sys
 import click
 from tqdm import tqdm
+import json
 
 from awe_report_generator.biz.radio import (
-    RadioCheckGenerator
+    RadioCheckGenerator,
 )
 from awe_report_generator.biz.rt.base import RTHeaderResource
-from awe_report_generator.core.base import ExcelFiledProperty
+from awe_report_generator.core.base import ExcelFiledProperty, DocGlobalParamConfig
 
 from awe_report_generator.core.simple_table_doc_generator import (
-    SimpleTableDocGenerator, MappingColumnCellsResource, SimpleCalculationColumnCellsResource
+    SimpleTableDocGenerator, MappingColumnCellsResource, SimpleCalculationColumnCellsResource, DataListMappingCellResource, GlobalParamMappingCellResource
 )
 from awe_report_generator.core.util import cast_util
 
@@ -20,7 +21,8 @@ from awe_report_generator.core.util import cast_util
 @click.option('-s', '--sheet')
 @click.option('-d', '--target-dir')
 @click.option('-m', '--mode')
-def run(template_path: str, file_path: str, sheet: str, target_dir: str, mode: str):
+@click.option('-p', '--global-param')
+def run(template_path: str, file_path: str, sheet: str, target_dir: str, mode: str, global_param: str):
     report_generator = None
 
     pbar = None
@@ -33,13 +35,14 @@ def run(template_path: str, file_path: str, sheet: str, target_dir: str, mode: s
 
         pbar.update(1)
 
+    global_param_dict = None
     if mode == 'radio':
         report_generator = RadioCheckGenerator(template_path=template_path, on_finish_one=on_finish_one)
     elif mode == 'rt':
         divide_key = 'orderId'
         filed_mapping = {
             "orderDate": ExcelFiledProperty('A', cast_util.wrap_str, '委托日期'),
-            "complete_date": ExcelFiledProperty('B', cast_util.wrap_str, '完成时间'),
+            "completeDate": ExcelFiledProperty('B', cast_util.wrap_str, '完成时间'),
             divide_key: ExcelFiledProperty('C', cast_util.wrap_str, '委托单编号'),
             "sampleNo": ExcelFiledProperty('D', cast_util.wrap_str, '检件编号'),
             "kindNo": ExcelFiledProperty('E', cast_util.wrap_str, '焊口编号'),
@@ -52,6 +55,7 @@ def run(template_path: str, file_path: str, sheet: str, target_dir: str, mode: s
             "unitName": ExcelFiledProperty('Q', cast_util.wrap_str, '单元名称'),
             "checkCount": ExcelFiledProperty('M', cast_util.wrap_int, '张数'),
             "okCount": ExcelFiledProperty('N', cast_util.wrap_int, '合格数量'),
+            "ray": ExcelFiledProperty('P', cast_util.wrap_int, 'γ射线'),
         }
         column_cell_resource_list = [
             MappingColumnCellsResource(table_index=0, table_data_start_row=5, column=0, mapping_data_key='sampleNo'),
@@ -63,12 +67,23 @@ def run(template_path: str, file_path: str, sheet: str, target_dir: str, mode: s
             SimpleCalculationColumnCellsResource(table_index=0, table_data_start_row=5, column=14, mapping_data_key_1='checkCount', mapping_data_key_2='okCount', operation='-'),
         ]
 
+        doc_global_data_param_config_list = [
+            DocGlobalParamConfig('projectName', None, '工程名称', False),
+            DocGlobalParamConfig('testingStandards', None, '检测标准', False),
+        ]
 
-        report_generator = SimpleTableDocGenerator(template_path=template_path, filed_mapping=filed_mapping, divide_key=divide_key, on_finish_one=on_finish_one, header_resource=RTHeaderResource(), column_cell_resource_list=column_cell_resource_list, cell_resource_list=[])
+        cell_resource_list = [
+            DataListMappingCellResource(table_index=0, row=0, column=14, mapping_key=divide_key),
+            DataListMappingCellResource(table_index=0, row=1, column=14, mapping_key='completeDate'),
+            DataListMappingCellResource(table_index=0, row=2, column=14, mapping_key='level'),
+        ]
+
+        global_param_dict = json.loads(global_param)
+        report_generator = SimpleTableDocGenerator(template_path=template_path, filed_mapping=filed_mapping, divide_key=divide_key, on_finish_one=on_finish_one, header_resource=RTHeaderResource(), column_cell_resource_list=column_cell_resource_list, cell_resource_list=cell_resource_list, doc_global_data_param_config_list=doc_global_data_param_config_list)
     if report_generator is None:
         sys.exit(f'Unknown mode:{mode}')
 
-    report_generator.execute(file_path=file_path, target_dir=target_dir, sheet=sheet, global_param={})
+    report_generator.execute(file_path=file_path, target_dir=target_dir, sheet=sheet, global_param=global_param_dict)
 
 
 if __name__ == '__main__':

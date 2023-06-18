@@ -29,10 +29,11 @@ class ExcelFiledProperty:
 
 
 class DocGlobalParamConfig:
-    def __init__(self, filed: str, title: str, required: bool=False):
+    def __init__(self, filed: str, default_value=None, title: str = None, required: bool = False):
         self.filed = filed
         self.title = title
         self.required = required
+        self.default_value = default_value
 
 
 def default_on_finish_one(number: int, total_cnt: int, success: bool, exception: BaseException):
@@ -51,8 +52,9 @@ class ReportGenerator(metaclass=ABCMeta):
 
     # args: number([0:N)), totalCount(N), success:bool, exception: BaseException
 
-    def __init__(self, template_path: str, filed_mapping: Dict[str, ExcelFiledProperty], divide_key: str, on_finish_one=default_on_finish_one,
-                 doc_global_data_param_list=None):
+    def __init__(self, template_path: str, filed_mapping: Dict[str, ExcelFiledProperty], divide_key: str,
+                 on_finish_one=default_on_finish_one,
+                 doc_global_data_param_config_list=None):
         """
         :param template_path: path to template docx file
         :param filed_mapping:
@@ -64,10 +66,12 @@ class ReportGenerator(metaclass=ABCMeta):
         self.filed_mapping = filed_mapping
         self.divide_key = divide_key
         self.on_finsh_one = on_finish_one
-        self.doc_global_data_param_list = doc_global_data_param_list
+        self.doc_global_data_param_config_list = doc_global_data_param_config_list
 
     def execute(self, file_path: str, target_dir: str, sheet: str = DEFAULT_SHEET_NAME, global_param: dict = None):
-        self._check_global_param(global_param)
+        if global_param is None:
+            global_param = {}
+        self._check_and_set_default_global_param(global_param)
         data_list = self.__read(file_path, sheet)
         raw_data_map = {}
         for raw_data in data_list:
@@ -88,7 +92,7 @@ class ReportGenerator(metaclass=ABCMeta):
         for key, sub_data_list in raw_data_map.items():
             try:
                 template_doc = docx.Document(self.template_path)
-                doc = self._process(data_list=sub_data_list, template_doc=template_doc, global_data=global_param)
+                doc = self._process(data_list=sub_data_list, template_doc=template_doc, global_param=global_param)
                 file_name = self._get_file_name(key)
                 save_path = os.path.join(target_dir, file_name)
                 self._save(doc, file_path=save_path)
@@ -116,16 +120,16 @@ class ReportGenerator(metaclass=ABCMeta):
 
         return data_list
 
-    def _check_global_param(self, global_param: dict):
-        if self.doc_global_data_param_list is None:
+    def _check_and_set_default_global_param(self, global_param: dict):
+        if self.doc_global_data_param_config_list is None:
             return
-        for config in self.doc_global_data_param_list:
+        for config in self.doc_global_data_param_config_list:
             config: DocGlobalParamConfig
             if config.required and config.filed not in global_param:
-                raise ValueError(f'缺少参数{config.title}')
+                raise ValueError(f'缺少参数:{config.title}')
 
     @abstractmethod
-    def _process(self, data_list: list, template_doc: Document, global_data: dict) -> Document:
+    def _process(self, data_list: list, template_doc: Document, global_param: dict) -> Document:
         pass
 
     def _get_file_name(self, key):
