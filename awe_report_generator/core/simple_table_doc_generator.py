@@ -195,13 +195,13 @@ class SimpleTableDocGenerator(ReportGenerator):
             x = count of rows/columns in one table
             y = count of block
             2 = (start, end) end is excluded, start < end
-            [2 tables
-                [table0:3 rows/columns
+            [M=2 tables
+                [table0:x=3 rows/columns
                     [(1, 2),(2, 6),(6, 7)],
                     [(1, 3),(3, 7)],
                     [(1, 2),(2, 5), (5, 7)],
                 ],
-                [table1:2 rows/columns
+                [table1:x=2 rows/columns
                     [(1, 3),(3, 8)],
                     [(1, 2),(2, 8)],
                 ]
