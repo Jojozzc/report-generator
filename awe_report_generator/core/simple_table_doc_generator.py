@@ -168,13 +168,6 @@ class SimpleTableDocGenerator(ReportGenerator):
         self.column_cell_resource_list = column_cell_resource_list
         self.cell_resource_list = cell_resource_list
 
-    ##### Template descript ####
-    # excel key to word table column index
-    table_mapping: Dict[str, int]
-
-    # start of data list
-    data_start_row_of_table: int
-
     def _process(self, data_list: list, template_doc: Document, global_param: dict) -> Document:
         if self.header_resource is not None:
             self.header_resource.set(doc=template_doc, data_list=data_list, global_data=global_param)
