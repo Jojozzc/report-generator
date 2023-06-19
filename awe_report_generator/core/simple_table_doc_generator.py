@@ -168,7 +168,7 @@ class SimpleTableDocGenerator(ReportGenerator):
         self.header_resource = header_resource
         self.column_cell_resource_list = column_cell_resource_list
         self.cell_resource_list = cell_resource_list
-        template_doc = docx.Document(template_path)
+        template_doc = Document(template_path)
         self.table_row_index_zips = self._build_template_doc_table_index_zips(template_doc, True)
         self.table_col_index_zips = self._build_template_doc_table_index_zips(template_doc, False)
 

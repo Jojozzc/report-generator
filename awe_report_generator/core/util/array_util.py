@@ -1,3 +1,6 @@
+from typing import List
+
+
 def zip_arr(arr: list) -> List[tuple]:
     """
     :return [(start1, end1),(start2, end2),...,(startN, endN)] end is excluded
