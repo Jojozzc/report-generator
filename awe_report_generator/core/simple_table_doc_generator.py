@@ -5,6 +5,7 @@ from typing import Dict, List
 
 from docx.enum.table import WD_TABLE_ALIGNMENT
 
+from awe_report_generator.core.util import array_util
 from .base import ReportGenerator, ExcelFiledProperty
 from .style import DocCellStyle
 
@@ -167,6 +168,10 @@ class SimpleTableDocGenerator(ReportGenerator):
         self.header_resource = header_resource
         self.column_cell_resource_list = column_cell_resource_list
         self.cell_resource_list = cell_resource_list
+        template_doc = docx.Document(template_path)
+        self.table_row_index_zips = self._build_template_doc_table_index_zips(template_doc, True)
+        self.table_col_index_zips = self._build_template_doc_table_index_zips(template_doc, False)
+
 
     def _process(self, data_list: list, template_doc: Document, global_param: dict) -> Document:
         if self.header_resource is not None:
@@ -183,5 +188,39 @@ class SimpleTableDocGenerator(ReportGenerator):
         return template_doc
 
     
-    def __build_template_doc_table_mapping(self):
-        pass
+    def _build_template_doc_table_index_zips(self, doc: Document, is_row: bool):
+        """
+        :return M * x * y * 2 array:
+            M = len of table.tables
+            x = count of rows/columns in one table
+            y = count of block
+            2 = (start, end) end is excluded, start < end
+            [2 tables
+                [table0:3 rows/columns
+                    [(1, 2),(2, 6),(6, 7)],
+                    [(1, 3),(3, 7)],
+                    [(1, 2),(2, 5), (5, 7)],
+                ],
+                [table1:2 rows/columns
+                    [(1, 3),(3, 8)],
+                    [(1, 2),(2, 8)],
+                ]
+            ]
+        """
+        tables = doc.tables
+        index_zips = []
+        if tables is None:
+            return index_zips
+
+        for table in tables:
+            zips = []
+            index_zips.append(zips)
+
+            row_or_column_cnt = len(table.rows) if is_row else len(table.columns)
+
+            for i in range(row_or_column_cnt):
+                cells = table.row_cells(i) if is_row else table.column_cells(i)
+                zips.append(array_util.zip_arr(cells))
+
+        return index_zips
+
