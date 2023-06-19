@@ -10,7 +10,6 @@ from .base import ReportGenerator, ExcelFiledProperty
 from .style import DocCellStyle
 
 
-
 class HeaderResource(metaclass=ABCMeta):
     """
     用于处理Word表格头数据
@@ -34,23 +33,26 @@ class ColumnCellsResource(metaclass=ABCMeta):
     用于处理word内表格内某一列数据
     """
 
-    def __init__(self, table_index: int, table_data_start_row, column: int, style: DocCellStyle = DocCellStyle()):
+    def __init__(self, table_index: int, table_data_start_row, column_view_index: int, style: DocCellStyle = DocCellStyle()):
         self.table_index = table_index
         self.table_data_start_row = table_data_start_row
-        self.column = column
+        self.column_view_index = column_view_index
         self.style = style
 
     @abstractmethod
     def get_value(self, data: dict, global_data: dict):
         pass
 
-    def set(self, cur_index: int, doc: Document, data: dict, global_data: dict):
+    def set(self, cur_index: int, doc: Document, data: dict, global_data: dict, tables_row_index_zip: List[List[List[tuple]]]):
         val = self.get_value(data, global_data)
         if val is None:
             return
         table = doc.tables[self.table_index]
-        row = table.rows[self.table_data_start_row + cur_index]
-        cell = row.cells[self.column]
+        row = self.table_data_start_row + cur_index
+
+        index_zip = tables_row_index_zip[self.table_index]
+        col = index_zip[row][self.column_view_index][0]
+        cell = table.cell(row, col)
         cell.text = str(val)
         if self.style is not None:
             cell.paragraphs[0].paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
@@ -61,22 +63,30 @@ class CellResource(metaclass=ABCMeta):
     用于处理表格内某一个cell数据
     """
 
-    def __init__(self, table_index: int, row: int, column: int, style: DocCellStyle = DocCellStyle()):
+    def __init__(self, table_index: int, row: int, column_view_index: int, style: DocCellStyle = DocCellStyle()):
         self.table_index = table_index
         self.row = row
-        self.column = column
+        self.column_view_index = column_view_index
         self.style = style
 
     @abstractmethod
     def get_value(self, data_list: List[dict], global_data: dict):
         pass
 
-    def set(self, doc: Document, data_list: List[dict], global_data: dict):
+    def set(self, doc: Document, data_list: List[dict], global_data: dict, tables_row_index_zip: List[List[List[tuple]]]):
+        """
+
+        :param tables_row_index_zip: M * x * y * 2 array
+        :return:
+        """
         val = self.get_value(data_list, global_data)
         if val is None:
             return
         table = doc.tables[self.table_index]
-        cell = table.cell(self.row, self.column)
+        index_zip = tables_row_index_zip[self.table_index]
+
+        col = index_zip[self.row][self.column_view_index][0]
+        cell = table.cell(self.row, col)
         cell.text = str(val)
         if self.style is not None:
             cell.paragraphs[0].paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
@@ -84,8 +94,8 @@ class CellResource(metaclass=ABCMeta):
 
 class MappingColumnCellsResource(ColumnCellsResource):
 
-    def __init__(self, table_index: int, table_data_start_row, column: int, mapping_data_key: str):
-        super().__init__(table_index, table_data_start_row, column)
+    def __init__(self, table_index: int, table_data_start_row, column_view_index: int, mapping_data_key: str):
+        super().__init__(table_index, table_data_start_row, column_view_index)
         self.mapping_data_key = mapping_data_key
 
     def get_value(self, data: dict, global_data: dict):
@@ -96,8 +106,8 @@ class MappingColumnCellsResource(ColumnCellsResource):
 
 class GlobalParamMappingCellResource(CellResource):
 
-    def __init__(self, table_index: int, row: int, column: int, mapping_key: str):
-        super().__init__(table_index, row, column)
+    def __init__(self, table_index: int, row: int, column_view_index: int, mapping_key: str):
+        super().__init__(table_index, row, column_view_index)
         self.mapping_key = mapping_key
 
     def get_value(self, data_list: List[dict], global_data: dict):
@@ -110,8 +120,8 @@ class GlobalParamMappingCellResource(CellResource):
 
 class DataListMappingCellResource(CellResource):
 
-    def __init__(self, table_index: int, row: int, column: int, mapping_key: str):
-        super().__init__(table_index, row, column)
+    def __init__(self, table_index: int, row: int, column_view_index: int, mapping_key: str):
+        super().__init__(table_index, row, column_view_index)
         self.mapping_key = mapping_key
 
     def get_value(self, data_list: List[dict], global_data: dict):
@@ -128,7 +138,7 @@ class DataListMappingCellResource(CellResource):
 
 
 class SimpleCalculationColumnCellsResource(ColumnCellsResource):
-    def __init__(self, table_index: int, table_data_start_row, column: int, mapping_data_key_1: str,
+    def __init__(self, table_index: int, table_data_start_row, column_view_index: int, mapping_data_key_1: str,
                  mapping_data_key_2: str, operation: str):
         """
 
@@ -136,7 +146,7 @@ class SimpleCalculationColumnCellsResource(ColumnCellsResource):
         :param mapping_data_key_2: must be key of number
         :param operation: +/-
         """
-        super().__init__(table_index, table_data_start_row, column)
+        super().__init__(table_index, table_data_start_row, column_view_index)
         self.mapping_data_key_1 = mapping_data_key_1
         self.mapping_data_key_2 = mapping_data_key_2
         self.operation = operation
@@ -169,9 +179,7 @@ class SimpleTableDocGenerator(ReportGenerator):
         self.column_cell_resource_list = column_cell_resource_list
         self.cell_resource_list = cell_resource_list
         template_doc = Document(template_path)
-        self.table_row_index_zips = self._build_template_doc_table_index_zips(template_doc, True)
-        self.table_col_index_zips = self._build_template_doc_table_index_zips(template_doc, False)
-
+        self.table_row_index_zips = self._build_template_doc_table_index_zips(template_doc)
 
     def _process(self, data_list: list, template_doc: Document, global_param: dict) -> Document:
         if self.header_resource is not None:
@@ -180,15 +188,14 @@ class SimpleTableDocGenerator(ReportGenerator):
             for i in range(len(data_list)):
                 data = data_list[i]
                 for col_res in self.column_cell_resource_list:
-                    col_res.set(i, template_doc, data, global_param)
+                    col_res.set(i, template_doc, data, global_param, self.table_row_index_zips)
         if self.cell_resource_list is not None:
             for cell_res in self.cell_resource_list:
-                cell_res.set(template_doc, data_list, global_param)
+                cell_res.set(template_doc, data_list, global_param, self.table_row_index_zips)
 
         return template_doc
 
-    
-    def _build_template_doc_table_index_zips(self, doc: Document, is_row: bool):
+    def _build_template_doc_table_index_zips(self, doc: Document):
         """
         :return M * x * y * 2 array:
             M = len of table.tables
@@ -197,13 +204,13 @@ class SimpleTableDocGenerator(ReportGenerator):
             2 = (start, end) end is excluded, start < end
             [M=2 tables
                 [table0:x=3 rows/columns
-                    [(1, 2),(2, 6),(6, 7)],
-                    [(1, 3),(3, 7)],
-                    [(1, 2),(2, 5), (5, 7)],
+                    [(0, 2),(2, 6),(6, 7)],
+                    [(0, 3),(3, 7)],
+                    [(0, 2),(2, 5), (5, 7)],
                 ],
                 [table1:x=2 rows/columns
-                    [(1, 3),(3, 8)],
-                    [(1, 2),(2, 8)],
+                    [(0, 3),(3, 8)],
+                    [(0, 2),(2, 8)],
                 ]
             ]
         """
@@ -216,11 +223,10 @@ class SimpleTableDocGenerator(ReportGenerator):
             zips = []
             index_zips.append(zips)
 
-            row_or_column_cnt = len(table.rows) if is_row else len(table.columns)
+            row_or_column_cnt = len(table.rows)
 
             for i in range(row_or_column_cnt):
-                cells = table.row_cells(i) if is_row else table.column_cells(i)
+                cells = table.row_cells(i)
                 zips.append(array_util.zip_arr(cells))
 
         return index_zips
-

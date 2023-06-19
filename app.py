@@ -6,7 +6,7 @@ from awe_report_generator.biz.rt.base import RTHeaderResource
 from awe_report_generator.core.base import ExcelFiledProperty, DocGlobalParamConfig
 from awe_report_generator.core.simple_table_doc_generator import (
     SimpleTableDocGenerator, MappingColumnCellsResource, SimpleCalculationColumnCellsResource,
-    DataListMappingCellResource
+    DataListMappingCellResource, GlobalParamMappingCellResource
 )
 from awe_report_generator.core.util import cast_util
 from awe_report_generator.ui.base import HomePageQWidget, ProcessorUIConfig
@@ -32,14 +32,14 @@ def build_rt_config():
         "ray": ExcelFiledProperty('P', cast_util.wrap_int, 'γ射线'),
     }
     column_cell_resource_list = [
-        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column=0, mapping_data_key='sampleNo'),
-        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column=2, mapping_data_key='kindNo'),
-        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column=4, mapping_data_key='material'),
-        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column=5, mapping_data_key='specification'),
-        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column=9,
+        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=0, mapping_data_key='sampleNo'),
+        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=1, mapping_data_key='kindNo'),
+        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=2, mapping_data_key='material'),
+        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=3, mapping_data_key='specification'),
+        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=4,
                                    mapping_data_key='baseSpecificationAndCnt'),
-        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column=12, mapping_data_key='okCount'),
-        SimpleCalculationColumnCellsResource(table_index=0, table_data_start_row=5, column=14,
+        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=5, mapping_data_key='okCount'),
+        SimpleCalculationColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=6,
                                              mapping_data_key_1='checkCount', mapping_data_key_2='okCount',
                                              operation='-'),
     ]
@@ -50,9 +50,11 @@ def build_rt_config():
     ]
 
     cell_resource_list = [
-        DataListMappingCellResource(table_index=0, row=0, column=14, mapping_key=divide_key),
-        DataListMappingCellResource(table_index=0, row=1, column=14, mapping_key='completeDate'),
-        DataListMappingCellResource(table_index=0, row=2, column=14, mapping_key='level'),
+        DataListMappingCellResource(table_index=0, row=0, column_view_index=3, mapping_key=divide_key),
+        DataListMappingCellResource(table_index=0, row=1, column_view_index=3, mapping_key='completeDate'),
+        GlobalParamMappingCellResource(table_index=0, row=2, column_view_index=3, mapping_key='testingStandards'),
+        DataListMappingCellResource(table_index=0, row=2, column_view_index=5, mapping_key='level'),
+
     ]
     template_path = os.path.join(os.path.dirname(__file__), 'template/rt/TEMPLATE.docx')
     report_generator = SimpleTableDocGenerator(template_path=template_path, filed_mapping=filed_mapping,
@@ -85,14 +87,14 @@ def build_ray_config():
         "ray": ExcelFiledProperty('P', cast_util.wrap_int, 'γ射线'),
     }
     column_cell_resource_list = [
-        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column=0, mapping_data_key='sampleNo'),
-        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column=2, mapping_data_key='kindNo'),
-        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column=4, mapping_data_key='material'),
-        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column=5, mapping_data_key='specification'),
-        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column=9,
+        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=0, mapping_data_key='sampleNo'),
+        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=2, mapping_data_key='kindNo'),
+        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=4, mapping_data_key='material'),
+        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=5, mapping_data_key='specification'),
+        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=9,
                                    mapping_data_key='baseSpecificationAndCnt'),
-        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column=12, mapping_data_key='okCount'),
-        SimpleCalculationColumnCellsResource(table_index=0, table_data_start_row=5, column=14,
+        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=12, mapping_data_key='okCount'),
+        SimpleCalculationColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=14,
                                              mapping_data_key_1='checkCount', mapping_data_key_2='okCount',
                                              operation='-'),
     ]
@@ -103,9 +105,9 @@ def build_ray_config():
     ]
 
     cell_resource_list = [
-        DataListMappingCellResource(table_index=0, row=0, column=14, mapping_key=divide_key),
-        DataListMappingCellResource(table_index=0, row=1, column=14, mapping_key='completeDate'),
-        DataListMappingCellResource(table_index=0, row=2, column=14, mapping_key='level'),
+        DataListMappingCellResource(table_index=0, row=0, column_view_index=14, mapping_key=divide_key),
+        DataListMappingCellResource(table_index=0, row=1, column_view_index=14, mapping_key='completeDate'),
+        DataListMappingCellResource(table_index=0, row=2, column_view_index=14, mapping_key='level'),
     ]
     template_path = os.path.join(os.path.dirname(__file__), 'template/rt/TEMPLATE.docx')
     report_generator = SimpleTableDocGenerator(template_path=template_path, filed_mapping=filed_mapping,
@@ -138,14 +140,14 @@ def build_surface_config():
         "ray": ExcelFiledProperty('P', cast_util.wrap_int, 'γ射线'),
     }
     column_cell_resource_list = [
-        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column=0, mapping_data_key='sampleNo'),
-        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column=2, mapping_data_key='kindNo'),
-        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column=4, mapping_data_key='material'),
-        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column=5, mapping_data_key='specification'),
-        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column=9,
+        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=0, mapping_data_key='sampleNo'),
+        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=2, mapping_data_key='kindNo'),
+        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=4, mapping_data_key='material'),
+        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=5, mapping_data_key='specification'),
+        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=9,
                                    mapping_data_key='baseSpecificationAndCnt'),
-        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column=12, mapping_data_key='okCount'),
-        SimpleCalculationColumnCellsResource(table_index=0, table_data_start_row=5, column=14,
+        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=12, mapping_data_key='okCount'),
+        SimpleCalculationColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=14,
                                              mapping_data_key_1='checkCount', mapping_data_key_2='okCount',
                                              operation='-'),
     ]
@@ -156,9 +158,9 @@ def build_surface_config():
     ]
 
     cell_resource_list = [
-        DataListMappingCellResource(table_index=0, row=0, column=14, mapping_key=divide_key),
-        DataListMappingCellResource(table_index=0, row=1, column=14, mapping_key='completeDate'),
-        DataListMappingCellResource(table_index=0, row=2, column=14, mapping_key='level'),
+        DataListMappingCellResource(table_index=0, row=0, column_view_index=14, mapping_key=divide_key),
+        DataListMappingCellResource(table_index=0, row=1, column_view_index=14, mapping_key='completeDate'),
+        DataListMappingCellResource(table_index=0, row=2, column_view_index=14, mapping_key='level'),
     ]
     template_path = os.path.join(os.path.dirname(__file__), 'template/surface/TEMPLATE.docx')
     report_generator = SimpleTableDocGenerator(template_path=template_path, filed_mapping=filed_mapping,
