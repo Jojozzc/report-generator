@@ -181,3 +181,7 @@ class SimpleTableDocGenerator(ReportGenerator):
                 cell_res.set(template_doc, data_list, global_param)
 
         return template_doc
+
+    
+    def __build_template_doc_table_mapping(self):
+        pass
