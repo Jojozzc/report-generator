@@ -15,7 +15,7 @@ class RTHeaderResource(HeaderResource, ABC):
 
 
 class RTSummaryCellResource(CellResource):
-    SUMMARY_FORMAT_ONE = """说明：共检测{data_size}道,合格{ok_data_size}道，不合格{bad_data_size}道，其中返修{bad_check_count}张，共计{check_count}张。"""
+    SUMMARY_FORMAT_ONE = '说明：共检测{data_size}道,合格{ok_data_size}道，不合格{bad_data_size}道，其中返修{bad_check_count}张，共计{check_count}张。'
     SUMMARY_FORMAT_TWO = '其中γ射线{ray}张。'
 
     def get_value(self, data_list: List[dict], global_data: dict):
