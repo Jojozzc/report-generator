@@ -21,4 +21,11 @@ def zip_arr(arr: list) -> List[tuple]:
     ans.append((pre, len(arr))) 
 
     return ans
-        
+
+def get_one_value(data_list:List[dict], key):
+    if data_list is None:
+        return None
+    for data in data_list:
+        if key in data:
+            return data[key]
+    return None

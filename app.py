@@ -6,10 +6,10 @@ from awe_report_generator.biz.rt.base import RTHeaderResource
 from awe_report_generator.core.base import ExcelFiledProperty, DocGlobalParamConfig
 from awe_report_generator.core.simple_table_doc_generator import (
     SimpleTableDocGenerator, MappingColumnCellsResource, SimpleCalculationColumnCellsResource,
-    DataListMappingCellResource, GlobalParamMappingCellResource
+    DataListMappingCellResource, GlobalParamMappingCellResource, DataListCellParagraphResource
 )
 from awe_report_generator.core.style import DocCellStyle
-from awe_report_generator.core.util import cast_util
+from awe_report_generator.core.util import cast_util, date_util as awe_date_util
 
 from awe_report_generator.ui import BaseUIConfig
 from awe_report_generator.ui.base import HomePageQWidget
@@ -61,12 +61,15 @@ def build_rt_config():
         DocGlobalParamConfig('testingStandards', None, '检测标准', False),
     ]
 
+
+
     cell_resource_list = [
         DataListMappingCellResource(table_index=0, row=0, column_view_index=3, mapping_key=divide_key),
         DataListMappingCellResource(table_index=0, row=1, column_view_index=3, mapping_key='completeDate'),
         GlobalParamMappingCellResource(table_index=0, row=2, column_view_index=3, mapping_key='testingStandards'),
         DataListMappingCellResource(table_index=0, row=2, column_view_index=5, mapping_key='level'),
         RTSummaryCellResource(table_index=0, row=21, column_view_index=0, style=DocCellStyle(center=False)),
+        DataListCellParagraphResource(table_index=0, row=22, column_view_index=3, style=DocCellStyle(right=True), paragraph_index=3, cast_value_to_str=awe_date_util.get_YYYYmmdd_cn, mapping_key='completeDate'),
     ]
     template_path = os.path.join(os.path.dirname(__file__), 'template/rt/TEMPLATE.docx')
     report_generator = SimpleTableDocGenerator(template_path=template_path, filed_mapping=filed_mapping,

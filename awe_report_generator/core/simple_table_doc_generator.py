@@ -6,6 +6,7 @@ from typing import Dict, List
 from docx.enum.table import WD_TABLE_ALIGNMENT
 
 from awe_report_generator.core.util import array_util
+from awe_report_generator.core.util import cast_util
 from .base import ReportGenerator, ExcelFiledProperty
 from .style import DocCellStyle
 
@@ -19,21 +20,14 @@ class HeaderResource(metaclass=ABCMeta):
     def set(self, doc: Document, data_list: List[Dict], global_data: dict):
         pass
 
-    def get_one_value(self, data_list, key):
-        if data_list is None:
-            return None
-        for data in data_list:
-            if key in data:
-                return data[key]
-        return None
-
 
 class ColumnCellsResource():
     """
     用于处理word内表格内某一列数据
     """
 
-    def __init__(self, table_index: int, table_data_start_row, column_view_index: int, style: DocCellStyle = DocCellStyle()):
+    def __init__(self, table_index: int, table_data_start_row, column_view_index: int,
+                 style: DocCellStyle = DocCellStyle()):
         self.table_index = table_index
         self.table_data_start_row = table_data_start_row
         self.column_view_index = column_view_index
@@ -42,7 +36,8 @@ class ColumnCellsResource():
     def get_value(self, data: dict, global_data: dict):
         return None
 
-    def set(self, cur_index: int, doc: Document, data: dict, global_data: dict, tables_row_index_zip: List[List[List[tuple]]]):
+    def set(self, cur_index: int, doc: Document, data: dict, global_data: dict,
+            tables_row_index_zip: List[List[List[tuple]]]):
         val = self.get_value(data, global_data)
         if val is None:
             return
@@ -62,16 +57,21 @@ class CellResource():
     用于处理表格内某一个cell数据
     """
 
-    def __init__(self, table_index: int, row: int, column_view_index: int, style: DocCellStyle = DocCellStyle()):
+    def __init__(self, table_index: int, row: int, column_view_index: int, style: DocCellStyle = DocCellStyle(),
+                 cast_value_to_str=cast_util.wrap_str):
         self.table_index = table_index
         self.row = row
         self.column_view_index = column_view_index
         self.style = style
+        if cast_value_to_str is None:
+            cast_value_to_str = cast_util.wrap_str
+        self.cast_value_to_str=cast_value_to_str
 
     def get_value(self, data_list: List[dict], global_data: dict):
         return None
 
-    def set(self, doc: Document, data_list: List[dict], global_data: dict, tables_row_index_zip: List[List[List[tuple]]]):
+    def set(self, doc: Document, data_list: List[dict], global_data: dict,
+            tables_row_index_zip: List[List[List[tuple]]]):
         """
 
         :param tables_row_index_zip: M * x * y * 2 array
@@ -85,7 +85,8 @@ class CellResource():
 
         col = index_zip[self.row][self.column_view_index][0]
         cell = table.cell(self.row, col)
-        cell.text = str(val)
+
+        cell.text = self.cast_value_to_str(val)
         if self.style is not None and self.style.center:
             cell.paragraphs[0].paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
 
@@ -104,8 +105,8 @@ class MappingColumnCellsResource(ColumnCellsResource):
 
 class GlobalParamMappingCellResource(CellResource):
 
-    def __init__(self, table_index: int, row: int, column_view_index: int, mapping_key: str):
-        super().__init__(table_index, row, column_view_index)
+    def __init__(self, table_index: int, row: int, column_view_index: int, mapping_key: str, cast_value_to_str=cast_util.wrap_str):
+        super().__init__(table_index, row, column_view_index, cast_value_to_str=cast_value_to_str)
         self.mapping_key = mapping_key
 
     def get_value(self, data_list: List[dict], global_data: dict):
@@ -118,35 +119,27 @@ class GlobalParamMappingCellResource(CellResource):
 
 class DataListMappingCellResource(CellResource):
 
-    def __init__(self, table_index: int, row: int, column_view_index: int, mapping_key: str):
-        super().__init__(table_index, row, column_view_index)
+    def __init__(self, table_index: int, row: int, column_view_index: int, mapping_key: str, cast_value_to_str=cast_util.wrap_str):
+        super().__init__(table_index, row, column_view_index, cast_value_to_str=cast_value_to_str)
         self.mapping_key = mapping_key
 
     def get_value(self, data_list: List[dict], global_data: dict):
-        val = self._get_one_value(data_list, self.mapping_key)
+        val = array_util.get_one_value(data_list, self.mapping_key)
         return val
-
-    def _get_one_value(self, data_list, key):
-        if data_list is None:
-            return None
-        for data in data_list:
-            if key in data:
-                return data[key]
-        return None
 
 
 class CellParagraphResource(CellResource):
     def __init__(self, table_index: int, row: int, column_view_index: int, style: DocCellStyle = DocCellStyle(),
-                 paragraph_index: int = 0):
-        super().__init__(table_index, row, column_view_index, style)
+                 cast_value_to_str=cast_util.wrap_str, paragraph_index: int = 0):
+        super().__init__(table_index, row, column_view_index, style, cast_value_to_str)
         self.table_index = table_index
         self.row = row
         self.column_view_index = column_view_index
         self.style = style
         self.paragraph_index = paragraph_index
 
-
-    def set(self, doc: Document, data_list: List[dict], global_data: dict, tables_row_index_zip: List[List[List[tuple]]]):
+    def set(self, doc: Document, data_list: List[dict], global_data: dict,
+            tables_row_index_zip: List[List[List[tuple]]]):
         val = self.get_value(data_list, global_data)
         if val is None:
             return
@@ -157,10 +150,27 @@ class CellParagraphResource(CellResource):
         cell = table.cell(self.row, col)
         para = cell.paragraphs[self.paragraph_index]
 
-        para.text = str(val)
-        if self.style is not None and self.style.center:
-            para.paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
-    
+        val = self.cast_value_to_str(val)
+
+        para.text = val
+        if self.style is not None:
+            if self.style.center:
+                para.paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
+            elif self.style.left:
+                para.paragraph_format.alignment = WD_TABLE_ALIGNMENT.LEFT
+            elif self.style.right:
+                para.paragraph_format.alignment = WD_TABLE_ALIGNMENT.RIGHT
+
+
+
+class DataListCellParagraphResource(CellParagraphResource):
+    def __init__(self, table_index: int, row: int, column_view_index: int, style: DocCellStyle = DocCellStyle(),
+                 paragraph_index: int = 0, cast_value_to_str=cast_util.wrap_str, mapping_key: str = None):
+        super().__init__(table_index, row, column_view_index, style, cast_value_to_str, paragraph_index)
+        self.mapping_key = mapping_key
+
+    def get_value(self, data_list: List[dict], global_data: dict):
+        return array_util.get_one_value(data_list, self.mapping_key)
 
 
 
