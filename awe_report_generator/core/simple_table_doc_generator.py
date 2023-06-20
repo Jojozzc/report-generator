@@ -88,7 +88,7 @@ class CellResource(metaclass=ABCMeta):
         col = index_zip[self.row][self.column_view_index][0]
         cell = table.cell(self.row, col)
         cell.text = str(val)
-        if self.style is not None:
+        if self.style is not None and self.style.center:
             cell.paragraphs[0].paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
 
 
@@ -135,6 +135,34 @@ class DataListMappingCellResource(CellResource):
             if key in data:
                 return data[key]
         return None
+
+
+class CellParagraphResource(CellResource):
+    def __init__(self, table_index: int, row: int, column_view_index: int, style: DocCellStyle = DocCellStyle(), paragraph_index: int = 0):
+        self.table_index = table_index
+        self.row = row
+        self.column_view_index = column_view_index
+        self.style = style
+        self.paragraph_index = paragraph_index
+
+
+    def set(self, doc: Document, data_list: List[dict], global_data: dict, tables_row_index_zip: List[List[List[tuple]]]):
+        val = self.get_value(data_list, global_data)
+        if val is None:
+            return
+        table = doc.tables[self.table_index]
+        index_zip = tables_row_index_zip[self.table_index]
+
+        col = index_zip[self.row][self.column_view_index][0]
+        cell = table.cell(self.row, col)
+        para = cell.paragraphs[self.paragraph_index]
+
+        para.text = str(val)
+        if self.style is not None and self.style.center:
+            para.paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
+    
+
+
 
 
 class SimpleCalculationColumnCellsResource(ColumnCellsResource):
