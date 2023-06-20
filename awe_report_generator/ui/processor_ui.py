@@ -6,13 +6,17 @@ from PyQt5.QtWidgets import (QWidget,
                              QPushButton, QGridLayout, QLineEdit, QLabel, QFileDialog, QMessageBox, QProgressBar,
                              )
 
-from awe_report_generator.ui.base import ProcessorUIConfig
+
+class ProcessorUIParam:
+    def __init__(self, title, processor: ReportGenerator) -> None:
+        self.title = title
+        self.processor = processor
 
 
 class ProcessorQWidget(QWidget):
-    def __init__(self, processor_ui_config: ProcessorUIConfig = None):
+    def __init__(self, processor_ui_param: ProcessorUIParam):
         super().__init__()
-        self.processor_ui_config = processor_ui_config
+        self.processor_ui_param = processor_ui_param
         self.input_file_path = None
         self.sheet = None
         self.output_dir_path = None
@@ -26,9 +30,9 @@ class ProcessorQWidget(QWidget):
 
         self.setLayout(grid)
         self.setGeometry(300, 300, 600, 100)
-        self.setWindowTitle(self.processor_ui_config.name)
+        self.setWindowTitle(self.processor_ui_param.title)
 
-        doc_global_data_param_config_list = self.processor_ui_config.processor.doc_global_data_param_config_list
+        doc_global_data_param_config_list = self.processor_ui_param.processor.doc_global_data_param_config_list
         i = 0
 
         if doc_global_data_param_config_list is not None:
@@ -91,7 +95,7 @@ class ProcessorQWidget(QWidget):
 
     def on_submit(self):
         global_param = {}
-        doc_global_data_param_config_list = self.processor_ui_config.processor.doc_global_data_param_config_list
+        doc_global_data_param_config_list = self.processor_ui_param.processor.doc_global_data_param_config_list
 
         if doc_global_data_param_config_list is not None:
             for param_config in doc_global_data_param_config_list:
@@ -116,7 +120,7 @@ class ProcessorQWidget(QWidget):
             self.alert('请输入Sheet名称')
             return
 
-        self.work_thread = threading.Thread(name='Processor', target=self.processor_ui_config.processor.execute, args=(
+        self.work_thread = threading.Thread(name=f'Processor-{processor_ui_param.title}', target=self.processor_ui_param.processor.execute, args=(
             self.input_file_path, self.output_dir_path, sheet, global_param, self.on_finish_one))
         # self.work_thread = threading.Thread(name='Processor', target=self.process)
         self.work_thread.start()

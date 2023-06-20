@@ -9,7 +9,11 @@ from awe_report_generator.core.simple_table_doc_generator import (
     DataListMappingCellResource, GlobalParamMappingCellResource
 )
 from awe_report_generator.core.util import cast_util
-from awe_report_generator.ui.base import HomePageQWidget, ProcessorUIConfig
+
+from awe_report_generator.ui import BaseUIConfig
+from awe_report_generator.ui.base import HomePageQWidget
+from awe_report_generator.ui.processor_ui import ProcessorQWidget, ProcessorUIParam
+
 
 
 def build_rt_config():
@@ -63,8 +67,10 @@ def build_rt_config():
                                                column_cell_resource_list=column_cell_resource_list,
                                                cell_resource_list=cell_resource_list,
                                                doc_global_data_param_config_list=doc_global_data_param_config_list)
+    processor_widget = ProcessorQWidget(ProcessorUIParam(title='射线结果生成器', processor=report_generator))
+    base_ui_config = BaseUIConfig('射线结果生成器', processor_widget)
 
-    return ProcessorUIConfig(name='射线结果生成器', processor=report_generator)
+    return base_ui_config
 
 
 def build_ray_config():
@@ -117,7 +123,11 @@ def build_ray_config():
                                                cell_resource_list=cell_resource_list,
                                                doc_global_data_param_config_list=doc_global_data_param_config_list)
 
-    return ProcessorUIConfig(name='委托生成器', processor=report_generator)
+    processor_widget = ProcessorQWidget(ProcessorUIParam(title='委托生成器', processor=report_generator))
+    base_ui_config = BaseUIConfig('委托生成器', processor_widget)
+
+    return base_ui_config
+
 
 
 def build_surface_config():
@@ -169,18 +179,20 @@ def build_surface_config():
                                                column_cell_resource_list=column_cell_resource_list,
                                                cell_resource_list=cell_resource_list,
                                                doc_global_data_param_config_list=doc_global_data_param_config_list)
+    processor_widget = ProcessorQWidget(ProcessorUIParam(title='表面结果生成器', processor=report_generator))
+    base_ui_config = BaseUIConfig('表面结果生成器', processor_widget)
 
-    return ProcessorUIConfig(name='表面结果生成器', processor=report_generator)
+    return base_ui_config
 
 
 if __name__ == '__main__':
-    processor_ui_list = [
+    ui_config_list = [
         build_ray_config(),
         build_rt_config(),
         build_surface_config(),
     ]
     app = QApplication(sys.argv)
-    ui = HomePageQWidget(processor_ui_list)
+    ui = HomePageQWidget(ui_config_list)
     ui.show()
 
     sys.exit(app.exec_())
