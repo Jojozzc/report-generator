@@ -8,12 +8,14 @@ from awe_report_generator.core.simple_table_doc_generator import (
     SimpleTableDocGenerator, MappingColumnCellsResource, SimpleCalculationColumnCellsResource,
     DataListMappingCellResource, GlobalParamMappingCellResource
 )
+from awe_report_generator.core.style import DocCellStyle
 from awe_report_generator.core.util import cast_util
 
 from awe_report_generator.ui import BaseUIConfig
 from awe_report_generator.ui.base import HomePageQWidget
 from awe_report_generator.ui.processor_ui import ProcessorQWidget, ProcessorUIParam
 
+from awe_report_generator.biz.rt.base import RTSummaryCellResource
 
 
 def build_rt_config():
@@ -29,6 +31,7 @@ def build_rt_config():
         "material": ExcelFiledProperty('H', cast_util.wrap_str, '材质'),
         "level": ExcelFiledProperty('I', cast_util.wrap_str, '合格级别'),
         "checkRatioKind": ExcelFiledProperty('J', cast_util.wrap_str, '检测比列'),
+        "isOk": ExcelFiledProperty('K', cast_util.wrap_str, '返修补片'),
         "baseSpecificationAndCnt": ExcelFiledProperty('L', cast_util.wrap_str, '底片规格/张'),
         "unitName": ExcelFiledProperty('Q', cast_util.wrap_str, '单元名称'),
         "checkCount": ExcelFiledProperty('M', cast_util.wrap_int, '张数'),
@@ -36,13 +39,18 @@ def build_rt_config():
         "ray": ExcelFiledProperty('P', cast_util.wrap_int, 'γ射线'),
     }
     column_cell_resource_list = [
-        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=0, mapping_data_key='sampleNo'),
-        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=1, mapping_data_key='kindNo'),
-        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=2, mapping_data_key='material'),
-        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=3, mapping_data_key='specification'),
+        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=0,
+                                   mapping_data_key='sampleNo'),
+        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=1,
+                                   mapping_data_key='kindNo'),
+        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=2,
+                                   mapping_data_key='material'),
+        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=3,
+                                   mapping_data_key='specification'),
         MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=4,
                                    mapping_data_key='baseSpecificationAndCnt'),
-        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=5, mapping_data_key='okCount'),
+        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=5,
+                                   mapping_data_key='okCount'),
         SimpleCalculationColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=6,
                                              mapping_data_key_1='checkCount', mapping_data_key_2='okCount',
                                              operation='-'),
@@ -58,7 +66,7 @@ def build_rt_config():
         DataListMappingCellResource(table_index=0, row=1, column_view_index=3, mapping_key='completeDate'),
         GlobalParamMappingCellResource(table_index=0, row=2, column_view_index=3, mapping_key='testingStandards'),
         DataListMappingCellResource(table_index=0, row=2, column_view_index=5, mapping_key='level'),
-
+        RTSummaryCellResource(table_index=0, row=21, column_view_index=0, style=DocCellStyle(center=False)),
     ]
     template_path = os.path.join(os.path.dirname(__file__), 'template/rt/TEMPLATE.docx')
     report_generator = SimpleTableDocGenerator(template_path=template_path, filed_mapping=filed_mapping,
@@ -93,13 +101,18 @@ def build_ray_config():
         "ray": ExcelFiledProperty('P', cast_util.wrap_int, 'γ射线'),
     }
     column_cell_resource_list = [
-        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=0, mapping_data_key='sampleNo'),
-        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=2, mapping_data_key='kindNo'),
-        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=4, mapping_data_key='material'),
-        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=5, mapping_data_key='specification'),
+        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=0,
+                                   mapping_data_key='sampleNo'),
+        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=2,
+                                   mapping_data_key='kindNo'),
+        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=4,
+                                   mapping_data_key='material'),
+        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=5,
+                                   mapping_data_key='specification'),
         MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=9,
                                    mapping_data_key='baseSpecificationAndCnt'),
-        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=12, mapping_data_key='okCount'),
+        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=12,
+                                   mapping_data_key='okCount'),
         SimpleCalculationColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=14,
                                              mapping_data_key_1='checkCount', mapping_data_key_2='okCount',
                                              operation='-'),
@@ -124,10 +137,10 @@ def build_ray_config():
                                                doc_global_data_param_config_list=doc_global_data_param_config_list)
 
     processor_widget = ProcessorQWidget(ProcessorUIParam(title='委托生成器', processor=report_generator))
+
     base_ui_config = BaseUIConfig('委托生成器', processor_widget)
 
     return base_ui_config
-
 
 
 def build_surface_config():
@@ -150,13 +163,18 @@ def build_surface_config():
         "ray": ExcelFiledProperty('P', cast_util.wrap_int, 'γ射线'),
     }
     column_cell_resource_list = [
-        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=0, mapping_data_key='sampleNo'),
-        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=2, mapping_data_key='kindNo'),
-        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=4, mapping_data_key='material'),
-        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=5, mapping_data_key='specification'),
+        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=0,
+                                   mapping_data_key='sampleNo'),
+        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=2,
+                                   mapping_data_key='kindNo'),
+        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=4,
+                                   mapping_data_key='material'),
+        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=5,
+                                   mapping_data_key='specification'),
         MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=9,
                                    mapping_data_key='baseSpecificationAndCnt'),
-        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=12, mapping_data_key='okCount'),
+        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=12,
+                                   mapping_data_key='okCount'),
         SimpleCalculationColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=14,
                                              mapping_data_key_1='checkCount', mapping_data_key_2='okCount',
                                              operation='-'),
@@ -186,12 +204,14 @@ def build_surface_config():
 
 
 if __name__ == '__main__':
+    # Must run before QWidgets init.
+    app = QApplication(sys.argv)
+
     ui_config_list = [
         build_ray_config(),
         build_rt_config(),
         build_surface_config(),
     ]
-    app = QApplication(sys.argv)
     ui = HomePageQWidget(ui_config_list)
     ui.show()
 

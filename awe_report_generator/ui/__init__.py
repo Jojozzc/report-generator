@@ -1,5 +1,4 @@
-from awe_report_generator.core.base import ReportGenerator
-
+from PyQt5.QtWidgets import QWidget
 
 
 class BaseUIConfig:

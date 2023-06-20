@@ -1,14 +1,14 @@
-from typing import List, Dict
 import threading
 
 from PyQt5.QtWidgets import (QWidget,
-                             QVBoxLayout,
                              QPushButton, QGridLayout, QLineEdit, QLabel, QFileDialog, QMessageBox, QProgressBar,
                              )
 
+from awe_report_generator.core.base import ReportGenerator
+
 
 class ProcessorUIParam:
-    def __init__(self, title, processor: ReportGenerator) -> None:
+    def __init__(self, title, processor: ReportGenerator):
         self.title = title
         self.processor = processor
 
@@ -120,7 +120,7 @@ class ProcessorQWidget(QWidget):
             self.alert('请输入Sheet名称')
             return
 
-        self.work_thread = threading.Thread(name=f'Processor-{processor_ui_param.title}', target=self.processor_ui_param.processor.execute, args=(
+        self.work_thread = threading.Thread(name=f'Processor-{self.processor_ui_param.title}', target=self.processor_ui_param.processor.execute, args=(
             self.input_file_path, self.output_dir_path, sheet, global_param, self.on_finish_one))
         # self.work_thread = threading.Thread(name='Processor', target=self.process)
         self.work_thread.start()

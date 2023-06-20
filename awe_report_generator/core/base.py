@@ -17,15 +17,12 @@ class ExcelFiledProperty:
     value_cast is a function: val = value_cast(value)
     """
 
-    column_title: str
-    value_cast = None
-    desc: str
-
-    def __init__(self, column_title, value_cast, desc: str) -> None:
+    def __init__(self, column_title, value_cast, desc: str, required=False) -> None:
         super().__init__()
         self.column_title = column_title
         self.value_cast = value_cast
         self.desc = desc
+        self.required = required
 
 
 class DocGlobalParamConfig:
@@ -110,13 +107,19 @@ class ReportGenerator(metaclass=ABCMeta):
             row = raw_datas.iloc[i]
             raw_data = {}
 
+            valid = True
             for k, filed_property in self.filed_mapping.items():
                 filed_property: ExcelFiledProperty
                 col_idx = excel_title_to_index(filed_property.column_title)
                 val = self._castValue(row[col_idx], filed_property.value_cast)
-                raw_data[k] = val
-
-            data_list.append(raw_data)
+                if val is None:
+                    if self.divide_key == k or filed_property.required:
+                        valid = False
+                        break
+                if val is not None:
+                    raw_data[k] = val
+            if valid:
+                data_list.append(raw_data)
 
         return data_list
 

@@ -28,7 +28,7 @@ class HeaderResource(metaclass=ABCMeta):
         return None
 
 
-class ColumnCellsResource(metaclass=ABCMeta):
+class ColumnCellsResource():
     """
     用于处理word内表格内某一列数据
     """
@@ -39,9 +39,8 @@ class ColumnCellsResource(metaclass=ABCMeta):
         self.column_view_index = column_view_index
         self.style = style
 
-    @abstractmethod
     def get_value(self, data: dict, global_data: dict):
-        pass
+        return None
 
     def set(self, cur_index: int, doc: Document, data: dict, global_data: dict, tables_row_index_zip: List[List[List[tuple]]]):
         val = self.get_value(data, global_data)
@@ -58,7 +57,7 @@ class ColumnCellsResource(metaclass=ABCMeta):
             cell.paragraphs[0].paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
 
 
-class CellResource(metaclass=ABCMeta):
+class CellResource():
     """
     用于处理表格内某一个cell数据
     """
@@ -69,9 +68,8 @@ class CellResource(metaclass=ABCMeta):
         self.column_view_index = column_view_index
         self.style = style
 
-    @abstractmethod
     def get_value(self, data_list: List[dict], global_data: dict):
-        pass
+        return None
 
     def set(self, doc: Document, data_list: List[dict], global_data: dict, tables_row_index_zip: List[List[List[tuple]]]):
         """
@@ -138,7 +136,9 @@ class DataListMappingCellResource(CellResource):
 
 
 class CellParagraphResource(CellResource):
-    def __init__(self, table_index: int, row: int, column_view_index: int, style: DocCellStyle = DocCellStyle(), paragraph_index: int = 0):
+    def __init__(self, table_index: int, row: int, column_view_index: int, style: DocCellStyle = DocCellStyle(),
+                 paragraph_index: int = 0):
+        super().__init__(table_index, row, column_view_index, style)
         self.table_index = table_index
         self.row = row
         self.column_view_index = column_view_index
