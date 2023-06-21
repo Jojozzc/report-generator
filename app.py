@@ -141,7 +141,7 @@ def build_ray_config():
 
     cell_resource_list = [
         # 单位工程名称
-        DataListCellParagraphResource(table_index=0, row=0, column_view_index=2, style=DocCellStyle(right=True), paragraph_index=3, cast_value_to_str=cast_unit_value_to_str, mapping_key='unitName'),
+        DataListCellParagraphResource(table_index=0, row=0, column_view_index=2, style=DocCellStyle(left=True), paragraph_index=3, cast_value_to_str=cast_unit_value_to_str, mapping_key='unitName'),
          # 委托单位
         GlobalParamMappingCellResource(table_index=0, row=1, column_view_index=1, mapping_key='customorCompany'),
         # 委托单编号
