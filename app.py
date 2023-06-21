@@ -133,7 +133,15 @@ def build_ray_config():
         DocGlobalParamConfig('appearanceDetection', '合格', '外观检查', False),
     ]
 
+    def cast_unit_value_to_str(unit_name):
+        if unit_name == None:
+            return None
+        return f'单位工程名称:{unit_name}'
+
+
     cell_resource_list = [
+        # 单位工程名称
+        DataListCellParagraphResource(table_index=0, row=0, column_view_index=2, style=DocCellStyle(right=True), paragraph_index=3, cast_value_to_str=cast_unit_value_to_str, mapping_key='unitName'),
          # 委托单位
         GlobalParamMappingCellResource(table_index=0, row=1, column_view_index=1, mapping_key='customorCompany'),
         # 委托单编号
@@ -154,6 +162,8 @@ def build_ray_config():
         DataListMappingCellResource(table_index=0, row=5, column_view_index=1, mapping_key='weldMethod'),
         # 外观检查
         GlobalParamMappingCellResource(table_index=0, row=5, column_view_index=3, mapping_key='appearanceDetection'),
+        # 施工单位时间
+        DataListCellParagraphResource(table_index=0, row=23, column_view_index=0, style=DocCellStyle(right=True), paragraph_index=3, cast_value_to_str=awe_date_util.get_YYYYmmdd_cn, mapping_key='orderDate'),
 
     ]
     template_path = os.path.join(os.path.dirname(__file__), 'template/ray/TEMPLATE.docx')
