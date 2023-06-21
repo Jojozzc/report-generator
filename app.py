@@ -241,7 +241,7 @@ def build_surface_config():
     template_path = os.path.join(os.path.dirname(__file__), 'template/surface/TEMPLATE.docx')
     report_generator = SimpleTableDocGenerator(template_path=template_path, filed_mapping=filed_mapping,
                                                divide_key=divide_key,
-                                               header_resource=HeaderResource(),
+                                               header_resource=RTHeaderResource(),
                                                column_cell_resource_list=column_cell_resource_list,
                                                cell_resource_list=cell_resource_list,
                                                doc_global_data_param_config_list=doc_global_data_param_config_list)
