@@ -2,7 +2,7 @@ import os, sys
 
 from PyQt5.QtWidgets import QApplication
 
-from awe_report_generator.biz.rt.base import RTHeaderResource
+from awe_report_generator.biz.rt.base import RTHeaderResource, RTSummaryCellResource2
 from awe_report_generator.core.base import ExcelFiledProperty, DocGlobalParamConfig
 from awe_report_generator.core.simple_table_doc_generator import (
     SimpleTableDocGenerator, MappingColumnCellsResource, SimpleCalculationColumnCellsResource,
@@ -78,8 +78,8 @@ def build_rt_config():
                                                column_cell_resource_list=column_cell_resource_list,
                                                cell_resource_list=cell_resource_list,
                                                doc_global_data_param_config_list=doc_global_data_param_config_list)
-    processor_widget = ProcessorQWidget(ProcessorUIParam(title='射线结果生成器', processor=report_generator))
-    base_ui_config = BaseUIConfig('射线结果生成器', processor_widget)
+    processor_widget = ProcessorQWidget(ProcessorUIParam(title='RT结果通知单台账', processor=report_generator))
+    base_ui_config = BaseUIConfig('RT结果通知单台账', processor_widget)
 
     return base_ui_config
 
@@ -174,9 +174,9 @@ def build_ray_config():
                                                cell_resource_list=cell_resource_list,
                                                doc_global_data_param_config_list=doc_global_data_param_config_list)
 
-    processor_widget = ProcessorQWidget(ProcessorUIParam(title='管道焊口检测委托单', processor=report_generator))
+    processor_widget = ProcessorQWidget(ProcessorUIParam(title='射线检测委托台账', processor=report_generator))
 
-    base_ui_config = BaseUIConfig('管道焊口检测委托单', processor_widget)
+    base_ui_config = BaseUIConfig('射线检测委托台账', processor_widget)
 
     return base_ui_config
 
@@ -212,6 +212,8 @@ def build_surface_config():
                                    mapping_data_key='material'),
         MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=3,
                                    mapping_data_key='specification'),
+        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=4,
+                                   mapping_data_key='detectionCount'),
         MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=5,
                                    mapping_data_key='okCount'),
         SimpleCalculationColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=6,
@@ -221,7 +223,7 @@ def build_surface_config():
 
     doc_global_data_param_config_list = [
         DocGlobalParamConfig('projectName', None, '工程名称', False),
-        DocGlobalParamConfig('customorCompany', None, '委托单位', False),
+        DocGlobalParamConfig('customerCompany', None, '委托单位', False),
         DocGlobalParamConfig('testingStandards', None, '检测标准', False),
     ]
 
@@ -230,10 +232,11 @@ def build_surface_config():
     cell_resource_list = [
         DataListMappingCellResource(table_index=0, row=0, column_view_index=3, mapping_key=divide_key),
         DataListMappingCellResource(table_index=0, row=1, column_view_index=3, mapping_key='completeDate'),
+        GlobalParamMappingCellResource(table_index=0, row=1, column_view_index=1, mapping_key='customerCompany'),
         GlobalParamMappingCellResource(table_index=0, row=2, column_view_index=3, mapping_key='testingStandards'),
         DataListMappingCellResource(table_index=0, row=2, column_view_index=5, mapping_key='level'),
-        RTSummaryCellResource(table_index=0, row=21, column_view_index=0, style=DocCellStyle(center=False)),
-        DataListCellParagraphResource(table_index=0, row=22, column_view_index=3, style=DocCellStyle(right=True), paragraph_index=3, cast_value_to_str=awe_date_util.get_YYYYmmdd_cn, mapping_key='completeDate'),
+        DataListCellParagraphResource(table_index=0, row=25, column_view_index=3, style=DocCellStyle(center=False, right=True), paragraph_index=4, cast_value_to_str=awe_date_util.get_YYYYmmdd_cn, mapping_key='completeDate'),
+        RTSummaryCellResource2(table_index=0, row=24, column_view_index=0, style=DocCellStyle(center=False)),
     ]
     template_path = os.path.join(os.path.dirname(__file__), 'template/surface/TEMPLATE.docx')
     report_generator = SimpleTableDocGenerator(template_path=template_path, filed_mapping=filed_mapping,
@@ -242,8 +245,8 @@ def build_surface_config():
                                                column_cell_resource_list=column_cell_resource_list,
                                                cell_resource_list=cell_resource_list,
                                                doc_global_data_param_config_list=doc_global_data_param_config_list)
-    processor_widget = ProcessorQWidget(ProcessorUIParam(title='表面结果生成器', processor=report_generator))
-    base_ui_config = BaseUIConfig('表面结果生成器', processor_widget)
+    processor_widget = ProcessorQWidget(ProcessorUIParam(title='表面结果通知单台账', processor=report_generator))
+    base_ui_config = BaseUIConfig('表面结果通知单台账', processor_widget)
 
     return base_ui_config
 

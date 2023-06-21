@@ -1,4 +1,3 @@
-
 def wrap_str(obj):
     if obj is None or str(obj) == 'nan' or str(obj) == 'None':
         return None
@@ -29,3 +28,9 @@ def _is_float(obj):
     except:
         return False
     return True
+
+
+def wrap_float(obj):
+    if _is_float(obj):
+        return float(obj)
+    return None

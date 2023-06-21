@@ -2,7 +2,7 @@ from typing import List
 
 from PyQt5.QtWidgets import (QWidget,
                              QGridLayout,
-                             QPushButton,
+                             QPushButton, QDesktopWidget,
                              )
 
 from . import BaseUIConfig
