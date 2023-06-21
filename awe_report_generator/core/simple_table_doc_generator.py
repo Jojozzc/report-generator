@@ -16,7 +16,6 @@ class HeaderResource(metaclass=ABCMeta):
     用于处理Word表格头数据
     """
 
-    @abstractmethod
     def set(self, doc: Document, data_list: List[Dict], global_data: dict):
         pass
 

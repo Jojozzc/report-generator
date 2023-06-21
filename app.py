@@ -6,7 +6,7 @@ from awe_report_generator.biz.rt.base import RTHeaderResource
 from awe_report_generator.core.base import ExcelFiledProperty, DocGlobalParamConfig
 from awe_report_generator.core.simple_table_doc_generator import (
     SimpleTableDocGenerator, MappingColumnCellsResource, SimpleCalculationColumnCellsResource,
-    DataListMappingCellResource, GlobalParamMappingCellResource, DataListCellParagraphResource
+    DataListMappingCellResource, GlobalParamMappingCellResource, DataListCellParagraphResource, HeaderResource
 )
 from awe_report_generator.core.style import DocCellStyle
 from awe_report_generator.core.util import cast_util, date_util as awe_date_util
@@ -104,7 +104,7 @@ def build_ray_config():
         "ray": ExcelFiledProperty('P', cast_util.wrap_int, 'γ射线'),
         "unitName": ExcelFiledProperty('Q', cast_util.wrap_str, '单元名称'),
         "weldMethod": ExcelFiledProperty('R', cast_util.wrap_str, '焊接方法'),
-        "lineNo": ExcelFiledProperty('R', cast_util.wrap_str, '单线号'),
+        "lineNo": ExcelFiledProperty('T', cast_util.wrap_str, '单线号'),
 
     }
 
@@ -141,15 +141,15 @@ def build_ray_config():
 
     cell_resource_list = [
         # 单位工程名称
-        DataListCellParagraphResource(table_index=0, row=0, column_view_index=2, style=DocCellStyle(left=True), paragraph_index=3, cast_value_to_str=cast_unit_value_to_str, mapping_key='unitName'),
+        DataListCellParagraphResource(table_index=0, row=0, column_view_index=2, style=DocCellStyle(center=False ,left=True, right=False), paragraph_index=2, cast_value_to_str=cast_unit_value_to_str, mapping_key='unitName'),
          # 委托单位
         GlobalParamMappingCellResource(table_index=0, row=1, column_view_index=1, mapping_key='customorCompany'),
         # 委托单编号
-        DataListMappingCellResource(table_index=0, row=1, column_view_index=3, mapping_key=orderId),
+        DataListMappingCellResource(table_index=0, row=1, column_view_index=3, mapping_key=divide_key),
         # 验收标准
         GlobalParamMappingCellResource(table_index=0, row=2, column_view_index=5, mapping_key='acceptStandard'),
         # 检测标准
-        GlobalParamMappingCellResource(table_index=0, row=3, column_view_index=3, mapping_key='testingStandards'),
+        GlobalParamMappingCellResource(table_index=0, row=3, column_view_index=1, mapping_key='testingStandards'),
         # 检测时机
         GlobalParamMappingCellResource(table_index=0, row=3, column_view_index=5, mapping_key='detectionOpportunity'),
         # 检测技术等级
@@ -169,7 +169,7 @@ def build_ray_config():
     template_path = os.path.join(os.path.dirname(__file__), 'template/ray/TEMPLATE.docx')
     report_generator = SimpleTableDocGenerator(template_path=template_path, filed_mapping=filed_mapping,
                                                divide_key=divide_key,
-                                               header_resource=RTHeaderResource(),
+                                               header_resource=HeaderResource(),
                                                column_cell_resource_list=column_cell_resource_list,
                                                cell_resource_list=cell_resource_list,
                                                doc_global_data_param_config_list=doc_global_data_param_config_list)
@@ -238,7 +238,7 @@ def build_surface_config():
     template_path = os.path.join(os.path.dirname(__file__), 'template/surface/TEMPLATE.docx')
     report_generator = SimpleTableDocGenerator(template_path=template_path, filed_mapping=filed_mapping,
                                                divide_key=divide_key,
-                                               header_resource=RTHeaderResource(),
+                                               header_resource=HeaderResource(),
                                                column_cell_resource_list=column_cell_resource_list,
                                                cell_resource_list=cell_resource_list,
                                                doc_global_data_param_config_list=doc_global_data_param_config_list)

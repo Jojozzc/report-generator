@@ -10,9 +10,12 @@ from awe_report_generator.core.util import array_util
 class RTHeaderResource(HeaderResource, ABC):
 
     def set(self, doc: Document, data_list: List[Dict], global_data: dict):
-        project_name = global_data['projectName']
-        doc.paragraphs[1].add_run(project_name)
-        doc.paragraphs[2].add_run(array_util.get_one_value(data_list, 'unitName'))
+        project_name = global_data.get('projectName', '')
+        if project_name is not None:
+            doc.paragraphs[1].add_run(project_name)
+        unit_name = array_util.get_one_value(data_list, 'unitName')
+        if unit_name is not None:
+            doc.paragraphs[2].add_run(unit_name)
 
 
 class RTSummaryCellResource(CellResource):
