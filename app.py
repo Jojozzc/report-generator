@@ -164,9 +164,9 @@ def build_ray_config():
                                                cell_resource_list=cell_resource_list,
                                                doc_global_data_param_config_list=doc_global_data_param_config_list)
 
-    processor_widget = ProcessorQWidget(ProcessorUIParam(title='委托生成器', processor=report_generator))
+    processor_widget = ProcessorQWidget(ProcessorUIParam(title='管道焊口检测委托单', processor=report_generator))
 
-    base_ui_config = BaseUIConfig('委托生成器', processor_widget)
+    base_ui_config = BaseUIConfig('管道焊口检测委托单', processor_widget)
 
     return base_ui_config
 
