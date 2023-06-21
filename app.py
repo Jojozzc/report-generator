@@ -71,7 +71,7 @@ def build_rt_config():
         RTSummaryCellResource(table_index=0, row=21, column_view_index=0, style=DocCellStyle(center=False)),
         DataListCellParagraphResource(table_index=0, row=22, column_view_index=3, style=DocCellStyle(right=True), paragraph_index=3, cast_value_to_str=awe_date_util.get_YYYYmmdd_cn, mapping_key='completeDate'),
     ]
-    template_path = os.path.join(os.path.dirname(__file__), 'template/rt/TEMPLATE.docx')
+    template_path = os.path.join(os.getcwd(), 'template/rt/TEMPLATE.docx')
     report_generator = SimpleTableDocGenerator(template_path=template_path, filed_mapping=filed_mapping,
                                                divide_key=divide_key,
                                                header_resource=RTHeaderResource(),
@@ -166,7 +166,8 @@ def build_ray_config():
         DataListCellParagraphResource(table_index=0, row=23, column_view_index=0, style=DocCellStyle(center=False, left=False, right=True), paragraph_index=3, cast_value_to_str=awe_date_util.get_YYYYmmdd_cn, mapping_key='orderDate'),
 
     ]
-    template_path = os.path.join(os.path.dirname(__file__), 'template/ray/TEMPLATE.docx')
+
+    template_path = os.path.join(os.getcwd(), 'template/ray/TEMPLATE.docx')
     report_generator = SimpleTableDocGenerator(template_path=template_path, filed_mapping=filed_mapping,
                                                divide_key=divide_key,
                                                header_resource=HeaderResource(),
@@ -238,7 +239,7 @@ def build_surface_config():
         DataListCellParagraphResource(table_index=0, row=25, column_view_index=3, style=DocCellStyle(center=False, right=True), paragraph_index=4, cast_value_to_str=awe_date_util.get_YYYYmmdd_cn, mapping_key='completeDate'),
         RTSummaryCellResource2(table_index=0, row=24, column_view_index=0, style=DocCellStyle(center=False)),
     ]
-    template_path = os.path.join(os.path.dirname(__file__), 'template/surface/TEMPLATE.docx')
+    template_path = os.path.join(os.getcwd(), 'template/surface/TEMPLATE.docx')
     report_generator = SimpleTableDocGenerator(template_path=template_path, filed_mapping=filed_mapping,
                                                divide_key=divide_key,
                                                header_resource=RTHeaderResource(),
@@ -253,6 +254,7 @@ def build_surface_config():
 
 if __name__ == '__main__':
     # Must run before QWidgets init.
+    print(os.getcwd())
     app = QApplication(sys.argv)
 
     ui_config_list = [
