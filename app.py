@@ -163,7 +163,7 @@ def build_ray_config():
         # 外观检查
         GlobalParamMappingCellResource(table_index=0, row=5, column_view_index=3, mapping_key='appearanceDetection'),
         # 施工单位时间
-        DataListCellParagraphResource(table_index=0, row=23, column_view_index=0, style=DocCellStyle(right=True), paragraph_index=3, cast_value_to_str=awe_date_util.get_YYYYmmdd_cn, mapping_key='orderDate'),
+        DataListCellParagraphResource(table_index=0, row=23, column_view_index=0, style=DocCellStyle(center=False, left=False, right=True), paragraph_index=3, cast_value_to_str=awe_date_util.get_YYYYmmdd_cn, mapping_key='orderDate'),
 
     ]
     template_path = os.path.join(os.path.dirname(__file__), 'template/ray/TEMPLATE.docx')
