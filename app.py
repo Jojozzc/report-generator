@@ -27,7 +27,7 @@ def build_rt_config():
         "sampleNo": ExcelFiledProperty('D', cast_util.wrap_str, '检件编号'),
         "kindNo": ExcelFiledProperty('E', cast_util.wrap_str, '焊口编号'),
         "empId": ExcelFiledProperty('F', cast_util.wrap_str, '焊工号'),
-        "specification": ExcelFiledProperty('G', cast_util.wrap_str, '规格（mm）'),
+        "specification": ExcelFiledProperty('G', cast_util.wrap_str, '规格(mm)'),
         "material": ExcelFiledProperty('H', cast_util.wrap_str, '材质'),
         "level": ExcelFiledProperty('I', cast_util.wrap_str, '合格级别'),
         "checkRatioKind": ExcelFiledProperty('J', cast_util.wrap_str, '检测比列'),
@@ -93,7 +93,7 @@ def build_ray_config():
         "sampleNo": ExcelFiledProperty('D', cast_util.wrap_str, '检件编号'),
         "kindNo": ExcelFiledProperty('E', cast_util.wrap_str, '焊口编号'),
         "empId": ExcelFiledProperty('F', cast_util.wrap_str, '焊工号'),
-        "specification": ExcelFiledProperty('G', cast_util.wrap_str, '规格（mm）'),
+        "specification": ExcelFiledProperty('G', cast_util.wrap_str, '规格(mm)'),
         "material": ExcelFiledProperty('H', cast_util.wrap_str, '材质'),
         "level": ExcelFiledProperty('I', cast_util.wrap_str, '合格级别'),
         "checkRatioKind": ExcelFiledProperty('J', cast_util.wrap_str, '检测比列'),
@@ -190,43 +190,50 @@ def build_surface_config():
         "sampleNo": ExcelFiledProperty('D', cast_util.wrap_str, '检件编号'),
         "kindNo": ExcelFiledProperty('E', cast_util.wrap_str, '焊口编号'),
         "empId": ExcelFiledProperty('F', cast_util.wrap_str, '焊工号'),
-        "specification": ExcelFiledProperty('G', cast_util.wrap_str, '规格（mm）'),
+        "specification": ExcelFiledProperty('G', cast_util.wrap_str, '规格(mm)'),
         "material": ExcelFiledProperty('H', cast_util.wrap_str, '材质'),
         "level": ExcelFiledProperty('I', cast_util.wrap_str, '合格级别'),
         "checkRatioKind": ExcelFiledProperty('J', cast_util.wrap_str, '检测比列'),
+        "isOk": ExcelFiledProperty('K', cast_util.wrap_str, '返修补片'),
         "baseSpecificationAndCnt": ExcelFiledProperty('L', cast_util.wrap_str, '底片规格/张'),
         "unitName": ExcelFiledProperty('Q', cast_util.wrap_str, '单元名称'),
         "checkCount": ExcelFiledProperty('M', cast_util.wrap_int, '张数'),
         "okCount": ExcelFiledProperty('N', cast_util.wrap_int, '合格数量'),
         "ray": ExcelFiledProperty('P', cast_util.wrap_int, 'γ射线'),
+        "detectionCount": ExcelFiledProperty('U', cast_util.wrap_str, '检测数量(道/m/m2/点)'),
+
     }
     column_cell_resource_list = [
         MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=0,
                                    mapping_data_key='sampleNo'),
-        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=2,
+        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=1,
                                    mapping_data_key='kindNo'),
-        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=4,
+        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=2,
                                    mapping_data_key='material'),
-        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=5,
+        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=3,
                                    mapping_data_key='specification'),
-        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=9,
-                                   mapping_data_key='baseSpecificationAndCnt'),
-        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=12,
+        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=5,
                                    mapping_data_key='okCount'),
-        SimpleCalculationColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=14,
+        SimpleCalculationColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=6,
                                              mapping_data_key_1='checkCount', mapping_data_key_2='okCount',
                                              operation='-'),
     ]
 
     doc_global_data_param_config_list = [
         DocGlobalParamConfig('projectName', None, '工程名称', False),
+        DocGlobalParamConfig('customorCompany', None, '委托单位', False),
         DocGlobalParamConfig('testingStandards', None, '检测标准', False),
     ]
 
+
+
     cell_resource_list = [
-        DataListMappingCellResource(table_index=0, row=0, column_view_index=14, mapping_key=divide_key),
-        DataListMappingCellResource(table_index=0, row=1, column_view_index=14, mapping_key='completeDate'),
-        DataListMappingCellResource(table_index=0, row=2, column_view_index=14, mapping_key='level'),
+        DataListMappingCellResource(table_index=0, row=0, column_view_index=3, mapping_key=divide_key),
+        DataListMappingCellResource(table_index=0, row=1, column_view_index=3, mapping_key='completeDate'),
+        GlobalParamMappingCellResource(table_index=0, row=2, column_view_index=3, mapping_key='testingStandards'),
+        DataListMappingCellResource(table_index=0, row=2, column_view_index=5, mapping_key='level'),
+        RTSummaryCellResource(table_index=0, row=21, column_view_index=0, style=DocCellStyle(center=False)),
+        DataListCellParagraphResource(table_index=0, row=22, column_view_index=3, style=DocCellStyle(right=True), paragraph_index=3, cast_value_to_str=awe_date_util.get_YYYYmmdd_cn, mapping_key='completeDate'),
     ]
     template_path = os.path.join(os.path.dirname(__file__), 'template/surface/TEMPLATE.docx')
     report_generator = SimpleTableDocGenerator(template_path=template_path, filed_mapping=filed_mapping,
