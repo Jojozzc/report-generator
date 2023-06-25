@@ -11,3 +11,7 @@
 2. 模板：template/TEMPLATE_MODE2.docx
 3. 执行 pyinstaller -F mode2_main.py
 
+## New App
+1. app.py
+2. 模板：template/*
+3. 执行 pyinstaller -F app.py
