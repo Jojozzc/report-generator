@@ -21,5 +21,7 @@ jobs:
       - run: pyinstaller -F app.py
       - run: ls dist
       - run: cp -r template dist/template
-      - run: ls dist
-      - run: ls dist/template
+      - run: mv dist/app.exe dist/文档生成器.exe
+      - run: mv dist 文档生成器
+      - run: zip 文档生成器.zip 文档生成器
+      - run: ls
