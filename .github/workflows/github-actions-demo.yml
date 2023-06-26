@@ -19,4 +19,7 @@ jobs:
       - run: pip install pyinstaller
       - run: echo 'pyinstaller installed'
       - run: pyinstaller -F app.py
-      - run: ls
+      - run: ls dist
+      - run: cp -r template dist/template
+      - run: ls dist
+      - run: ls dist/template
