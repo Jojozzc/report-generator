@@ -1,6 +1,8 @@
 name: GitHub Actions Demo
 run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
-on: [push]
+on: 
+  release:
+    types: [published]
 jobs:
   Explore-GitHub-Actions:
     runs-on: windows-latest
@@ -24,3 +26,6 @@ jobs:
       - run: mv dist/app.exe dist/文档生成器.exe
       - run: Compress-Archive -Path dist -Destination 文档生成器.zip
       - run: ls
+      - name: Upload asset files to release ${{  github.ref_name }}
+      - run: gh release upload ${{  github.ref_name }} 文档生成器.zip
+      
