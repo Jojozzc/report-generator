@@ -1,5 +1,7 @@
 name: GitHub Actions Demo
-run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
+run-name: ${{ github.actor }} is publishing artifact 🚀
+env:
+  GH_TOKEN: ${{ github.token }}
 on: 
   release:
     types: [published]
