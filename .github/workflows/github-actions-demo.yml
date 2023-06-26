@@ -27,5 +27,5 @@ jobs:
       - run: Compress-Archive -Path dist -Destination 文档生成器.zip
       - run: ls
       - name: Upload asset files to release ${{  github.ref_name }}
-      - run: gh release upload ${{  github.ref_name }} 文档生成器.zip
+        run: gh release upload ${{  github.ref_name }} 文档生成器.zip
       
