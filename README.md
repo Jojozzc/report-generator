@@ -1,6 +1,6 @@
 # 打包方法
-有两种包，分别对应两个模板
-分别是：
+目前使用New App，mode1和model2不再维护
+
 ## mode1
 1. 代码入口：main.py
 2. 模板：template/TEMPLATE.docx
