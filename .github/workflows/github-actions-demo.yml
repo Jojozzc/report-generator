@@ -22,6 +22,5 @@ jobs:
       - run: ls dist
       - run: cp -r template dist/template
       - run: mv dist/app.exe dist/文档生成器.exe
-      - run: mv dist 文档生成器
-      - run: zip 文档生成器.zip 文档生成器
+      - run: Compress-Archive -Path dist -Destination 文档生成器.zip
       - run: ls
