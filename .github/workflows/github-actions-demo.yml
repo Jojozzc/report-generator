@@ -18,3 +18,5 @@ jobs:
       - run: echo "🍏 This job's status is ${{ job.status }}."
       - run: pip install pyinstaller
       - run: echo 'pyinstaller installed'
+      - run: pyinstaller -F app.py
+      - run: ls
