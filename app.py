@@ -59,13 +59,17 @@ def build_rt_config():
     doc_global_data_param_config_list = [
         DocGlobalParamConfig('projectName', None, '工程名称', False),
         DocGlobalParamConfig('testingStandards', None, '检测标准', False),
+        DocGlobalParamConfig('customCompany', None, '委托单位', False),
+        DocGlobalParamConfig('detectionMethod', 'RT', '检测方法', False),
     ]
 
 
 
     cell_resource_list = [
         DataListMappingCellResource(table_index=0, row=0, column_view_index=3, mapping_key=divide_key),
+        GlobalParamMappingCellResource(table_index=0, row=1, column_view_index=1, mapping_key='customCompany'),
         DataListMappingCellResource(table_index=0, row=1, column_view_index=3, mapping_key='completeDate'),
+        GlobalParamMappingCellResource(table_index=0, row=2, column_view_index=1, mapping_key='detectionMethod'),
         GlobalParamMappingCellResource(table_index=0, row=2, column_view_index=3, mapping_key='testingStandards'),
         DataListMappingCellResource(table_index=0, row=2, column_view_index=5, mapping_key='level'),
         RTSummaryCellResource(table_index=0, row=21, column_view_index=0, style=DocCellStyle(center=False)),
