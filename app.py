@@ -6,7 +6,8 @@ from awe_report_generator.biz.rt.base import RTHeaderResource, RTSummaryCellReso
 from awe_report_generator.core.base import ExcelFiledProperty, DocGlobalParamConfig
 from awe_report_generator.core.simple_table_doc_generator import (
     SimpleTableDocGenerator, MappingColumnCellsResource, SimpleCalculationColumnCellsResource,
-    DataListMappingCellResource, GlobalParamMappingCellResource, DataListCellParagraphResource, HeaderResource
+    DataListMappingCellResource, GlobalParamMappingCellResource, DataListCellParagraphResource, HeaderResource,
+    GlobalParamCellParagraphResource
 )
 from awe_report_generator.core.style import DocCellStyle
 from awe_report_generator.core.util import cast_util, date_util as awe_date_util
@@ -100,7 +101,7 @@ def build_ray_config():
         "specification": ExcelFiledProperty('G', cast_util.wrap_str, '规格(mm)'),
         "material": ExcelFiledProperty('H', cast_util.wrap_str, '材质'),
         "level": ExcelFiledProperty('I', cast_util.wrap_str, '合格级别'),
-        "checkRatioKind": ExcelFiledProperty('J', cast_util.wrap_str, '检测比列'),
+        "checkRatioKind": ExcelFiledProperty('J', cast_util.wrap_str, '检测比例'),
         "isOk": ExcelFiledProperty('K', cast_util.wrap_str, '返修补片'),
         "baseSpecificationAndCnt": ExcelFiledProperty('L', cast_util.wrap_str, '底片规格/张'),
         "checkCount": ExcelFiledProperty('M', cast_util.wrap_int, '张数'),
@@ -108,6 +109,7 @@ def build_ray_config():
         "ray": ExcelFiledProperty('P', cast_util.wrap_int, 'γ射线'),
         "unitName": ExcelFiledProperty('Q', cast_util.wrap_str, '单元名称'),
         "weldMethod": ExcelFiledProperty('R', cast_util.wrap_str, '焊接方法'),
+        "areaNo": ExcelFiledProperty('S', cast_util.wrap_str, '区号'),
         "lineNo": ExcelFiledProperty('T', cast_util.wrap_str, '单线号'),
 
     }
@@ -129,12 +131,15 @@ def build_ray_config():
     ]
 
     doc_global_data_param_config_list = [
+        DocGlobalParamConfig('projectName', None, '工程名称', False),
         DocGlobalParamConfig('customorCompany', None, '委托单位', False),
         DocGlobalParamConfig('testingStandards', None, '检测标准', False),
         DocGlobalParamConfig('detectionOpportunity', None, '检测时机', False),
         DocGlobalParamConfig('acceptStandard', None, '验收规范', False),
+        DocGlobalParamConfig('detectionRatio', None, '检测比例', False),
         DocGlobalParamConfig('detectionTechLevel', None, '检测技术等级', False),
         DocGlobalParamConfig('appearanceDetection', '合格', '外观检查', False),
+        DocGlobalParamConfig('groove', 'V', '坡口形式', False),
     ]
 
     def cast_unit_value_to_str(unit_name):
@@ -144,13 +149,17 @@ def build_ray_config():
 
 
     cell_resource_list = [
+        # 工程名称
+        GlobalParamCellParagraphResource(table_index=0, row=0, column_view_index=2, style=DocCellStyle(center=False ,left=True, right=False), paragraph_index=0, cast_value_to_str=cast_unit_value_to_str, mapping_key='projectName'),
         # 单位工程名称
         DataListCellParagraphResource(table_index=0, row=0, column_view_index=2, style=DocCellStyle(center=False ,left=True, right=False), paragraph_index=2, cast_value_to_str=cast_unit_value_to_str, mapping_key='unitName'),
          # 委托单位
         GlobalParamMappingCellResource(table_index=0, row=1, column_view_index=1, mapping_key='customorCompany'),
         # 委托单编号
         DataListMappingCellResource(table_index=0, row=1, column_view_index=3, mapping_key=divide_key),
-        # 验收标准
+        # 区号
+        DataListMappingCellResource(table_index=0, row=2, column_view_index=3, mapping_key='areaNo'),
+        # 验收规范
         GlobalParamMappingCellResource(table_index=0, row=2, column_view_index=5, mapping_key='acceptStandard'),
         # 检测标准
         GlobalParamMappingCellResource(table_index=0, row=3, column_view_index=1, mapping_key='testingStandards'),
@@ -158,8 +167,8 @@ def build_ray_config():
         GlobalParamMappingCellResource(table_index=0, row=3, column_view_index=5, mapping_key='detectionOpportunity'),
         # 检测技术等级
         GlobalParamMappingCellResource(table_index=0, row=4, column_view_index=1, mapping_key='detectionTechLevel'),
-        # 检测比列
-        DataListMappingCellResource(table_index=0, row=4, column_view_index=3, mapping_key='checkRatioKind'),
+        # 检测比例
+        GlobalParamMappingCellResource(table_index=0, row=4, column_view_index=3, mapping_key='detectionRatio'),
         # 合格级别
         DataListMappingCellResource(table_index=0, row=4, column_view_index=5, mapping_key='level'),
         # 焊接方法
@@ -168,7 +177,8 @@ def build_ray_config():
         GlobalParamMappingCellResource(table_index=0, row=5, column_view_index=3, mapping_key='appearanceDetection'),
         # 施工单位时间
         DataListCellParagraphResource(table_index=0, row=23, column_view_index=0, style=DocCellStyle(center=False, left=False, right=True), paragraph_index=3, cast_value_to_str=awe_date_util.get_YYYYmmdd_cn, mapping_key='orderDate'),
-
+        # 坡口形式
+        GlobalParamMappingCellResource(table_index=0, row=5, column_view_index=5, mapping_key='groove'),
     ]
 
     template_path = os.path.join(os.getcwd(), 'template/ray/TEMPLATE.docx')
@@ -230,6 +240,7 @@ def build_surface_config():
         DocGlobalParamConfig('projectName', None, '工程名称', False),
         DocGlobalParamConfig('customerCompany', None, '委托单位', False),
         DocGlobalParamConfig('testingStandards', None, '检测标准', False),
+        DocGlobalParamConfig('detectionMethod', 'RT', '检测方法', False),
     ]
 
 
@@ -238,6 +249,7 @@ def build_surface_config():
         DataListMappingCellResource(table_index=0, row=0, column_view_index=3, mapping_key=divide_key),
         DataListMappingCellResource(table_index=0, row=1, column_view_index=3, mapping_key='completeDate'),
         GlobalParamMappingCellResource(table_index=0, row=1, column_view_index=1, mapping_key='customerCompany'),
+        GlobalParamMappingCellResource(table_index=0, row=2, column_view_index=1, mapping_key='detectionMethod'),
         GlobalParamMappingCellResource(table_index=0, row=2, column_view_index=3, mapping_key='testingStandards'),
         DataListMappingCellResource(table_index=0, row=2, column_view_index=5, mapping_key='level'),
         DataListCellParagraphResource(table_index=0, row=25, column_view_index=3, style=DocCellStyle(center=False, right=True), paragraph_index=4, cast_value_to_str=awe_date_util.get_YYYYmmdd_cn, mapping_key='completeDate'),

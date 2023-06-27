@@ -172,6 +172,17 @@ class DataListCellParagraphResource(CellParagraphResource):
         return array_util.get_one_value(data_list, self.mapping_key)
 
 
+class GlobalParamCellParagraphResource(CellParagraphResource):
+    def __init__(self, table_index: int, row: int, column_view_index: int, style: DocCellStyle = DocCellStyle(),
+                 paragraph_index: int = 0, cast_value_to_str=cast_util.wrap_str, mapping_key: str = None):
+        super().__init__(table_index, row, column_view_index, style, cast_value_to_str, paragraph_index)
+        self.mapping_key = mapping_key
+
+    def get_value(self, data_list: List[dict], global_data: dict):
+        if global_data is None:
+            return None
+        return global_data.get(self.mapping_key, None)
+
 
 
 class SimpleCalculationColumnCellsResource(ColumnCellsResource):
