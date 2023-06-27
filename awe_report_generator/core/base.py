@@ -8,7 +8,7 @@ from typing import List, Dict
 
 from docx import Document
 
-from . import DEFAULT_SHEET_NAME
+from . import DEFAULT_SHEET
 from .util import excel_title_to_index
 
 
@@ -62,7 +62,7 @@ class ReportGenerator(metaclass=ABCMeta):
         self.divide_key = divide_key
         self.doc_global_data_param_config_list = doc_global_data_param_config_list
 
-    def execute(self, file_path: str, target_dir: str, sheet: str = DEFAULT_SHEET_NAME, global_param: dict = None, on_finish_one=default_on_finish_one):
+    def execute(self, file_path: str, target_dir: str, sheet = DEFAULT_SHEET, global_param: dict = None, on_finish_one=default_on_finish_one):
         """
         :param on_finish_one: callback, on_finish_one(number: int, total_cnt: int, success: bool, exception: BaseException)
         """

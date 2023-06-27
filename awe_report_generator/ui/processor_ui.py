@@ -49,13 +49,6 @@ class ProcessorQWidget(QWidget):
                 grid.addWidget(qline_edit, i, 1)
                 i = i + 1
 
-        sheet_qlabel = QLabel('请输入表格sheet名称')
-        grid.addWidget(sheet_qlabel, i, 0)
-
-        self.sheet_edit = QLineEdit('空分质量部抽检')
-        grid.addWidget(self.sheet_edit, i, 1)
-        i = i + 1
-
         input_file_btn = QPushButton()
         input_file_btn.setText('选择输入文件(xlsx)*')
         input_file_btn.clicked.connect(self.select_input_file)
@@ -115,13 +108,8 @@ class ProcessorQWidget(QWidget):
             self.alert(f'请选择输出文件夹')
             return
 
-        sheet = self.sheet_edit.text()
-        if sheet is None or sheet == '':
-            self.alert('请输入Sheet名称')
-            return
-
         self.work_thread = threading.Thread(name=f'Processor-{self.processor_ui_param.title}', target=self.processor_ui_param.processor.execute, args=(
-            self.input_file_path, self.output_dir_path, sheet, global_param, self.on_finish_one))
+            self.input_file_path, self.output_dir_path, 0, global_param, self.on_finish_one))
         # self.work_thread = threading.Thread(name='Processor', target=self.process)
         self.work_thread.start()
 
