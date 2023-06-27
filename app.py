@@ -1,22 +1,22 @@
-import os, sys
+import os
+import sys
 
 from PyQt5.QtWidgets import QApplication
 
 from awe_report_generator.biz.rt.base import RTHeaderResource, RTSummaryCellResource2
+from awe_report_generator.biz.rt.base import RTSummaryCellResource
 from awe_report_generator.core.base import ExcelFiledProperty, DocGlobalParamConfig
 from awe_report_generator.core.simple_table_doc_generator import (
     SimpleTableDocGenerator, MappingColumnCellsResource, SimpleCalculationColumnCellsResource,
     DataListMappingCellResource, GlobalParamMappingCellResource, DataListCellParagraphResource, HeaderResource,
-    GlobalParamCellParagraphResource
+    GlobalParamCellParagraphAddRunResource,
+    DataListCellParagraphAddRunResource
 )
 from awe_report_generator.core.style import DocCellStyle
 from awe_report_generator.core.util import cast_util, date_util as awe_date_util
-
 from awe_report_generator.ui import BaseUIConfig
 from awe_report_generator.ui.base import HomePageQWidget
 from awe_report_generator.ui.processor_ui import ProcessorQWidget, ProcessorUIParam
-
-from awe_report_generator.biz.rt.base import RTSummaryCellResource
 
 
 def build_rt_config():
@@ -150,9 +150,9 @@ def build_ray_config():
 
     cell_resource_list = [
         # 工程名称
-        GlobalParamCellParagraphResource(table_index=0, row=0, column_view_index=2, style=DocCellStyle(center=False ,left=True, right=False), paragraph_index=0, cast_value_to_str=cast_unit_value_to_str, mapping_key='projectName'),
+        GlobalParamCellParagraphAddRunResource(table_index=0, row=0, column_view_index=2, style=DocCellStyle(center=False ,left=True, right=False, font_cn='楷体'), paragraph_index=0, cast_value_to_str=cast_util.wrap_str, mapping_key='projectName'),
         # 单位工程名称
-        DataListCellParagraphResource(table_index=0, row=0, column_view_index=2, style=DocCellStyle(center=False ,left=True, right=False), paragraph_index=2, cast_value_to_str=cast_unit_value_to_str, mapping_key='unitName'),
+        DataListCellParagraphAddRunResource(table_index=0, row=0, column_view_index=2, style=DocCellStyle(center=False ,left=True, right=False, font_cn='楷体'), paragraph_index=2, cast_value_to_str=cast_util.wrap_str, mapping_key='unitName'),
          # 委托单位
         GlobalParamMappingCellResource(table_index=0, row=1, column_view_index=1, mapping_key='customorCompany'),
         # 委托单编号
