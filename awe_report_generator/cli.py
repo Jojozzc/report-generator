@@ -1,16 +1,17 @@
+import json
 import sys
+
 import click
 from tqdm import tqdm
-import json
 
 from awe_report_generator.biz.radio import (
     RadioCheckGenerator,
 )
 from awe_report_generator.biz.rt.base import RTHeaderResource
 from awe_report_generator.core.base import ExcelFiledProperty, DocGlobalParamConfig
-
 from awe_report_generator.core.simple_table_doc_generator import (
-    SimpleTableDocGenerator, MappingColumnCellsResource, SimpleCalculationColumnCellsResource, DataListMappingCellResource, GlobalParamMappingCellResource
+    SimpleTableDocGenerator, MappingColumnCellsParagraphAddRunResource,
+    SimpleCalculationColumnCellsParagraphAddRunResource, DataListCellParagraphAddRunResource
 )
 from awe_report_generator.core.util import cast_util
 
@@ -58,13 +59,13 @@ def run(template_path: str, file_path: str, sheet: str, target_dir: str, mode: s
             "ray": ExcelFiledProperty('P', cast_util.wrap_int, 'γ射线'),
         }
         column_cell_resource_list = [
-            MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=0, mapping_data_key='sampleNo'),
-            MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=2, mapping_data_key='kindNo'),
-            MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=4, mapping_data_key='material'),
-            MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=5, mapping_data_key='specification'),
-            MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=9, mapping_data_key='baseSpecificationAndCnt'),
-            MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=12, mapping_data_key='okCount'),
-            SimpleCalculationColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=14, mapping_data_key_1='checkCount', mapping_data_key_2='okCount', operation='-'),
+            MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=5, column_view_index=0, mapping_data_key='sampleNo'),
+            MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=5, column_view_index=2, mapping_data_key='kindNo'),
+            MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=5, column_view_index=4, mapping_data_key='material'),
+            MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=5, column_view_index=5, mapping_data_key='specification'),
+            MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=5, column_view_index=9, mapping_data_key='baseSpecificationAndCnt'),
+            MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=5, column_view_index=12, mapping_data_key='okCount'),
+            SimpleCalculationColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=5, column_view_index=14, mapping_data_key_1='checkCount', mapping_data_key_2='okCount', operation='-'),
         ]
 
         doc_global_data_param_config_list = [
@@ -73,9 +74,9 @@ def run(template_path: str, file_path: str, sheet: str, target_dir: str, mode: s
         ]
 
         cell_resource_list = [
-            DataListMappingCellResource(table_index=0, row=0, column_view_index=14, mapping_key=divide_key),
-            DataListMappingCellResource(table_index=0, row=1, column_view_index=14, mapping_key='completeDate'),
-            DataListMappingCellResource(table_index=0, row=2, column_view_index=14, mapping_key='level'),
+            DataListCellParagraphAddRunResource(table_index=0, row=0, column_view_index=14, mapping_key=divide_key),
+            DataListCellParagraphAddRunResource(table_index=0, row=1, column_view_index=14, mapping_key='completeDate'),
+            DataListCellParagraphAddRunResource(table_index=0, row=2, column_view_index=14, mapping_key='level'),
         ]
 
         global_param_dict = json.loads(global_param)

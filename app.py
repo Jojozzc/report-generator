@@ -2,13 +2,15 @@ import os
 import sys
 
 from PyQt5.QtWidgets import QApplication
+from docx.enum.table import WD_TABLE_ALIGNMENT
 
 from awe_report_generator.biz.rt.base import RTHeaderResource, RTSummaryCellResource2
 from awe_report_generator.biz.rt.base import RTSummaryCellResource
 from awe_report_generator.core.base import ExcelFiledProperty, DocGlobalParamConfig
 from awe_report_generator.core.simple_table_doc_generator import (
-    SimpleTableDocGenerator, MappingColumnCellsResource, SimpleCalculationColumnCellsResource,
-    DataListMappingCellResource, GlobalParamMappingCellResource, DataListCellParagraphResource, HeaderResource,
+    SimpleTableDocGenerator, MappingColumnCellsParagraphAddRunResource,
+    SimpleCalculationColumnCellsParagraphAddRunResource,
+    HeaderResource,
     GlobalParamCellParagraphAddRunResource,
     DataListCellParagraphAddRunResource
 )
@@ -40,21 +42,24 @@ def build_rt_config():
         "ray": ExcelFiledProperty('P', cast_util.wrap_int, 'γ射线'),
     }
     column_cell_resource_list = [
-        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=0,
-                                   mapping_data_key='sampleNo'),
-        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=1,
-                                   mapping_data_key='kindNo'),
-        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=2,
-                                   mapping_data_key='material'),
-        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=3,
-                                   mapping_data_key='specification'),
-        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=4,
-                                   mapping_data_key='baseSpecificationAndCnt'),
-        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=5,
-                                   mapping_data_key='okCount'),
-        SimpleCalculationColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=6,
-                                             mapping_data_key_1='checkCount', mapping_data_key_2='okCount',
-                                             operation='-'),
+        MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=5, column_view_index=0,
+                                                  mapping_data_key='sampleNo', style=DocCellStyle(font_cn='楷体')),
+        MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=5, column_view_index=1,
+                                                  mapping_data_key='kindNo', style=DocCellStyle(font_cn='楷体')),
+        MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=5, column_view_index=2,
+                                                  mapping_data_key='material', style=DocCellStyle(font_cn='楷体')),
+        MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=5, column_view_index=3,
+                                                  mapping_data_key='specification', style=DocCellStyle(font_cn='楷体')),
+        MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=5, column_view_index=4,
+                                                  mapping_data_key='baseSpecificationAndCnt',
+                                                  style=DocCellStyle(font_cn='楷体')),
+        MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=5, column_view_index=5,
+                                                  mapping_data_key='okCount', style=DocCellStyle(font_cn='楷体')),
+        SimpleCalculationColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=5, column_view_index=6,
+                                                            style=DocCellStyle(font_cn='楷体'),
+                                                            mapping_data_key_1='checkCount',
+                                                            mapping_data_key_2='okCount',
+                                                            operation='-'),
     ]
 
     doc_global_data_param_config_list = [
@@ -64,17 +69,25 @@ def build_rt_config():
         DocGlobalParamConfig('detectionMethod', 'RT', '检测方法', False),
     ]
 
-
-
     cell_resource_list = [
-        DataListMappingCellResource(table_index=0, row=0, column_view_index=3, mapping_key=divide_key),
-        GlobalParamMappingCellResource(table_index=0, row=1, column_view_index=1, mapping_key='customCompany'),
-        DataListMappingCellResource(table_index=0, row=1, column_view_index=3, mapping_key='completeDate'),
-        GlobalParamMappingCellResource(table_index=0, row=2, column_view_index=1, mapping_key='detectionMethod'),
-        GlobalParamMappingCellResource(table_index=0, row=2, column_view_index=3, mapping_key='testingStandards'),
-        DataListMappingCellResource(table_index=0, row=2, column_view_index=5, mapping_key='level'),
-        RTSummaryCellResource(table_index=0, row=21, column_view_index=0, style=DocCellStyle(center=False)),
-        DataListCellParagraphResource(table_index=0, row=22, column_view_index=3, style=DocCellStyle(right=True), paragraph_index=3, cast_value_to_str=awe_date_util.get_YYYYmmdd_cn, mapping_key='completeDate'),
+        DataListCellParagraphAddRunResource(table_index=0, row=0, column_view_index=3, mapping_key=divide_key,
+                                            style=DocCellStyle(font_cn='楷体')),
+        GlobalParamCellParagraphAddRunResource(table_index=0, row=1, column_view_index=1, mapping_key='customCompany',
+                                               style=DocCellStyle(font_cn='楷体')),
+        DataListCellParagraphAddRunResource(table_index=0, row=1, column_view_index=3, mapping_key='completeDate',
+                                            style=DocCellStyle(font_cn='楷体')),
+        GlobalParamCellParagraphAddRunResource(table_index=0, row=2, column_view_index=1, mapping_key='detectionMethod',
+                                               style=DocCellStyle(font_cn='楷体')),
+        GlobalParamCellParagraphAddRunResource(table_index=0, row=2, column_view_index=3,
+                                               mapping_key='testingStandards', style=DocCellStyle(font_cn='楷体')),
+        DataListCellParagraphAddRunResource(table_index=0, row=2, column_view_index=5, mapping_key='level',
+                                            style=DocCellStyle(font_cn='楷体')),
+        RTSummaryCellResource(table_index=0, row=21, column_view_index=0,
+                              style=DocCellStyle(alignment=WD_TABLE_ALIGNMENT.LEFT)),
+        DataListCellParagraphAddRunResource(table_index=0, row=22, column_view_index=3,
+                                            style=DocCellStyle(alignment=WD_TABLE_ALIGNMENT.RIGHT), paragraph_index=3,
+                                            run_index=None, cast_value_to_str=awe_date_util.get_YYYYmmdd_cn,
+                                            mapping_key='completeDate'),
     ]
     template_path = os.path.join(os.getcwd(), 'template/rt/TEMPLATE.docx')
     report_generator = SimpleTableDocGenerator(template_path=template_path, filed_mapping=filed_mapping,
@@ -114,20 +127,19 @@ def build_ray_config():
 
     }
 
-    
     column_cell_resource_list = [
-        MappingColumnCellsResource(table_index=0, table_data_start_row=7, column_view_index=1,
-                                   mapping_data_key='sampleNo'),
-        MappingColumnCellsResource(table_index=0, table_data_start_row=7, column_view_index=2,
-                                   mapping_data_key='lineNo'),
-        MappingColumnCellsResource(table_index=0, table_data_start_row=7, column_view_index=3,
-                                   mapping_data_key='kindNo'),
-        MappingColumnCellsResource(table_index=0, table_data_start_row=7, column_view_index=4,
-                                   mapping_data_key='empId'),
-        MappingColumnCellsResource(table_index=0, table_data_start_row=7, column_view_index=5,
-                                   mapping_data_key='specification'),
-        MappingColumnCellsResource(table_index=0, table_data_start_row=7, column_view_index=6,
-                                   mapping_data_key='material'),
+        MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=7, column_view_index=1,
+                                                  mapping_data_key='sampleNo', style=DocCellStyle(font_cn='楷体')),
+        MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=7, column_view_index=2,
+                                                  mapping_data_key='lineNo', style=DocCellStyle(font_cn='楷体')),
+        MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=7, column_view_index=3,
+                                                  mapping_data_key='kindNo', style=DocCellStyle(font_cn='楷体')),
+        MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=7, column_view_index=4,
+                                                  mapping_data_key='empId', style=DocCellStyle(font_cn='楷体')),
+        MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=7, column_view_index=5,
+                                                  mapping_data_key='specification', style=DocCellStyle(font_cn='楷体')),
+        MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=7, column_view_index=6,
+                                                  mapping_data_key='material', style=DocCellStyle(font_cn='楷体')),
     ]
 
     doc_global_data_param_config_list = [
@@ -137,48 +149,66 @@ def build_ray_config():
         DocGlobalParamConfig('detectionOpportunity', None, '检测时机', False),
         DocGlobalParamConfig('acceptStandard', None, '验收规范', False),
         DocGlobalParamConfig('detectionRatio', None, '检测比例', False),
+        DocGlobalParamConfig('detectionMethod', None, '检测方法', False),
         DocGlobalParamConfig('detectionTechLevel', None, '检测技术等级', False),
         DocGlobalParamConfig('appearanceDetection', '合格', '外观检查', False),
         DocGlobalParamConfig('groove', 'V', '坡口形式', False),
     ]
 
-    def cast_unit_value_to_str(unit_name):
-        if unit_name == None:
-            return None
-        return f'单位工程名称:{unit_name}'
-
-
     cell_resource_list = [
         # 工程名称
-        GlobalParamCellParagraphAddRunResource(table_index=0, row=0, column_view_index=2, style=DocCellStyle(center=False ,left=True, right=False, font_cn='楷体'), paragraph_index=0, cast_value_to_str=cast_util.wrap_str, mapping_key='projectName'),
+        GlobalParamCellParagraphAddRunResource(table_index=0, row=0, column_view_index=2,
+                                               style=DocCellStyle(alignment=WD_TABLE_ALIGNMENT.LEFT, font_cn='楷体'),
+                                               paragraph_index=0, cast_value_to_str=cast_util.wrap_str,
+                                               mapping_key='projectName'),
         # 单位工程名称
-        DataListCellParagraphAddRunResource(table_index=0, row=0, column_view_index=2, style=DocCellStyle(center=False ,left=True, right=False, font_cn='楷体'), paragraph_index=2, cast_value_to_str=cast_util.wrap_str, mapping_key='unitName'),
-         # 委托单位
-        GlobalParamMappingCellResource(table_index=0, row=1, column_view_index=1, mapping_key='customorCompany'),
+        DataListCellParagraphAddRunResource(table_index=0, row=0, column_view_index=2,
+                                            style=DocCellStyle(alignment=WD_TABLE_ALIGNMENT.LEFT, font_cn='楷体'),
+                                            paragraph_index=2, cast_value_to_str=cast_util.wrap_str,
+                                            mapping_key='unitName'),
+        # 委托单位
+        GlobalParamCellParagraphAddRunResource(table_index=0, row=1, column_view_index=1, mapping_key='customorCompany',
+                                               style=DocCellStyle(font_cn='楷体')),
         # 委托单编号
-        DataListMappingCellResource(table_index=0, row=1, column_view_index=3, mapping_key=divide_key),
+        DataListCellParagraphAddRunResource(table_index=0, row=1, column_view_index=3, mapping_key=divide_key,
+                                            style=DocCellStyle(font_cn='楷体')),
         # 区号
-        DataListMappingCellResource(table_index=0, row=2, column_view_index=3, mapping_key='areaNo'),
+        DataListCellParagraphAddRunResource(table_index=0, row=2, column_view_index=3, mapping_key='areaNo',
+                                            style=DocCellStyle(font_cn='楷体')),
         # 验收规范
-        GlobalParamMappingCellResource(table_index=0, row=2, column_view_index=5, mapping_key='acceptStandard'),
+        GlobalParamCellParagraphAddRunResource(table_index=0, row=2, column_view_index=5, mapping_key='acceptStandard',
+                                               style=DocCellStyle(font_cn='楷体')),
         # 检测标准
-        GlobalParamMappingCellResource(table_index=0, row=3, column_view_index=1, mapping_key='testingStandards'),
+        GlobalParamCellParagraphAddRunResource(table_index=0, row=3, column_view_index=1,
+                                               mapping_key='testingStandards', style=DocCellStyle(font_cn='楷体')),
+        # 检测方法
+        GlobalParamCellParagraphAddRunResource(table_index=0, row=3, column_view_index=3, mapping_key='detectionMethod',
+                                               style=DocCellStyle(font_cn='楷体')),
         # 检测时机
-        GlobalParamMappingCellResource(table_index=0, row=3, column_view_index=5, mapping_key='detectionOpportunity'),
+        GlobalParamCellParagraphAddRunResource(table_index=0, row=3, column_view_index=5,
+                                               mapping_key='detectionOpportunity', style=DocCellStyle(font_cn='楷体')),
         # 检测技术等级
-        GlobalParamMappingCellResource(table_index=0, row=4, column_view_index=1, mapping_key='detectionTechLevel'),
+        GlobalParamCellParagraphAddRunResource(table_index=0, row=4, column_view_index=1,
+                                               mapping_key='detectionTechLevel', style=DocCellStyle(font_cn='楷体')),
         # 检测比例
-        GlobalParamMappingCellResource(table_index=0, row=4, column_view_index=3, mapping_key='detectionRatio'),
+        GlobalParamCellParagraphAddRunResource(table_index=0, row=4, column_view_index=3, mapping_key='detectionRatio',
+                                               style=DocCellStyle(font_cn='楷体')),
         # 合格级别
-        DataListMappingCellResource(table_index=0, row=4, column_view_index=5, mapping_key='level'),
+        DataListCellParagraphAddRunResource(table_index=0, row=4, column_view_index=5, mapping_key='level',
+                                            style=DocCellStyle(font_cn='楷体')),
         # 焊接方法
-        DataListMappingCellResource(table_index=0, row=5, column_view_index=1, mapping_key='weldMethod'),
+        DataListCellParagraphAddRunResource(table_index=0, row=5, column_view_index=1, mapping_key='weldMethod',
+                                            style=DocCellStyle(font_cn='楷体')),
         # 外观检查
-        GlobalParamMappingCellResource(table_index=0, row=5, column_view_index=3, mapping_key='appearanceDetection'),
+        GlobalParamCellParagraphAddRunResource(table_index=0, row=5, column_view_index=3,
+                                               mapping_key='appearanceDetection', style=DocCellStyle(font_cn='楷体')),
         # 施工单位时间
-        DataListCellParagraphResource(table_index=0, row=23, column_view_index=0, style=DocCellStyle(center=False, left=False, right=True), paragraph_index=3, cast_value_to_str=awe_date_util.get_YYYYmmdd_cn, mapping_key='orderDate'),
+        DataListCellParagraphAddRunResource(table_index=0, row=23, column_view_index=0,
+                                            style=DocCellStyle(alignment=WD_TABLE_ALIGNMENT.RIGHT), paragraph_index=3,
+                                            cast_value_to_str=awe_date_util.get_YYYYmmdd_cn, mapping_key='orderDate'),
         # 坡口形式
-        GlobalParamMappingCellResource(table_index=0, row=5, column_view_index=5, mapping_key='groove'),
+        GlobalParamCellParagraphAddRunResource(table_index=0, row=5, column_view_index=5, mapping_key='groove',
+                                               style=DocCellStyle(font_cn='楷体')),
     ]
 
     template_path = os.path.join(os.getcwd(), 'template/ray/TEMPLATE.docx')
@@ -219,21 +249,23 @@ def build_surface_config():
 
     }
     column_cell_resource_list = [
-        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=0,
-                                   mapping_data_key='sampleNo'),
-        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=1,
-                                   mapping_data_key='kindNo'),
-        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=2,
-                                   mapping_data_key='material'),
-        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=3,
-                                   mapping_data_key='specification'),
-        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=4,
-                                   mapping_data_key='detectionCount'),
-        MappingColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=5,
-                                   mapping_data_key='okCount'),
-        SimpleCalculationColumnCellsResource(table_index=0, table_data_start_row=5, column_view_index=6,
-                                             mapping_data_key_1='checkCount', mapping_data_key_2='okCount',
-                                             operation='-'),
+        MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=5, column_view_index=0,
+                                                  mapping_data_key='sampleNo', style=DocCellStyle(font_cn='楷体')),
+        MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=5, column_view_index=1,
+                                                  mapping_data_key='kindNo', style=DocCellStyle(font_cn='楷体')),
+        MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=5, column_view_index=2,
+                                                  mapping_data_key='material', style=DocCellStyle(font_cn='楷体')),
+        MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=5, column_view_index=3,
+                                                  mapping_data_key='specification', style=DocCellStyle(font_cn='楷体')),
+        MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=5, column_view_index=4,
+                                                  mapping_data_key='detectionCount',
+                                                  style=DocCellStyle(font_cn='楷体')),
+        MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=5, column_view_index=5,
+                                                  mapping_data_key='okCount', style=DocCellStyle(font_cn='楷体')),
+        SimpleCalculationColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=5, column_view_index=6,
+                                                            mapping_data_key_1='checkCount',
+                                                            mapping_data_key_2='okCount',
+                                                            operation='-', style=DocCellStyle(font_cn='楷体')),
     ]
 
     doc_global_data_param_config_list = [
@@ -243,17 +275,25 @@ def build_surface_config():
         DocGlobalParamConfig('detectionMethod', 'RT', '检测方法', False),
     ]
 
-
-
     cell_resource_list = [
-        DataListMappingCellResource(table_index=0, row=0, column_view_index=3, mapping_key=divide_key),
-        DataListMappingCellResource(table_index=0, row=1, column_view_index=3, mapping_key='completeDate'),
-        GlobalParamMappingCellResource(table_index=0, row=1, column_view_index=1, mapping_key='customerCompany'),
-        GlobalParamMappingCellResource(table_index=0, row=2, column_view_index=1, mapping_key='detectionMethod'),
-        GlobalParamMappingCellResource(table_index=0, row=2, column_view_index=3, mapping_key='testingStandards'),
-        DataListMappingCellResource(table_index=0, row=2, column_view_index=5, mapping_key='level'),
-        DataListCellParagraphResource(table_index=0, row=25, column_view_index=3, style=DocCellStyle(center=False, right=True), paragraph_index=4, cast_value_to_str=awe_date_util.get_YYYYmmdd_cn, mapping_key='completeDate'),
-        RTSummaryCellResource2(table_index=0, row=24, column_view_index=0, style=DocCellStyle(center=False)),
+        DataListCellParagraphAddRunResource(table_index=0, row=0, column_view_index=3, paragraph_index=0,
+                                            mapping_key=divide_key, style=DocCellStyle(font_cn='楷体')),
+        DataListCellParagraphAddRunResource(table_index=0, row=1, column_view_index=3, paragraph_index=0,
+                                            mapping_key='completeDate', style=DocCellStyle(font_cn='楷体')),
+        GlobalParamCellParagraphAddRunResource(table_index=0, row=1, column_view_index=1, mapping_key='customerCompany',
+                                               style=DocCellStyle(font_cn='楷体')),
+        GlobalParamCellParagraphAddRunResource(table_index=0, row=2, column_view_index=1, mapping_key='detectionMethod',
+                                               style=DocCellStyle(font_cn='楷体')),
+        GlobalParamCellParagraphAddRunResource(table_index=0, row=2, column_view_index=3,
+                                               mapping_key='testingStandards', style=DocCellStyle(font_cn='楷体')),
+        DataListCellParagraphAddRunResource(table_index=0, row=2, column_view_index=5, paragraph_index=0,
+                                            mapping_key='level', style=DocCellStyle(font_cn='楷体')),
+        DataListCellParagraphAddRunResource(table_index=0, row=25, column_view_index=3,
+                                            style=DocCellStyle(alignment=WD_TABLE_ALIGNMENT.RIGHT), paragraph_index=4,
+                                            cast_value_to_str=awe_date_util.get_YYYYmmdd_cn,
+                                            mapping_key='completeDate'),
+        RTSummaryCellResource2(table_index=0, row=24, column_view_index=0,
+                               style=DocCellStyle(alignment=WD_TABLE_ALIGNMENT.LEFT, font_cn='楷体')),
     ]
     template_path = os.path.join(os.getcwd(), 'template/surface/TEMPLATE.docx')
     report_generator = SimpleTableDocGenerator(template_path=template_path, filed_mapping=filed_mapping,

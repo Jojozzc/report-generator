@@ -21,17 +21,18 @@ class HeaderResource(metaclass=ABCMeta):
         pass
 
 
-class ColumnCellsResource():
+class ColumnCellsParagraphAddRunResource():
     """
     用于处理word内表格内某一列数据
     """
 
-    def __init__(self, table_index: int, table_data_start_row, column_view_index: int,
+    def __init__(self, table_index: int, table_data_start_row, column_view_index: int, paragraph_index=0,
                  style: DocCellStyle = DocCellStyle()):
         self.table_index = table_index
         self.table_data_start_row = table_data_start_row
         self.column_view_index = column_view_index
         self.style = style
+        self.paragraph_index = paragraph_index
 
     def get_value(self, data: dict, global_data: dict):
         return None
@@ -47,9 +48,23 @@ class ColumnCellsResource():
         index_zip = tables_row_index_zip[self.table_index]
         col = index_zip[row][self.column_view_index][0]
         cell = table.cell(row, col)
-        cell.text = str(val)
+        para = cell.paragraphs[self.paragraph_index]
         if self.style is not None:
-            cell.paragraphs[0].paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
+            para.paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
+
+        if val is None:
+            return
+
+        font_cn = None
+
+        if self.style is not None and self.style.font_cn is not None:
+            font_cn = self.style.font_cn
+
+        run = para.add_run(text=str(val))
+
+        if font_cn is not None:
+            run.font.name = font_cn
+            run._element.rPr.rFonts.set(qn('w:eastAsia'), font_cn)
 
 
 class CellResource():
@@ -87,14 +102,15 @@ class CellResource():
         cell = table.cell(self.row, col)
 
         cell.text = self.cast_value_to_str(val)
-        if self.style is not None and self.style.center:
-            cell.paragraphs[0].paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
+        if self.style is not None and self.style.alignment is not None:
+            cell.paragraphs[0].paragraph_format.alignment = self.style.alignment
 
 
-class MappingColumnCellsResource(ColumnCellsResource):
+class MappingColumnCellsParagraphAddRunResource(ColumnCellsParagraphAddRunResource):
 
-    def __init__(self, table_index: int, table_data_start_row, column_view_index: int, mapping_data_key: str):
-        super().__init__(table_index, table_data_start_row, column_view_index)
+    def __init__(self, table_index: int, table_data_start_row, column_view_index: int, mapping_data_key: str,
+                 paragraph_index=0, style=DocCellStyle()):
+        super().__init__(table_index, table_data_start_row, column_view_index, paragraph_index, style)
         self.mapping_data_key = mapping_data_key
 
     def get_value(self, data: dict, global_data: dict):
@@ -103,76 +119,16 @@ class MappingColumnCellsResource(ColumnCellsResource):
         return None
 
 
-class GlobalParamMappingCellResource(CellResource):
-
-    def __init__(self, table_index: int, row: int, column_view_index: int, mapping_key: str,
-                 cast_value_to_str=cast_util.wrap_str):
-        super().__init__(table_index, row, column_view_index, cast_value_to_str=cast_value_to_str)
-        self.mapping_key = mapping_key
-
-    def get_value(self, data_list: List[dict], global_data: dict):
-        if global_data is None:
-            return None
-        if self.mapping_key in global_data:
-            return global_data[self.mapping_key]
-        return None
-
-
-class DataListMappingCellResource(CellResource):
-
-    def __init__(self, table_index: int, row: int, column_view_index: int, mapping_key: str,
-                 cast_value_to_str=cast_util.wrap_str):
-        super().__init__(table_index, row, column_view_index, cast_value_to_str=cast_value_to_str)
-        self.mapping_key = mapping_key
-
-    def get_value(self, data_list: List[dict], global_data: dict):
-        val = array_util.get_one_value(data_list, self.mapping_key)
-        return val
-
-
-class CellParagraphResource(CellResource):
-    def __init__(self, table_index: int, row: int, column_view_index: int, style: DocCellStyle = DocCellStyle(),
-                 cast_value_to_str=cast_util.wrap_str, paragraph_index: int = 0):
-        super().__init__(table_index, row, column_view_index, style, cast_value_to_str)
-        self.table_index = table_index
-        self.row = row
-        self.column_view_index = column_view_index
-        self.style = style
-        self.paragraph_index = paragraph_index
-
-    def set(self, doc: Document, data_list: List[dict], global_data: dict,
-            tables_row_index_zip: List[List[List[tuple]]]):
-        val = self.get_value(data_list, global_data)
-        if val is None:
-            return
-        table = doc.tables[self.table_index]
-        index_zip = tables_row_index_zip[self.table_index]
-
-        col = index_zip[self.row][self.column_view_index][0]
-        cell = table.cell(self.row, col)
-        para = cell.paragraphs[self.paragraph_index]
-
-        val = self.cast_value_to_str(val)
-
-        para.text = val
-        if self.style is not None:
-            if self.style.center:
-                para.paragraph_format.alignment = WD_TABLE_ALIGNMENT.CENTER
-            elif self.style.left:
-                para.paragraph_format.alignment = WD_TABLE_ALIGNMENT.LEFT
-            elif self.style.right:
-                para.paragraph_format.alignment = WD_TABLE_ALIGNMENT.RIGHT
-
-
 class CellParagraphAddRunResource(CellResource):
     def __init__(self, table_index: int, row: int, column_view_index: int, style: DocCellStyle = DocCellStyle(),
-                 cast_value_to_str=cast_util.wrap_str, paragraph_index: int = 0):
+                 cast_value_to_str=cast_util.wrap_str, paragraph_index: int = 0, run_index: int = None):
         super().__init__(table_index, row, column_view_index, style, cast_value_to_str)
         self.table_index = table_index
         self.row = row
         self.column_view_index = column_view_index
         self.style = style
         self.paragraph_index = paragraph_index
+        self.run_index = run_index
 
     def set(self, doc: Document, data_list: List[dict], global_data: dict,
             tables_row_index_zip: List[List[List[tuple]]]):
@@ -195,66 +151,52 @@ class CellParagraphAddRunResource(CellResource):
 
         if self.style is not None and self.style.font_cn is not None:
             font_cn = self.style.font_cn
-        run = para.add_run(text=val)
+        if self.run_index is None:
+            run = para.add_run(text=val)
+        else:
+            run = para.runs[self.run_index]
+            run.text = val
+
         if font_cn is not None:
             run.font.name = font_cn
             run._element.rPr.rFonts.set(qn('w:eastAsia'), font_cn)
 
 
-
-class DataListCellParagraphResource(CellParagraphResource):
-    def __init__(self, table_index: int, row: int, column_view_index: int, style: DocCellStyle = DocCellStyle(),
-                 paragraph_index: int = 0, cast_value_to_str=cast_util.wrap_str, mapping_key: str = None):
-        super().__init__(table_index, row, column_view_index, style, cast_value_to_str, paragraph_index)
-        self.mapping_key = mapping_key
-
-    def get_value(self, data_list: List[dict], global_data: dict):
-        return array_util.get_one_value(data_list, self.mapping_key)
-
-
-class GlobalParamCellParagraphResource(CellParagraphResource):
-    def __init__(self, table_index: int, row: int, column_view_index: int, style: DocCellStyle = DocCellStyle(),
-                 paragraph_index: int = 0, cast_value_to_str=cast_util.wrap_str, mapping_key: str = None):
-        super().__init__(table_index, row, column_view_index, style, cast_value_to_str, paragraph_index)
-        self.mapping_key = mapping_key
-
-    def get_value(self, data_list: List[dict], global_data: dict):
-        if global_data is None:
-            return None
-        return global_data.get(self.mapping_key, None)
-
-
 class GlobalParamCellParagraphAddRunResource(CellParagraphAddRunResource):
     def __init__(self, table_index: int, row: int, column_view_index: int, style: DocCellStyle = DocCellStyle(),
-                 paragraph_index: int = 0, cast_value_to_str=cast_util.wrap_str, mapping_key: str = None):
-        super().__init__(table_index, row, column_view_index, style, cast_value_to_str, paragraph_index)
+                 paragraph_index: int = 0, cast_value_to_str=cast_util.wrap_str, mapping_key: str = None,
+                 run_index: int = None):
+        super().__init__(table_index, row, column_view_index, style, cast_value_to_str, paragraph_index, run_index)
         self.mapping_key = mapping_key
 
     def get_value(self, data_list: List[dict], global_data: dict):
         if global_data is None:
             return None
         return global_data.get(self.mapping_key, None)
+
 
 class DataListCellParagraphAddRunResource(CellParagraphAddRunResource):
     def __init__(self, table_index: int, row: int, column_view_index: int, style: DocCellStyle = DocCellStyle(),
-                 paragraph_index: int = 0, cast_value_to_str=cast_util.wrap_str, mapping_key: str = None):
-        super().__init__(table_index, row, column_view_index, style, cast_value_to_str, paragraph_index)
+                 paragraph_index: int = 0, cast_value_to_str=cast_util.wrap_str, mapping_key: str = None,
+                 run_index: int = None):
+        super().__init__(table_index, row, column_view_index, style, cast_value_to_str, paragraph_index, run_index)
         self.mapping_key = mapping_key
 
     def get_value(self, data_list: List[dict], global_data: dict):
         return array_util.get_one_value(data_list, self.mapping_key)
 
 
-class SimpleCalculationColumnCellsResource(ColumnCellsResource):
-    def __init__(self, table_index: int, table_data_start_row, column_view_index: int, mapping_data_key_1: str,
-                 mapping_data_key_2: str, operation: str):
+class SimpleCalculationColumnCellsParagraphAddRunResource(ColumnCellsParagraphAddRunResource):
+    def __init__(self, table_index: int, table_data_start_row, column_view_index: int, paragraph_index: int = 0,
+                 style: DocCellStyle = DocCellStyle(), mapping_data_key_1: str = None, mapping_data_key_2: str = None,
+                 operation: str = None):
         """
 
         :param mapping_data_key_1: must be key of number
         :param mapping_data_key_2: must be key of number
         :param operation: +/-
         """
-        super().__init__(table_index, table_data_start_row, column_view_index)
+        super().__init__(table_index, table_data_start_row, column_view_index, paragraph_index, style)
         self.mapping_data_key_1 = mapping_data_key_1
         self.mapping_data_key_2 = mapping_data_key_2
         self.operation = operation
@@ -280,7 +222,7 @@ class SimpleCalculationColumnCellsResource(ColumnCellsResource):
 class SimpleTableDocGenerator(ReportGenerator):
 
     def __init__(self, template_path: str, filed_mapping: Dict[str, ExcelFiledProperty], divide_key: str,
-                 header_resource: HeaderResource, column_cell_resource_list: List[ColumnCellsResource],
+                 header_resource: HeaderResource, column_cell_resource_list: List[ColumnCellsParagraphAddRunResource],
                  cell_resource_list: List[CellResource], doc_global_data_param_config_list=None):
         super().__init__(template_path, filed_mapping, divide_key, doc_global_data_param_config_list)
         self.header_resource = header_resource
