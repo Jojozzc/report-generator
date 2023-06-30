@@ -12,13 +12,21 @@ from awe_report_generator.core.simple_table_doc_generator import (
     SimpleCalculationColumnCellsParagraphAddRunResource,
     HeaderResource,
     GlobalParamCellParagraphAddRunResource,
-    DataListCellParagraphAddRunResource
+    DataListCellParagraphAddRunResource, MergedDataCellParagraphAddRunResource
 )
 from awe_report_generator.core.style import DocCellStyle
 from awe_report_generator.core.util import cast_util, date_util as awe_date_util
 from awe_report_generator.ui import BaseUIConfig
 from awe_report_generator.ui.base import HomePageQWidget
 from awe_report_generator.ui.processor_ui import ProcessorQWidget, ProcessorUIParam
+from awe_report_generator.core.util import array_util
+
+
+def date_merge_fun(date_list):
+    if date_list is None or len(date_list) == 0:
+        return None
+    date_list = array_util.sort_date_array(date_list, True)
+    return date_list[0]
 
 
 def build_rt_config():
@@ -74,7 +82,7 @@ def build_rt_config():
                                             style=DocCellStyle(font_cn='楷体')),
         GlobalParamCellParagraphAddRunResource(table_index=0, row=1, column_view_index=1, mapping_key='customCompany',
                                                style=DocCellStyle(font_cn='楷体')),
-        DataListCellParagraphAddRunResource(table_index=0, row=1, column_view_index=3, mapping_key='completeDate',
+        MergedDataCellParagraphAddRunResource(table_index=0, row=1, column_view_index=3, mapping_key='completeDate',
                                             style=DocCellStyle(font_cn='楷体')),
         GlobalParamCellParagraphAddRunResource(table_index=0, row=2, column_view_index=1, mapping_key='detectionMethod',
                                                style=DocCellStyle(font_cn='楷体')),
@@ -84,7 +92,7 @@ def build_rt_config():
                                             style=DocCellStyle(font_cn='楷体')),
         RTSummaryCellResource(table_index=0, row=21, column_view_index=0,
                               style=DocCellStyle(alignment=WD_TABLE_ALIGNMENT.LEFT)),
-        DataListCellParagraphAddRunResource(table_index=0, row=22, column_view_index=3,
+        MergedDataCellParagraphAddRunResource(table_index=0, row=22, column_view_index=3,
                                             style=DocCellStyle(alignment=WD_TABLE_ALIGNMENT.RIGHT), paragraph_index=3,
                                             run_index=None, cast_value_to_str=awe_date_util.get_YYYYmmdd_cn,
                                             mapping_key='completeDate'),
@@ -95,7 +103,7 @@ def build_rt_config():
                                                header_resource=RTHeaderResource(),
                                                column_cell_resource_list=column_cell_resource_list,
                                                cell_resource_list=cell_resource_list,
-                                               doc_global_data_param_config_list=doc_global_data_param_config_list)
+                                               doc_global_data_param_config_list=doc_global_data_param_config_list, merge_fun_dict={'completeDate' : date_merge_fun})
     processor_widget = ProcessorQWidget(ProcessorUIParam(title='RT结果通知单台账', processor=report_generator))
     base_ui_config = BaseUIConfig('RT结果通知单台账', processor_widget)
 
@@ -217,7 +225,7 @@ def build_ray_config():
                                                header_resource=HeaderResource(),
                                                column_cell_resource_list=column_cell_resource_list,
                                                cell_resource_list=cell_resource_list,
-                                               doc_global_data_param_config_list=doc_global_data_param_config_list)
+                                               doc_global_data_param_config_list=doc_global_data_param_config_list, merge_fun_dict={'completeDate' : date_merge_fun})
 
     processor_widget = ProcessorQWidget(ProcessorUIParam(title='射线检测委托台账', processor=report_generator))
 
@@ -288,7 +296,7 @@ def build_surface_config():
                                                mapping_key='testingStandards', style=DocCellStyle(font_cn='楷体')),
         DataListCellParagraphAddRunResource(table_index=0, row=2, column_view_index=5, paragraph_index=0,
                                             mapping_key='level', style=DocCellStyle(font_cn='楷体')),
-        DataListCellParagraphAddRunResource(table_index=0, row=25, column_view_index=3,
+        MergedDataCellParagraphAddRunResource(table_index=0, row=25, column_view_index=3,
                                             style=DocCellStyle(alignment=WD_TABLE_ALIGNMENT.RIGHT), paragraph_index=4,
                                             cast_value_to_str=awe_date_util.get_YYYYmmdd_cn,
                                             mapping_key='completeDate'),
@@ -301,7 +309,7 @@ def build_surface_config():
                                                header_resource=RTHeaderResource(),
                                                column_cell_resource_list=column_cell_resource_list,
                                                cell_resource_list=cell_resource_list,
-                                               doc_global_data_param_config_list=doc_global_data_param_config_list)
+                                               doc_global_data_param_config_list=doc_global_data_param_config_list, merge_fun_dict={'completeDate' : date_merge_fun})
     processor_widget = ProcessorQWidget(ProcessorUIParam(title='表面结果通知单台账', processor=report_generator))
     base_ui_config = BaseUIConfig('表面结果通知单台账', processor_widget)
 

@@ -34,12 +34,12 @@ class ColumnCellsParagraphAddRunResource():
         self.style = style
         self.paragraph_index = paragraph_index
 
-    def get_value(self, data: dict, global_data: dict):
+    def get_value(self, data: dict, global_data: dict, merged_data: dict):
         return None
 
     def set(self, cur_index: int, doc: Document, data: dict, global_data: dict,
-            tables_row_index_zip: List[List[List[tuple]]]):
-        val = self.get_value(data, global_data)
+            tables_row_index_zip: List[List[List[tuple]]], merged_data: dict):
+        val = self.get_value(data, global_data, merged_data)
         if val is None:
             return
         table = doc.tables[self.table_index]
@@ -82,17 +82,17 @@ class CellResource():
             cast_value_to_str = cast_util.wrap_str
         self.cast_value_to_str = cast_value_to_str
 
-    def get_value(self, data_list: List[dict], global_data: dict):
+    def get_value(self, data_list: List[dict], global_data: dict, merged_data: dict):
         return None
 
     def set(self, doc: Document, data_list: List[dict], global_data: dict,
-            tables_row_index_zip: List[List[List[tuple]]]):
+            tables_row_index_zip: List[List[List[tuple]]], merged_data: dict):
         """
 
         :param tables_row_index_zip: M * x * y * 2 array
         :return:
         """
-        val = self.get_value(data_list, global_data)
+        val = self.get_value(data_list, global_data, merged_data)
         if val is None:
             return
         table = doc.tables[self.table_index]
@@ -113,7 +113,7 @@ class MappingColumnCellsParagraphAddRunResource(ColumnCellsParagraphAddRunResour
         super().__init__(table_index, table_data_start_row, column_view_index, paragraph_index, style)
         self.mapping_data_key = mapping_data_key
 
-    def get_value(self, data: dict, global_data: dict):
+    def get_value(self, data: dict, global_data: dict, merged_data: dict):
         if self.mapping_data_key in data:
             return data[self.mapping_data_key]
         return None
@@ -131,8 +131,8 @@ class CellParagraphAddRunResource(CellResource):
         self.run_index = run_index
 
     def set(self, doc: Document, data_list: List[dict], global_data: dict,
-            tables_row_index_zip: List[List[List[tuple]]]):
-        val = self.get_value(data_list, global_data)
+            tables_row_index_zip: List[List[List[tuple]]], merged_data: dict):
+        val = self.get_value(data_list, global_data, merged_data)
         if val is None:
             return
         table = doc.tables[self.table_index]
@@ -169,7 +169,7 @@ class GlobalParamCellParagraphAddRunResource(CellParagraphAddRunResource):
         super().__init__(table_index, row, column_view_index, style, cast_value_to_str, paragraph_index, run_index)
         self.mapping_key = mapping_key
 
-    def get_value(self, data_list: List[dict], global_data: dict):
+    def get_value(self, data_list: List[dict], global_data: dict, merged_data: dict):
         if global_data is None:
             return None
         return global_data.get(self.mapping_key, None)
@@ -182,8 +182,21 @@ class DataListCellParagraphAddRunResource(CellParagraphAddRunResource):
         super().__init__(table_index, row, column_view_index, style, cast_value_to_str, paragraph_index, run_index)
         self.mapping_key = mapping_key
 
-    def get_value(self, data_list: List[dict], global_data: dict):
+    def get_value(self, data_list: List[dict], global_data: dict, merged_data: dict):
         return array_util.get_one_value(data_list, self.mapping_key)
+
+
+class MergedDataCellParagraphAddRunResource(CellParagraphAddRunResource):
+    def __init__(self, table_index: int, row: int, column_view_index: int, style: DocCellStyle = DocCellStyle(),
+                 paragraph_index: int = 0, cast_value_to_str=cast_util.wrap_str, mapping_key: str = None,
+                 run_index: int = None):
+        super().__init__(table_index, row, column_view_index, style, cast_value_to_str, paragraph_index, run_index)
+        self.mapping_key = mapping_key
+
+    def get_value(self, data_list: List[dict], global_data: dict, merged_data: dict):
+        if merged_data is None:
+            return None
+        return merged_data.get(self.mapping_key, None)
 
 
 class SimpleCalculationColumnCellsParagraphAddRunResource(ColumnCellsParagraphAddRunResource):
@@ -201,7 +214,7 @@ class SimpleCalculationColumnCellsParagraphAddRunResource(ColumnCellsParagraphAd
         self.mapping_data_key_2 = mapping_data_key_2
         self.operation = operation
 
-    def get_value(self, data: dict, global_data: dict):
+    def get_value(self, data: dict, global_data: dict, merged_data: dict):
         if global_data is None:
             return None
 
@@ -224,59 +237,27 @@ class SimpleTableDocGenerator(ReportGenerator):
     def __init__(self, template_path: str, filed_mapping: Dict[str, ExcelFiledProperty], divide_key: str,
                  header_resource: HeaderResource, column_cell_resource_list: List[ColumnCellsParagraphAddRunResource],
                  cell_resource_list: List[CellResource], doc_global_data_param_config_list=None, merge_fun_dict:dict=None):
-        super().__init__(template_path, filed_mapping, divide_key, doc_global_data_param_config_list)
+        super().__init__(template_path, filed_mapping, divide_key, doc_global_data_param_config_list, merge_fun_dict)
         self.header_resource = header_resource
         self.column_cell_resource_list = column_cell_resource_list
         self.cell_resource_list = cell_resource_list
         template_doc = Document(template_path)
         self.table_row_index_zips = self._build_template_doc_table_index_zips(template_doc)
-        self.merge_fun_dict = merge_fun_dict
 
-    def _process(self, data_list: list, template_doc: Document, global_param: dict) -> Document:
-        merged_data_list = self._merge_data_list(data_list=data_list, merge_fun_dict=self.merge_fun_dict)
+
+    def _process(self, data_list: list, template_doc: Document, global_param: dict, merged_data: dict) -> Document:
         if self.header_resource is not None:
             self.header_resource.set(doc=template_doc, data_list=data_list, global_data=global_param)
         if self.column_cell_resource_list is not None:
             for i in range(len(data_list)):
                 data = data_list[i]
                 for col_res in self.column_cell_resource_list:
-                    col_res.set(i, template_doc, data, global_param, self.table_row_index_zips)
+                    col_res.set(i, template_doc, data, global_param, self.table_row_index_zips, merged_data)
         if self.cell_resource_list is not None:
             for cell_res in self.cell_resource_list:
-                cell_res.set(template_doc, data_list, global_param, self.table_row_index_zips)
+                cell_res.set(template_doc, data_list, global_param, self.table_row_index_zips, merged_data)
 
         return template_doc
-
-
-    def _merge_data_list(self, data_list: List[dict], merge_fun_dict: dict) -> Dict[str, dict]:
-        """
-        :param merge_fun_dict mappingKey -> merge_fun
-               merge_fun:merge_fun(mappingDataList) -> obj
-        """
-        merged_dict = {}
-        if data_list is None:
-            return merged_dict
-        custom_merge_list_dict = {}
-        for data in data_list:
-            for k, v in data.items():
-                if merge_fun_dict is not None and k in merge_fun_dict:
-                    if k not in custom_merge_list_dict:
-                        custom_merge_list_dict[k] = []
-                    custom_merge_list_dict[k].append(v)
-                else:
-                    if v is None:
-                        continue
-                    else:
-                        if k in merged_dict:
-                            continue
-                        else:
-                            merged_dict[k] = v
-        
-        for k, mapping_list in custom_merge_list_dict.items():
-            data = merge_fun_dict[k](mapping_list)
-            if data is not None:
-                merged_dict[k] = data
-        return merged_dict
 
 
     def _build_template_doc_table_index_zips(self, doc: Document):
