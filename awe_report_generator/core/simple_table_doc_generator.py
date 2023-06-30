@@ -223,15 +223,17 @@ class SimpleTableDocGenerator(ReportGenerator):
 
     def __init__(self, template_path: str, filed_mapping: Dict[str, ExcelFiledProperty], divide_key: str,
                  header_resource: HeaderResource, column_cell_resource_list: List[ColumnCellsParagraphAddRunResource],
-                 cell_resource_list: List[CellResource], doc_global_data_param_config_list=None):
+                 cell_resource_list: List[CellResource], doc_global_data_param_config_list=None, merge_fun_dict:dict=None):
         super().__init__(template_path, filed_mapping, divide_key, doc_global_data_param_config_list)
         self.header_resource = header_resource
         self.column_cell_resource_list = column_cell_resource_list
         self.cell_resource_list = cell_resource_list
         template_doc = Document(template_path)
         self.table_row_index_zips = self._build_template_doc_table_index_zips(template_doc)
+        self.merge_fun_dict = merge_fun_dict
 
     def _process(self, data_list: list, template_doc: Document, global_param: dict) -> Document:
+        merged_data_list = self._merge_data_list(data_list=data_list, merge_fun_dict=self.merge_fun_dict)
         if self.header_resource is not None:
             self.header_resource.set(doc=template_doc, data_list=data_list, global_data=global_param)
         if self.column_cell_resource_list is not None:
