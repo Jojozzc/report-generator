@@ -33,20 +33,22 @@ class RTSummaryCellResource(CellResource):
         ray = 0
 
         for data in data_list:
-            if data.get('isOk', '') != '合格':
-                pass
-            else:
+            check_c = data.get('checkCount', 0)
+            check_count += check_c
+
+            ok_check_c = data.get('okCount', 0)
+            ok_check_count += ok_check_c
+
+            if check_c == ok_check_c:
                 ok_data_size += 1
-            check_count += data.get('checkCount', 0)
-            ok_check_count += data.get('okCount', 0)
+
             ray += data.get('ray', 0)
 
         val = self.SUMMARY_FORMAT_ONE.format(data_size=data_size, ok_data_size=ok_data_size,
                                              bad_data_size=data_size - ok_data_size,
                                              bad_check_count=check_count - ok_check_count, check_count=check_count)
 
-        if ray > 0:
-            val = val + self.SUMMARY_FORMAT_TWO.format(ray=ray)
+        val = val + self.SUMMARY_FORMAT_TWO.format(ray=ray)
 
         return val
 
@@ -67,12 +69,15 @@ class RTSummaryCellResource2(CellResource):
         line_sum = 0
 
         for data in data_list:
-            if data.get('isOk', '') != '合格':
-                pass
-            else:
+            check_c = data.get('checkCount', 0)
+            check_count += check_c
+
+            ok_check_c = data.get('okCount', 0)
+            ok_check_count += ok_check_c
+
+            if check_c == ok_check_c:
                 ok_data_size += 1
-            check_count += data.get('checkCount', 0)
-            ok_check_count += data.get('okCount', 0)
+
             detection_count: str = data.get('detectionCount', None)
             if detection_count is None:
                 pass
@@ -90,7 +95,7 @@ class RTSummaryCellResource2(CellResource):
         elif meter_sum <= 0:
             agg_val = f'共计{cast_util.wrap_int_str(line_sum)}道'
         elif line_sum <= 0:
-            agg_val = f'共计{cast_util}米'
+            agg_val = f'共计{meter_sum}米'
         else:
             agg_val = f'共计{cast_util.wrap_int_str(line_sum)}道，{meter_sum}米'
         val = self.SUMMARY_FORMAT_ONE.format(data_size=data_size, ok_data_size=ok_data_size,
