@@ -245,6 +245,38 @@ class SimpleTableDocGenerator(ReportGenerator):
 
         return template_doc
 
+
+    def _merge_data_list(self, data_list: List[dict], merge_fun_dict: dict) -> Dict[str, dict]:
+        """
+        :param merge_fun_dict mappingKey -> merge_fun
+               merge_fun:merge_fun(mappingDataList) -> obj
+        """
+        merged_dict = {}
+        if data_list is None:
+            return merged_dict
+        custom_merge_list_dict = {}
+        for data in data_list:
+            for k, v in data.items():
+                if merge_fun_dict is not None and k in merge_fun_dict:
+                    if k not in custom_merge_list_dict:
+                        custom_merge_list_dict[k] = []
+                    custom_merge_list_dict[k].append(v)
+                else:
+                    if v is None:
+                        continue
+                    else:
+                        if k in merged_dict:
+                            continue
+                        else:
+                            merged_dict[k] = v
+        
+        for k, mapping_list in custom_merge_list_dict.items():
+            data = merge_fun_dict[k](mapping_list)
+            if data is not None:
+                merged_dict[k] = data
+        return merged_dict
+
+
     def _build_template_doc_table_index_zips(self, doc: Document):
         """
         :return M * x * y * 2 array:
