@@ -37,7 +37,7 @@ def build_rt_config():
         divide_key: ExcelFiledProperty('C', cast_util.wrap_str, '委托单编号'),
         "sampleNo": ExcelFiledProperty('D', cast_util.wrap_str, '检件编号'),
         "kindNo": ExcelFiledProperty('E', cast_util.wrap_str, '焊口编号'),
-        "empId": ExcelFiledProperty('F', cast_util.wrap_str, '焊工号'),
+        "empId": ExcelFiledProperty('F', cast_util.wrap_int_str, '焊工号'),
         "specification": ExcelFiledProperty('G', cast_util.wrap_str, '规格(mm)'),
         "material": ExcelFiledProperty('H', cast_util.wrap_str, '材质'),
         "level": ExcelFiledProperty('I', cast_util.wrap_str, '合格级别'),
@@ -47,7 +47,7 @@ def build_rt_config():
         "unitName": ExcelFiledProperty('Q', cast_util.wrap_str, '单元名称'),
         "checkCount": ExcelFiledProperty('M', cast_util.wrap_int, '张数'),
         "okCount": ExcelFiledProperty('N', cast_util.wrap_int, '合格数量'),
-        "ray": ExcelFiledProperty('P', cast_util.wrap_int, 'γ射线'),
+        "ray": ExcelFiledProperty('P', cast_util.wrap_str, 'γ射线'),
     }
     column_cell_resource_list = [
         MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=5, column_view_index=0,
@@ -118,7 +118,7 @@ def build_ray_config():
         divide_key: ExcelFiledProperty('C', cast_util.wrap_str, '委托单编号'),
         "sampleNo": ExcelFiledProperty('D', cast_util.wrap_str, '检件编号'),
         "kindNo": ExcelFiledProperty('E', cast_util.wrap_str, '焊口编号'),
-        "empId": ExcelFiledProperty('F', cast_util.wrap_str, '焊工号'),
+        "empId": ExcelFiledProperty('F', cast_util.wrap_int_str, '焊工号'),
         "specification": ExcelFiledProperty('G', cast_util.wrap_str, '规格(mm)'),
         "material": ExcelFiledProperty('H', cast_util.wrap_str, '材质'),
         "level": ExcelFiledProperty('I', cast_util.wrap_str, '合格级别'),
@@ -127,11 +127,12 @@ def build_ray_config():
         "baseSpecificationAndCnt": ExcelFiledProperty('L', cast_util.wrap_str, '底片规格/张'),
         "checkCount": ExcelFiledProperty('M', cast_util.wrap_int, '张数'),
         "okCount": ExcelFiledProperty('N', cast_util.wrap_int, '合格数量'),
-        "ray": ExcelFiledProperty('P', cast_util.wrap_int, 'γ射线'),
+        "ray": ExcelFiledProperty('P', cast_util.wrap_str, 'γ射线'),
         "unitName": ExcelFiledProperty('Q', cast_util.wrap_str, '单元名称'),
         "weldMethod": ExcelFiledProperty('R', cast_util.wrap_str, '焊接方法'),
         "areaNo": ExcelFiledProperty('S', cast_util.wrap_str, '区号'),
         "lineNo": ExcelFiledProperty('T', cast_util.wrap_str, '单线号'),
+        "detectionOpportunity": ExcelFiledProperty('V', cast_util.wrap_str, '检测时机'),
 
     }
 
@@ -154,9 +155,7 @@ def build_ray_config():
         DocGlobalParamConfig('projectName', None, '工程名称', False),
         DocGlobalParamConfig('customorCompany', None, '委托单位', False),
         DocGlobalParamConfig('testingStandards', None, '检测标准', False),
-        DocGlobalParamConfig('detectionOpportunity', None, '检测时机', False),
         DocGlobalParamConfig('acceptStandard', None, '验收规范', False),
-        DocGlobalParamConfig('detectionRatio', None, '检测比例', False),
         DocGlobalParamConfig('detectionMethod', None, '检测方法', False),
         DocGlobalParamConfig('detectionTechLevel', None, '检测技术等级', False),
         DocGlobalParamConfig('appearanceDetection', '合格', '外观检查', False),
@@ -193,13 +192,13 @@ def build_ray_config():
         GlobalParamCellParagraphAddRunResource(table_index=0, row=3, column_view_index=3, mapping_key='detectionMethod',
                                                style=DocCellStyle(font_cn='楷体')),
         # 检测时机
-        GlobalParamCellParagraphAddRunResource(table_index=0, row=3, column_view_index=5,
+        DataListCellParagraphAddRunResource(table_index=0, row=3, column_view_index=5,
                                                mapping_key='detectionOpportunity', style=DocCellStyle(font_cn='楷体')),
         # 检测技术等级
         GlobalParamCellParagraphAddRunResource(table_index=0, row=4, column_view_index=1,
                                                mapping_key='detectionTechLevel', style=DocCellStyle(font_cn='楷体')),
         # 检测比例
-        GlobalParamCellParagraphAddRunResource(table_index=0, row=4, column_view_index=3, mapping_key='detectionRatio',
+        DataListCellParagraphAddRunResource(table_index=0, row=4, column_view_index=3, mapping_key='checkRatioKind',
                                                style=DocCellStyle(font_cn='楷体')),
         # 合格级别
         DataListCellParagraphAddRunResource(table_index=0, row=4, column_view_index=5, mapping_key='level',
@@ -242,7 +241,7 @@ def build_surface_config():
         divide_key: ExcelFiledProperty('C', cast_util.wrap_str, '委托单编号'),
         "sampleNo": ExcelFiledProperty('D', cast_util.wrap_str, '检件编号'),
         "kindNo": ExcelFiledProperty('E', cast_util.wrap_str, '焊口编号'),
-        "empId": ExcelFiledProperty('F', cast_util.wrap_str, '焊工号'),
+        "empId": ExcelFiledProperty('F', cast_util.wrap_int_str, '焊工号'),
         "specification": ExcelFiledProperty('G', cast_util.wrap_str, '规格(mm)'),
         "material": ExcelFiledProperty('H', cast_util.wrap_str, '材质'),
         "level": ExcelFiledProperty('I', cast_util.wrap_str, '合格级别'),
@@ -252,7 +251,7 @@ def build_surface_config():
         "unitName": ExcelFiledProperty('Q', cast_util.wrap_str, '单元名称'),
         "checkCount": ExcelFiledProperty('M', cast_util.wrap_int, '张数'),
         "okCount": ExcelFiledProperty('N', cast_util.wrap_int, '合格数量'),
-        "ray": ExcelFiledProperty('P', cast_util.wrap_int, 'γ射线'),
+        "ray": ExcelFiledProperty('P', cast_util.wrap_str, 'γ射线'),
         "detectionCount": ExcelFiledProperty('U', cast_util.wrap_str, '检测数量(道/m/m2/点)'),
 
     }

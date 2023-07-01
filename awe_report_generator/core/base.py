@@ -115,6 +115,8 @@ class ReportGenerator(metaclass=ABCMeta):
             for k, filed_property in self.filed_mapping.items():
                 filed_property: ExcelFiledProperty
                 col_idx = excel_title_to_index(filed_property.column_title)
+                if col_idx >= len(row):
+                    continue
                 val = self._castValue(row[col_idx], filed_property.value_cast)
                 if val is None:
                     if self.divide_key == k or filed_property.required:

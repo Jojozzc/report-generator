@@ -42,7 +42,9 @@ class RTSummaryCellResource(CellResource):
             if check_c == ok_check_c:
                 ok_data_size += 1
 
-            ray += data.get('ray', 0)
+            ray_str = data.get('ray', '')
+            if ray_str is not None and len(ray_str) > 0:
+                ray += 1
 
         val = self.SUMMARY_FORMAT_ONE.format(data_size=data_size, ok_data_size=ok_data_size,
                                              bad_data_size=data_size - ok_data_size,
