@@ -22,7 +22,7 @@ class RTSummaryCellResource(CellResource):
     SUMMARY_FORMAT_ONE = '说明：共检测{data_size}道,合格{ok_data_size}道，不合格{bad_data_size}道，其中返修{bad_check_count}张，共计{check_count}张。'
     SUMMARY_FORMAT_TWO = '其中γ射线{ray}张。'
 
-    def get_value(self, data_list: List[dict], global_data: dict):
+    def get_value(self, data_list: List[dict], global_data: dict, merged_data: dict):
         if data_list is None:
             return None
         data_size = len(data_list)
@@ -33,20 +33,24 @@ class RTSummaryCellResource(CellResource):
         ray = 0
 
         for data in data_list:
-            if data.get('isOk', '') != '合格':
-                pass
-            else:
+            check_c = data.get('checkCount', 0)
+            check_count += check_c
+
+            ok_check_c = data.get('okCount', 0)
+            ok_check_count += ok_check_c
+
+            if check_c == ok_check_c:
                 ok_data_size += 1
-            check_count += data.get('checkCount', 0)
-            ok_check_count += data.get('okCount', 0)
-            ray += data.get('ray', 0)
+
+            ray_str = data.get('ray', '')
+            if ray_str is not None and len(ray_str) > 0:
+                ray += 1
 
         val = self.SUMMARY_FORMAT_ONE.format(data_size=data_size, ok_data_size=ok_data_size,
                                              bad_data_size=data_size - ok_data_size,
                                              bad_check_count=check_count - ok_check_count, check_count=check_count)
 
-        if ray > 0:
-            val = val + self.SUMMARY_FORMAT_TWO.format(ray=ray)
+        val = val + self.SUMMARY_FORMAT_TWO.format(ray=ray)
 
         return val
 
@@ -54,7 +58,7 @@ class RTSummaryCellResource(CellResource):
 class RTSummaryCellResource2(CellResource):
     SUMMARY_FORMAT_ONE = '说明：共检测{data_size}道,合格{ok_data_size}道，不合格{bad_data_size}道'
 
-    def get_value(self, data_list: List[dict], global_data: dict):
+    def get_value(self, data_list: List[dict], global_data: dict, merged_data: dict):
         if data_list is None:
             return None
         data_size = len(data_list)
@@ -67,12 +71,15 @@ class RTSummaryCellResource2(CellResource):
         line_sum = 0
 
         for data in data_list:
-            if data.get('isOk', '') != '合格':
-                pass
-            else:
+            check_c = data.get('checkCount', 0)
+            check_count += check_c
+
+            ok_check_c = data.get('okCount', 0)
+            ok_check_count += ok_check_c
+
+            if check_c == ok_check_c:
                 ok_data_size += 1
-            check_count += data.get('checkCount', 0)
-            ok_check_count += data.get('okCount', 0)
+
             detection_count: str = data.get('detectionCount', None)
             if detection_count is None:
                 pass
@@ -90,7 +97,7 @@ class RTSummaryCellResource2(CellResource):
         elif meter_sum <= 0:
             agg_val = f'共计{cast_util.wrap_int_str(line_sum)}道'
         elif line_sum <= 0:
-            agg_val = f'共计{cast_util}米'
+            agg_val = f'共计{meter_sum}米'
         else:
             agg_val = f'共计{cast_util.wrap_int_str(line_sum)}道，{meter_sum}米'
         val = self.SUMMARY_FORMAT_ONE.format(data_size=data_size, ok_data_size=ok_data_size,
