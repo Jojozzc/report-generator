@@ -34,3 +34,17 @@ def wrap_float(obj):
     if _is_float(obj):
         return float(obj)
     return None
+
+
+def wrap_percent(obj):
+    if obj is None:
+        return None
+    try:
+        number = wrap_float(obj)
+        return "{:.0%}".format(number)
+    except BaseException as e:
+        return str(obj)
+
+
+if __name__ == '__main__':
+    print(wrap_percent('0.1'))

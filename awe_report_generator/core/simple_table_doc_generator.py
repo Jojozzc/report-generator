@@ -4,6 +4,7 @@ from docx import Document
 from typing import Dict, List
 
 from docx.enum.table import WD_TABLE_ALIGNMENT
+from docx.shared import Pt
 
 from awe_report_generator.core.util import array_util
 from awe_report_generator.core.util import cast_util
@@ -66,6 +67,8 @@ class ColumnCellsParagraphAddRunResource():
             run.font.name = font_cn
             run._element.rPr.rFonts.set(qn('w:eastAsia'), font_cn)
 
+        if self.style is not None and self.style.font_size is not None:
+            run.font.size = Pt(self.style.font_size)
 
 class CellResource():
     """
@@ -160,6 +163,9 @@ class CellParagraphAddRunResource(CellResource):
         if font_cn is not None:
             run.font.name = font_cn
             run._element.rPr.rFonts.set(qn('w:eastAsia'), font_cn)
+
+        if self.style is not None and self.style.font_size is not None:
+            run.font.size = Pt(self.style.font_size)
 
 
 class GlobalParamCellParagraphAddRunResource(CellParagraphAddRunResource):

@@ -122,7 +122,7 @@ def build_ray_config():
         "specification": ExcelFiledProperty('G', cast_util.wrap_str, '规格(mm)'),
         "material": ExcelFiledProperty('H', cast_util.wrap_str, '材质'),
         "level": ExcelFiledProperty('I', cast_util.wrap_str, '合格级别'),
-        "checkRatioKind": ExcelFiledProperty('J', cast_util.wrap_str, '检测比例'),
+        "checkRatioKind": ExcelFiledProperty('J', cast_util.wrap_percent, '检测比例'),
         "isOk": ExcelFiledProperty('K', cast_util.wrap_str, '返修补片'),
         "baseSpecificationAndCnt": ExcelFiledProperty('L', cast_util.wrap_str, '底片规格/张'),
         "checkCount": ExcelFiledProperty('M', cast_util.wrap_int, '张数'),
@@ -146,7 +146,7 @@ def build_ray_config():
         MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=7, column_view_index=4,
                                                   mapping_data_key='empId', style=DocCellStyle(font_cn='楷体')),
         MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=7, column_view_index=5,
-                                                  mapping_data_key='specification', style=DocCellStyle(font_cn='楷体')),
+                                                  mapping_data_key='specification', style=DocCellStyle(font_cn='楷体', font_size=7.5)),
         MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=7, column_view_index=6,
                                                   mapping_data_key='material', style=DocCellStyle(font_cn='楷体')),
     ]
@@ -171,7 +171,7 @@ def build_ray_config():
         # 单位工程名称
         DataListCellParagraphAddRunResource(table_index=0, row=0, column_view_index=2,
                                             style=DocCellStyle(alignment=WD_TABLE_ALIGNMENT.LEFT, font_cn='楷体'),
-                                            paragraph_index=2, cast_value_to_str=cast_util.wrap_str,
+                                            paragraph_index=1, cast_value_to_str=cast_util.wrap_str,
                                             mapping_key='unitName'),
         # 委托单位
         GlobalParamCellParagraphAddRunResource(table_index=0, row=1, column_view_index=1, mapping_key='customorCompany',
