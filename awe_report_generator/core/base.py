@@ -17,12 +17,16 @@ class ExcelFiledProperty:
     value_cast is a function: val = value_cast(value)
     """
 
-    def __init__(self, column_title, value_cast, desc: str, required=False) -> None:
+    def __init__(self, column_title, value_cast, desc: str, required=False, column_type=None) -> None:
+        '''
+        :param column_type: see dtype in https://pandas.pydata.org/docs/reference/api/pandas.read_excel.html
+        '''
         super().__init__()
         self.column_title = column_title
         self.value_cast = value_cast
         self.desc = desc
         self.required = required
+        self.column_type = column_type
 
 
 class DocGlobalParamConfig:
@@ -50,12 +54,15 @@ class ReportGenerator(metaclass=ABCMeta):
     # args: number([0:N)), totalCount(N), success:bool, exception: BaseException
 
     def __init__(self, template_path: str, filed_mapping: Dict[str, ExcelFiledProperty], divide_key: str,
-                 doc_global_data_param_config_list: List[DocGlobalParamConfig]=None,
+                 doc_global_data_param_config_list: List[DocGlobalParamConfig] = None,
                  merge_fun_dict: dict = None):
         """
         :param template_path: path to template docx file
         :param filed_mapping:
         :param divide_key: unique key
+
+        dtype: Data type for data or columns. E.g. {‘a’: np.float64, ‘b’: np.int32} Use object to preserve data as stored in Excel and not interpret dtype. If converters are specified, they will be applied INSTEAD of dtype conversion.
+            https://pandas.pydata.org/docs/reference/api/pandas.read_excel.html
         """
         super().__init__()
         self.template_path = template_path
@@ -63,8 +70,14 @@ class ReportGenerator(metaclass=ABCMeta):
         self.divide_key = divide_key
         self.doc_global_data_param_config_list = doc_global_data_param_config_list
         self.merge_fun_dict = merge_fun_dict
+        self.dtype = {}
+        for key, property in filed_mapping.items():
+            if property is not None and property.column_type is not None:
+                self.dtype[key] = property.column_type
 
-    def execute(self, file_path: str, target_dir: str, sheet = DEFAULT_SHEET, global_param: dict = None, on_finish_one=default_on_finish_one):
+
+    def execute(self, file_path: str, target_dir: str, sheet=DEFAULT_SHEET, global_param: dict = None,
+                on_finish_one=default_on_finish_one):
         """
         :param on_finish_one: callback, on_finish_one(number: int, total_cnt: int, success: bool, exception: BaseException)
         """
@@ -93,7 +106,8 @@ class ReportGenerator(metaclass=ABCMeta):
         for key, sub_data_list in raw_data_map.items():
             try:
                 template_doc = docx.Document(self.template_path)
-                doc = self._process(data_list=sub_data_list, template_doc=template_doc, global_param=global_param, merged_data=merged_data)
+                doc = self._process(data_list=sub_data_list, template_doc=template_doc, global_param=global_param,
+                                    merged_data=merged_data)
                 file_name = self._get_file_name(key)
                 save_path = os.path.join(target_dir, file_name)
                 self._save(doc, file_path=save_path)
@@ -105,7 +119,7 @@ class ReportGenerator(metaclass=ABCMeta):
                 p = p + 1
 
     def __read(self, file_path: str, sheet: str) -> List[dict]:
-        raw_datas = pandas.read_excel(file_path, sheet)
+        raw_datas = pandas.read_excel(file_path, sheet, dtype=self.dtype)
         data_list = []
         for i in range(raw_datas.shape[0]):
             row = raw_datas.iloc[i]
@@ -141,7 +155,6 @@ class ReportGenerator(metaclass=ABCMeta):
     def _process(self, data_list: list, template_doc: Document, global_param: dict, merged_data: dict) -> Document:
         pass
 
-
     def _merge_data(self, data_list: List[dict], merge_fun_dict: dict) -> Dict[str, dict]:
         """
         :param merge_fun_dict mappingKey -> merge_fun
@@ -171,7 +184,6 @@ class ReportGenerator(metaclass=ABCMeta):
             if data is not None:
                 merged_dict[k] = data
         return merged_dict
-
 
     def _get_file_name(self, key):
         return f'{key}.docx'

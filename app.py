@@ -12,14 +12,14 @@ from awe_report_generator.core.simple_table_doc_generator import (
     SimpleCalculationColumnCellsParagraphAddRunResource,
     HeaderResource,
     GlobalParamCellParagraphAddRunResource,
-    DataListCellParagraphAddRunResource, MergedDataCellParagraphAddRunResource
+    DataListCellParagraphAddRunResource
 )
 from awe_report_generator.core.style import DocCellStyle
+from awe_report_generator.core.util import array_util
 from awe_report_generator.core.util import cast_util, date_util as awe_date_util
 from awe_report_generator.ui import BaseUIConfig
 from awe_report_generator.ui.base import HomePageQWidget
 from awe_report_generator.ui.processor_ui import ProcessorQWidget, ProcessorUIParam
-from awe_report_generator.core.util import array_util
 
 
 def date_merge_fun(date_list):
@@ -36,7 +36,7 @@ def build_rt_config():
         "completeDate": ExcelFiledProperty('B', cast_util.wrap_str, '完成时间'),
         divide_key: ExcelFiledProperty('C', cast_util.wrap_str, '委托单编号'),
         "sampleNo": ExcelFiledProperty('D', cast_util.wrap_str, '检件编号'),
-        "kindNo": ExcelFiledProperty('E', cast_util.wrap_str, '焊口编号'),
+        "kindNo": ExcelFiledProperty('E', cast_util.wrap_str, '焊口编号', column_type=str),
         "empId": ExcelFiledProperty('F', cast_util.wrap_int_str, '焊工号'),
         "specification": ExcelFiledProperty('G', cast_util.wrap_str, '规格(mm)'),
         "material": ExcelFiledProperty('H', cast_util.wrap_str, '材质'),
@@ -82,8 +82,9 @@ def build_rt_config():
                                             style=DocCellStyle(font_cn='楷体')),
         GlobalParamCellParagraphAddRunResource(table_index=0, row=1, column_view_index=1, mapping_key='customCompany',
                                                style=DocCellStyle(font_cn='楷体')),
-        MergedDataCellParagraphAddRunResource(table_index=0, row=1, column_view_index=3, mapping_key='completeDate',
-                                            style=DocCellStyle(font_cn='楷体')),
+        DataListCellParagraphAddRunResource(table_index=0, row=1, column_view_index=3, mapping_key='completeDate',
+                                            style=DocCellStyle(font_cn='楷体'),
+                                            data_list_sort_func=awe_date_util.parse_dot_date_time, data_list_sort_reverse=True),
         GlobalParamCellParagraphAddRunResource(table_index=0, row=2, column_view_index=1, mapping_key='detectionMethod',
                                                style=DocCellStyle(font_cn='楷体')),
         GlobalParamCellParagraphAddRunResource(table_index=0, row=2, column_view_index=3,
@@ -92,10 +93,10 @@ def build_rt_config():
                                             style=DocCellStyle(font_cn='楷体')),
         RTSummaryCellResource(table_index=0, row=21, column_view_index=0,
                               style=DocCellStyle(alignment=WD_TABLE_ALIGNMENT.LEFT)),
-        MergedDataCellParagraphAddRunResource(table_index=0, row=22, column_view_index=3,
+        DataListCellParagraphAddRunResource(table_index=0, row=22, column_view_index=3,
                                             style=DocCellStyle(alignment=WD_TABLE_ALIGNMENT.RIGHT), paragraph_index=3,
                                             run_index=None, cast_value_to_str=awe_date_util.get_YYYYmmdd_cn,
-                                            mapping_key='completeDate'),
+                                            mapping_key='completeDate', data_list_sort_func=awe_date_util.parse_dot_date_time, data_list_sort_reverse=True),
     ]
     template_path = os.path.join(os.getcwd(), 'template/rt/TEMPLATE.docx')
     report_generator = SimpleTableDocGenerator(template_path=template_path, filed_mapping=filed_mapping,
@@ -117,7 +118,7 @@ def build_ray_config():
         "completeDate": ExcelFiledProperty('B', cast_util.wrap_str, '完成时间'),
         divide_key: ExcelFiledProperty('C', cast_util.wrap_str, '委托单编号'),
         "sampleNo": ExcelFiledProperty('D', cast_util.wrap_str, '检件编号'),
-        "kindNo": ExcelFiledProperty('E', cast_util.wrap_str, '焊口编号'),
+        "kindNo": ExcelFiledProperty('E', cast_util.wrap_str, '焊口编号', column_type=str),
         "empId": ExcelFiledProperty('F', cast_util.wrap_int_str, '焊工号'),
         "specification": ExcelFiledProperty('G', cast_util.wrap_str, '规格(mm)'),
         "material": ExcelFiledProperty('H', cast_util.wrap_str, '材质'),
@@ -212,7 +213,8 @@ def build_ray_config():
         # 施工单位时间
         DataListCellParagraphAddRunResource(table_index=0, row=23, column_view_index=0,
                                             style=DocCellStyle(alignment=WD_TABLE_ALIGNMENT.RIGHT), paragraph_index=3,
-                                            cast_value_to_str=awe_date_util.get_YYYYmmdd_cn, mapping_key='orderDate'),
+                                            cast_value_to_str=awe_date_util.get_YYYYmmdd_cn, mapping_key='orderDate',
+                                            data_list_sort_func=awe_date_util.parse_dot_date_time, data_list_sort_reverse=True),
         # 坡口形式
         GlobalParamCellParagraphAddRunResource(table_index=0, row=5, column_view_index=5, mapping_key='groove',
                                                style=DocCellStyle(font_cn='楷体')),
@@ -240,7 +242,7 @@ def build_surface_config():
         "completeDate": ExcelFiledProperty('B', cast_util.wrap_str, '完成时间'),
         divide_key: ExcelFiledProperty('C', cast_util.wrap_str, '委托单编号'),
         "sampleNo": ExcelFiledProperty('D', cast_util.wrap_str, '检件编号'),
-        "kindNo": ExcelFiledProperty('E', cast_util.wrap_str, '焊口编号'),
+        "kindNo": ExcelFiledProperty('E', cast_util.wrap_str, '焊口编号', column_type=str),
         "empId": ExcelFiledProperty('F', cast_util.wrap_int_str, '焊工号'),
         "specification": ExcelFiledProperty('G', cast_util.wrap_str, '规格(mm)'),
         "material": ExcelFiledProperty('H', cast_util.wrap_str, '材质'),
@@ -286,7 +288,8 @@ def build_surface_config():
         DataListCellParagraphAddRunResource(table_index=0, row=0, column_view_index=3, paragraph_index=0,
                                             mapping_key=divide_key, style=DocCellStyle(font_cn='楷体')),
         DataListCellParagraphAddRunResource(table_index=0, row=1, column_view_index=3, paragraph_index=0,
-                                            mapping_key='completeDate', style=DocCellStyle(font_cn='楷体')),
+                                            mapping_key='completeDate', style=DocCellStyle(font_cn='楷体'),
+                                            data_list_sort_func=awe_date_util.parse_dot_date_time, data_list_sort_reverse=True),
         GlobalParamCellParagraphAddRunResource(table_index=0, row=1, column_view_index=1, mapping_key='customerCompany',
                                                style=DocCellStyle(font_cn='楷体')),
         GlobalParamCellParagraphAddRunResource(table_index=0, row=2, column_view_index=1, mapping_key='detectionMethod',
@@ -295,7 +298,7 @@ def build_surface_config():
                                                mapping_key='testingStandards', style=DocCellStyle(font_cn='楷体')),
         DataListCellParagraphAddRunResource(table_index=0, row=2, column_view_index=5, paragraph_index=0,
                                             mapping_key='level', style=DocCellStyle(font_cn='楷体')),
-        MergedDataCellParagraphAddRunResource(table_index=0, row=25, column_view_index=3,
+        DataListCellParagraphAddRunResource(table_index=0, row=25, column_view_index=3,
                                             style=DocCellStyle(alignment=WD_TABLE_ALIGNMENT.RIGHT), paragraph_index=4,
                                             cast_value_to_str=awe_date_util.get_YYYYmmdd_cn,
                                             mapping_key='completeDate'),

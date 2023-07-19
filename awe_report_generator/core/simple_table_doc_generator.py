@@ -70,6 +70,7 @@ class ColumnCellsParagraphAddRunResource():
         if self.style is not None and self.style.font_size is not None:
             run.font.size = Pt(self.style.font_size)
 
+
 class CellResource():
     """
     用于处理表格内某一个cell数据
@@ -184,11 +185,16 @@ class GlobalParamCellParagraphAddRunResource(CellParagraphAddRunResource):
 class DataListCellParagraphAddRunResource(CellParagraphAddRunResource):
     def __init__(self, table_index: int, row: int, column_view_index: int, style: DocCellStyle = DocCellStyle(),
                  paragraph_index: int = 0, cast_value_to_str=cast_util.wrap_str, mapping_key: str = None,
-                 run_index: int = None):
+                 run_index: int = None, data_list_sort_func=None, data_list_sort_reverse=False):
         super().__init__(table_index, row, column_view_index, style, cast_value_to_str, paragraph_index, run_index)
         self.mapping_key = mapping_key
+        self.data_list_sort_func = data_list_sort_func
+        self.data_list_sort_reverse = data_list_sort_reverse
 
     def get_value(self, data_list: List[dict], global_data: dict, merged_data: dict):
+        if self.data_list_sort_func is not None:
+            data_list = sorted(data_list, key=lambda data: self.data_list_sort_func(data[self.mapping_key]),
+                               reverse=self.data_list_sort_reverse)
         return array_util.get_one_value(data_list, self.mapping_key)
 
 
@@ -242,14 +248,14 @@ class SimpleTableDocGenerator(ReportGenerator):
 
     def __init__(self, template_path: str, filed_mapping: Dict[str, ExcelFiledProperty], divide_key: str,
                  header_resource: HeaderResource, column_cell_resource_list: List[ColumnCellsParagraphAddRunResource],
-                 cell_resource_list: List[CellResource], doc_global_data_param_config_list=None, merge_fun_dict:dict=None):
+                 cell_resource_list: List[CellResource], doc_global_data_param_config_list=None,
+                 merge_fun_dict: dict = None):
         super().__init__(template_path, filed_mapping, divide_key, doc_global_data_param_config_list, merge_fun_dict)
         self.header_resource = header_resource
         self.column_cell_resource_list = column_cell_resource_list
         self.cell_resource_list = cell_resource_list
         template_doc = Document(template_path)
         self.table_row_index_zips = self._build_template_doc_table_index_zips(template_doc)
-
 
     def _process(self, data_list: list, template_doc: Document, global_param: dict, merged_data: dict) -> Document:
         if self.header_resource is not None:
@@ -264,7 +270,6 @@ class SimpleTableDocGenerator(ReportGenerator):
                 cell_res.set(template_doc, data_list, global_param, self.table_row_index_zips, merged_data)
 
         return template_doc
-
 
     def _build_template_doc_table_index_zips(self, doc: Document):
         """
