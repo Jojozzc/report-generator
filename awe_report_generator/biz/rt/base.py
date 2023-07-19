@@ -50,7 +50,8 @@ class RTSummaryCellResource(CellResource):
                                              bad_data_size=data_size - ok_data_size,
                                              bad_check_count=check_count - ok_check_count, check_count=check_count)
 
-        val = val + self.SUMMARY_FORMAT_TWO.format(ray=ray)
+        if ray > 0:
+            val = val + self.SUMMARY_FORMAT_TWO.format(ray=ray)
 
         return val
 
