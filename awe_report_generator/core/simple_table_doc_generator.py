@@ -193,7 +193,8 @@ class DataListCellParagraphAddRunResource(CellParagraphAddRunResource):
 
     def get_value(self, data_list: List[dict], global_data: dict, merged_data: dict):
         if self.data_list_sort_func is not None:
-            data_list = sorted(data_list, key=lambda data: self.data_list_sort_func(data[self.mapping_key]), reverse=self.data_list_sort_reverse)
+            data_list = sorted(data_list, key=lambda data: self.data_list_sort_func(data[self.mapping_key]),
+                               reverse=self.data_list_sort_reverse)
         return array_util.get_one_value(data_list, self.mapping_key)
 
 
