@@ -12,14 +12,14 @@ from awe_report_generator.core.simple_table_doc_generator import (
     SimpleCalculationColumnCellsParagraphAddRunResource,
     HeaderResource,
     GlobalParamCellParagraphAddRunResource,
-    DataListCellParagraphAddRunResource, MergedDataCellParagraphAddRunResource
+    DataListCellParagraphAddRunResource
 )
 from awe_report_generator.core.style import DocCellStyle
+from awe_report_generator.core.util import array_util
 from awe_report_generator.core.util import cast_util, date_util as awe_date_util
 from awe_report_generator.ui import BaseUIConfig
 from awe_report_generator.ui.base import HomePageQWidget
 from awe_report_generator.ui.processor_ui import ProcessorQWidget, ProcessorUIParam
-from awe_report_generator.core.util import array_util
 
 
 def date_merge_fun(date_list):
