@@ -98,9 +98,9 @@ class RTSummaryCellResource2(CellResource):
         elif meter_sum <= 0:
             agg_val = f'共计{cast_util.wrap_int_str(line_sum)}道'
         elif line_sum <= 0:
-            agg_val = f'共计{meter_sum}米'
+            agg_val = f'共计{round(meter_sum, 2)}米'
         else:
-            agg_val = f'共计{cast_util.wrap_int_str(line_sum)}道，{meter_sum}米'
+            agg_val = f'共计{cast_util.wrap_int_str(line_sum)}道，{round(meter_sum, 2)}米'
         val = self.SUMMARY_FORMAT_ONE.format(data_size=data_size, ok_data_size=ok_data_size,
                                              bad_data_size=data_size - ok_data_size) + '，' + agg_val
 
