@@ -48,6 +48,7 @@ def build_rt_config():
         "checkCount": ExcelFiledProperty('M', cast_util.wrap_int, '张数'),
         "okCount": ExcelFiledProperty('N', cast_util.wrap_int, '合格数量'),
         "ray": ExcelFiledProperty('P', cast_util.wrap_str, 'γ射线'),
+        "detectionCount": ExcelFiledProperty('U', cast_util.wrap_str, '检测数量(道/m/㎡/点)'),
     }
     column_cell_resource_list = [
         MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=5, column_view_index=0,
@@ -60,6 +61,9 @@ def build_rt_config():
                                                   mapping_data_key='specification', style=DocCellStyle(font_cn='楷体')),
         MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=5, column_view_index=4,
                                                   mapping_data_key='baseSpecificationAndCnt',
+                                                  style=DocCellStyle(font_cn='楷体')),
+        MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=5, column_view_index=5,
+                                                  mapping_data_key='detectionCount',
                                                   style=DocCellStyle(font_cn='楷体')),
         MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=5, column_view_index=5,
                                                   mapping_data_key='okCount', style=DocCellStyle(font_cn='楷体')),
