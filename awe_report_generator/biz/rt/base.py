@@ -19,7 +19,7 @@ class RTHeaderResource(HeaderResource, ABC):
 
 
 class RTSummaryCellResource(CellResource):
-    SUMMARY_FORMAT_ONE = '说明：共检测{data_size}道,合格{ok_data_size}道，不合格{bad_data_size}道，其中返修{bad_check_count}张，共计{check_count}张。'
+    SUMMARY_FORMAT_ONE = '说明：共检测{data_size}道，合格{ok_data_size}道，不合格{bad_data_size}道，其中返修{bad_check_count}张，共计{check_count}张。'
     SUMMARY_FORMAT_TWO = '其中γ射线{ray}张。'
 
     def get_value(self, data_list: List[dict], global_data: dict, merged_data: dict):
@@ -57,7 +57,7 @@ class RTSummaryCellResource(CellResource):
 
 
 class RTSummaryCellResource2(CellResource):
-    SUMMARY_FORMAT_ONE = '说明：共检测{data_size}道,合格{ok_data_size}道，不合格{bad_data_size}道'
+    SUMMARY_FORMAT_ONE = '说明：共检测{data_size}道，合格{ok_data_size}道，不合格{bad_data_size}道'
 
     def get_value(self, data_list: List[dict], global_data: dict, merged_data: dict):
         if data_list is None:
@@ -98,9 +98,9 @@ class RTSummaryCellResource2(CellResource):
         elif meter_sum <= 0:
             agg_val = f'共计{cast_util.wrap_int_str(line_sum)}道'
         elif line_sum <= 0:
-            agg_val = f'共计{meter_sum}米'
+            agg_val = f'共计{round(meter_sum, 2)}米'
         else:
-            agg_val = f'共计{cast_util.wrap_int_str(line_sum)}道，{meter_sum}米'
+            agg_val = f'共计{cast_util.wrap_int_str(line_sum)}道，{round(meter_sum, 2)}米'
         val = self.SUMMARY_FORMAT_ONE.format(data_size=data_size, ok_data_size=ok_data_size,
                                              bad_data_size=data_size - ok_data_size) + '，' + agg_val
 
