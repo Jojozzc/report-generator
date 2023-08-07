@@ -4,7 +4,7 @@ import sys
 from PyQt5.QtWidgets import QApplication
 from docx.enum.table import WD_TABLE_ALIGNMENT
 
-from awe_report_generator.biz.rt.base import RTHeaderResource, RTSummaryCellResource2
+from awe_report_generator.biz.rt.base import RTHeaderResource, RTSummaryCellResource2, RecordHeaderResource
 from awe_report_generator.biz.rt.base import RTSummaryCellResource
 from awe_report_generator.core.base import ExcelFiledProperty, DocGlobalParamConfig
 from awe_report_generator.core.simple_table_doc_generator import (
@@ -88,7 +88,8 @@ def build_rt_config():
                                                style=DocCellStyle(font_cn='楷体')),
         DataListCellParagraphAddRunResource(table_index=0, row=1, column_view_index=3, mapping_key='completeDate',
                                             style=DocCellStyle(font_cn='楷体'),
-                                            data_list_sort_func=awe_date_util.parse_dot_date_time, data_list_sort_reverse=True),
+                                            data_list_sort_func=awe_date_util.parse_dot_date_time,
+                                            data_list_sort_reverse=True),
         GlobalParamCellParagraphAddRunResource(table_index=0, row=2, column_view_index=1, mapping_key='detectionMethod',
                                                style=DocCellStyle(font_cn='楷体')),
         GlobalParamCellParagraphAddRunResource(table_index=0, row=2, column_view_index=3,
@@ -100,7 +101,9 @@ def build_rt_config():
         DataListCellParagraphAddRunResource(table_index=0, row=22, column_view_index=3,
                                             style=DocCellStyle(alignment=WD_TABLE_ALIGNMENT.RIGHT), paragraph_index=3,
                                             run_index=None, cast_value_to_str=awe_date_util.get_YYYYmmdd_cn,
-                                            mapping_key='completeDate', data_list_sort_func=awe_date_util.parse_dot_date_time, data_list_sort_reverse=True),
+                                            mapping_key='completeDate',
+                                            data_list_sort_func=awe_date_util.parse_dot_date_time,
+                                            data_list_sort_reverse=True),
     ]
     template_path = os.path.join(os.getcwd(), 'template/rt/TEMPLATE.docx')
     report_generator = SimpleTableDocGenerator(template_path=template_path, filed_mapping=filed_mapping,
@@ -108,7 +111,8 @@ def build_rt_config():
                                                header_resource=RTHeaderResource(),
                                                column_cell_resource_list=column_cell_resource_list,
                                                cell_resource_list=cell_resource_list,
-                                               doc_global_data_param_config_list=doc_global_data_param_config_list, merge_fun_dict={'completeDate' : date_merge_fun})
+                                               doc_global_data_param_config_list=doc_global_data_param_config_list,
+                                               merge_fun_dict={'completeDate': date_merge_fun})
     processor_widget = ProcessorQWidget(ProcessorUIParam(title='RT结果通知单台账', processor=report_generator))
     base_ui_config = BaseUIConfig('RT结果通知单台账', processor_widget)
 
@@ -151,7 +155,8 @@ def build_ray_config():
         MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=7, column_view_index=4,
                                                   mapping_data_key='empId', style=DocCellStyle(font_cn='楷体')),
         MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=7, column_view_index=5,
-                                                  mapping_data_key='specification', style=DocCellStyle(font_cn='楷体', font_size=7.5)),
+                                                  mapping_data_key='specification',
+                                                  style=DocCellStyle(font_cn='楷体', font_size=7.5)),
         MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=7, column_view_index=6,
                                                   mapping_data_key='material', style=DocCellStyle(font_cn='楷体')),
     ]
@@ -198,13 +203,13 @@ def build_ray_config():
                                                style=DocCellStyle(font_cn='楷体')),
         # 检测时机
         DataListCellParagraphAddRunResource(table_index=0, row=3, column_view_index=5,
-                                               mapping_key='detectionOpportunity', style=DocCellStyle(font_cn='楷体')),
+                                            mapping_key='detectionOpportunity', style=DocCellStyle(font_cn='楷体')),
         # 检测技术等级
         GlobalParamCellParagraphAddRunResource(table_index=0, row=4, column_view_index=1,
                                                mapping_key='detectionTechLevel', style=DocCellStyle(font_cn='楷体')),
         # 检测比例
         DataListCellParagraphAddRunResource(table_index=0, row=4, column_view_index=3, mapping_key='checkRatioKind',
-                                               style=DocCellStyle(font_cn='楷体')),
+                                            style=DocCellStyle(font_cn='楷体')),
         # 合格级别
         DataListCellParagraphAddRunResource(table_index=0, row=4, column_view_index=5, mapping_key='level',
                                             style=DocCellStyle(font_cn='楷体')),
@@ -218,7 +223,8 @@ def build_ray_config():
         DataListCellParagraphAddRunResource(table_index=0, row=23, column_view_index=0,
                                             style=DocCellStyle(alignment=WD_TABLE_ALIGNMENT.RIGHT), paragraph_index=3,
                                             cast_value_to_str=awe_date_util.get_YYYYmmdd_cn, mapping_key='orderDate',
-                                            data_list_sort_func=awe_date_util.parse_dot_date_time, data_list_sort_reverse=True),
+                                            data_list_sort_func=awe_date_util.parse_dot_date_time,
+                                            data_list_sort_reverse=True),
         # 坡口形式
         GlobalParamCellParagraphAddRunResource(table_index=0, row=5, column_view_index=5, mapping_key='groove',
                                                style=DocCellStyle(font_cn='楷体')),
@@ -230,7 +236,8 @@ def build_ray_config():
                                                header_resource=HeaderResource(),
                                                column_cell_resource_list=column_cell_resource_list,
                                                cell_resource_list=cell_resource_list,
-                                               doc_global_data_param_config_list=doc_global_data_param_config_list, merge_fun_dict={'completeDate' : date_merge_fun})
+                                               doc_global_data_param_config_list=doc_global_data_param_config_list,
+                                               merge_fun_dict={'completeDate': date_merge_fun})
 
     processor_widget = ProcessorQWidget(ProcessorUIParam(title='射线检测委托台账', processor=report_generator))
 
@@ -293,7 +300,8 @@ def build_surface_config():
                                             mapping_key=divide_key, style=DocCellStyle(font_cn='楷体')),
         DataListCellParagraphAddRunResource(table_index=0, row=1, column_view_index=3, paragraph_index=0,
                                             mapping_key='completeDate', style=DocCellStyle(font_cn='楷体'),
-                                            data_list_sort_func=awe_date_util.parse_dot_date_time, data_list_sort_reverse=True),
+                                            data_list_sort_func=awe_date_util.parse_dot_date_time,
+                                            data_list_sort_reverse=True),
         GlobalParamCellParagraphAddRunResource(table_index=0, row=1, column_view_index=1, mapping_key='customerCompany',
                                                style=DocCellStyle(font_cn='楷体')),
         GlobalParamCellParagraphAddRunResource(table_index=0, row=2, column_view_index=1, mapping_key='detectionMethod',
@@ -315,9 +323,70 @@ def build_surface_config():
                                                header_resource=RTHeaderResource(),
                                                column_cell_resource_list=column_cell_resource_list,
                                                cell_resource_list=cell_resource_list,
-                                               doc_global_data_param_config_list=doc_global_data_param_config_list, merge_fun_dict={'completeDate' : date_merge_fun})
+                                               doc_global_data_param_config_list=doc_global_data_param_config_list,
+                                               merge_fun_dict={'completeDate': date_merge_fun})
     processor_widget = ProcessorQWidget(ProcessorUIParam(title='表面结果通知单台账', processor=report_generator))
     base_ui_config = BaseUIConfig('表面结果通知单台账', processor_widget)
+
+    return base_ui_config
+
+
+def build_record_config():
+    divide_key = 'orderId'
+    filed_mapping = {
+        "orderDate": ExcelFiledProperty('A', cast_util.wrap_str, '委托日期'),
+        "completeDate": ExcelFiledProperty('B', cast_util.wrap_str, '完成时间'),
+        divide_key: ExcelFiledProperty('C', cast_util.wrap_str, '委托单编号'),
+        "sampleNo": ExcelFiledProperty('D', cast_util.wrap_str, '检件编号'),
+        "kindNo": ExcelFiledProperty('E', cast_util.wrap_str, '焊口编号', column_type=str),
+        "empId": ExcelFiledProperty('F', cast_util.wrap_int_str, '焊工号', column_type=str),
+        "specification": ExcelFiledProperty('G', cast_util.wrap_str, '规格(mm)'),
+        "material": ExcelFiledProperty('H', cast_util.wrap_str, '材质'),
+        "level": ExcelFiledProperty('I', cast_util.wrap_str, '合格级别'),
+        "checkRatioKind": ExcelFiledProperty('J', cast_util.wrap_percent, '检测比例'),
+        "isOk": ExcelFiledProperty('K', cast_util.wrap_str, '返修补片'),
+        "baseSpecificationAndCnt": ExcelFiledProperty('L', cast_util.wrap_str, '底片规格/张'),
+        "unitName": ExcelFiledProperty('Q', cast_util.wrap_str, '单元名称'),
+        "checkCount": ExcelFiledProperty('M', cast_util.wrap_int, '张数'),
+        "okCount": ExcelFiledProperty('N', cast_util.wrap_int, '合格数量'),
+        "ray": ExcelFiledProperty('P', cast_util.wrap_str, 'γ射线'),
+        "detectionCount": ExcelFiledProperty('U', cast_util.wrap_str, '检测数量(道/m/m2/点)'),
+
+    }
+    column_cell_resource_list = [
+        MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=4, column_view_index=0,
+                                                  mapping_data_key='sampleNo', style=DocCellStyle(font_cn='楷体')),
+
+        MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=4, column_view_index=1,
+                                                  mapping_data_key='empId', style=DocCellStyle(font_cn='楷体')),
+
+    ]
+
+    doc_global_data_param_config_list = [
+        DocGlobalParamConfig('projectName', '内蒙古宝丰煤基新材料有限公司4×100万吨/年煤制烯烃示范项目一期260万吨/年项目', '工程名称', False),
+        DocGlobalParamConfig('customerCompany', None, '委托单位', False),
+    ]
+
+    cell_resource_list = [
+        DataListCellParagraphAddRunResource(table_index=0, row=0, column_view_index=3, paragraph_index=0,
+                                            mapping_key=divide_key, style=DocCellStyle(font_cn='楷体')),
+        DataListCellParagraphAddRunResource(table_index=0, row=2, column_view_index=1, paragraph_index=0,
+                                            mapping_key='sampleNo', style=DocCellStyle(font_cn='楷体')),
+        DataListCellParagraphAddRunResource(table_index=0, row=2, column_view_index=3, paragraph_index=0,
+                                            mapping_key='material', style=DocCellStyle(font_cn='楷体')),
+        DataListCellParagraphAddRunResource(table_index=0, row=2, column_view_index=5, paragraph_index=0,
+                                            mapping_key='specification', style=DocCellStyle(font_cn='楷体')),
+    ]
+    template_path = os.path.join(os.getcwd(), 'template/rt_recod/record.docx')
+    report_generator = SimpleTableDocGenerator(template_path=template_path, filed_mapping=filed_mapping,
+                                               divide_key=divide_key,
+                                               header_resource=RecordHeaderResource(),
+                                               column_cell_resource_list=column_cell_resource_list,
+                                               cell_resource_list=cell_resource_list,
+                                               doc_global_data_param_config_list=doc_global_data_param_config_list,
+                                               merge_fun_dict={'completeDate': date_merge_fun})
+    processor_widget = ProcessorQWidget(ProcessorUIParam(title=' 射线检测评片记录 ', processor=report_generator))
+    base_ui_config = BaseUIConfig(' 射线检测评片记录 ', processor_widget)
 
     return base_ui_config
 
@@ -331,6 +400,7 @@ if __name__ == '__main__':
         build_ray_config(),
         build_rt_config(),
         build_surface_config(),
+        build_record_config(),
     ]
     ui = HomePageQWidget(ui_config_list)
     ui.show()

@@ -18,6 +18,17 @@ class RTHeaderResource(HeaderResource, ABC):
             doc.paragraphs[2].add_run(unit_name)
 
 
+class RecordHeaderResource(HeaderResource, ABC):
+
+    def set(self, doc: Document, data_list: List[Dict], global_data: dict):
+        project_name = global_data.get('projectName', '')
+        if project_name is not None:
+            doc.paragraphs[1].add_run(project_name)
+        unit_name = global_data.get('customerCompany', '')
+        if unit_name is not None:
+            doc.paragraphs[2].add_run(unit_name)
+
+
 class RTSummaryCellResource(CellResource):
     SUMMARY_FORMAT_ONE = '说明：共检测{data_size}道，合格{ok_data_size}道，不合格{bad_data_size}道，其中返修{bad_check_count}张，共计{check_count}张。'
     SUMMARY_FORMAT_TWO = '其中γ射线{ray}张。'
