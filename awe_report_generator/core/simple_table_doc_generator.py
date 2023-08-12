@@ -5,10 +5,11 @@ from typing import Dict, List
 
 from docx.enum.table import WD_TABLE_ALIGNMENT
 from docx.shared import Pt
+from xlsxwriter import Workbook
 
 from awe_report_generator.core.util import array_util
 from awe_report_generator.core.util import cast_util
-from .base import ReportGenerator, ExcelFiledProperty
+from .base import ReportGenerator, ExcelFiledProperty, OutputFileMode, DivideMode
 from .style import DocCellStyle
 from docx.oxml.ns import qn
 
@@ -246,18 +247,20 @@ class SimpleCalculationColumnCellsParagraphAddRunResource(ColumnCellsParagraphAd
 
 class SimpleTableDocGenerator(ReportGenerator):
 
-    def __init__(self, template_path: str, filed_mapping: Dict[str, ExcelFiledProperty], divide_key: str,
-                 header_resource: HeaderResource, column_cell_resource_list: List[ColumnCellsParagraphAddRunResource],
-                 cell_resource_list: List[CellResource], doc_global_data_param_config_list=None,
+    def __init__(self, template_path: str, filed_mapping: Dict[str, ExcelFiledProperty], divide_key: str, divide_mode:DivideMode=DivideMode.DIVIDE_MODE_BY_KEY,
+                 header_resource: HeaderResource=None, column_cell_resource_list=None,
+                 cell_resource_list: List[CellResource]=None, doc_global_data_param_config_list=None,
                  merge_fun_dict: dict = None):
-        super().__init__(template_path, filed_mapping, divide_key, doc_global_data_param_config_list, merge_fun_dict)
+        super().__init__(template_path=template_path, filed_mapping=filed_mapping, divide_key=divide_key, divide_mode=divide_mode, output_file_mode=OutputFileMode.WORD, doc_global_data_param_config_list=doc_global_data_param_config_list, merge_fun_dict=merge_fun_dict)
+        if column_cell_resource_list is None:
+            column_cell_resource_list = []
         self.header_resource = header_resource
         self.column_cell_resource_list = column_cell_resource_list
         self.cell_resource_list = cell_resource_list
         template_doc = Document(template_path)
         self.table_row_index_zips = self._build_template_doc_table_index_zips(template_doc)
 
-    def _process(self, data_list: list, template_doc: Document, global_param: dict, merged_data: dict) -> Document:
+    def _process_word(self, data_list: list, template_doc: Document, global_param: dict, merged_data: dict) -> Document:
         if self.header_resource is not None:
             self.header_resource.set(doc=template_doc, data_list=data_list, global_data=global_param)
         if self.column_cell_resource_list is not None:
@@ -270,6 +273,9 @@ class SimpleTableDocGenerator(ReportGenerator):
                 cell_res.set(template_doc, data_list, global_param, self.table_row_index_zips, merged_data)
 
         return template_doc
+
+    def _process_excel(self, data_list: list, work_book: Workbook, global_param: dict, merged_data: dict) -> Workbook:
+        raise Exception('Excel not supported.')
 
     def _build_template_doc_table_index_zips(self, doc: Document):
         """
