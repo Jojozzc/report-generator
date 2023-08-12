@@ -385,8 +385,61 @@ def build_record_config():
                                                cell_resource_list=cell_resource_list,
                                                doc_global_data_param_config_list=doc_global_data_param_config_list,
                                                merge_fun_dict={'completeDate': date_merge_fun})
-    processor_widget = ProcessorQWidget(ProcessorUIParam(title=' 射线检测评片记录 ', processor=report_generator))
-    base_ui_config = BaseUIConfig(' 射线检测评片记录 ', processor_widget)
+    processor_widget = ProcessorQWidget(ProcessorUIParam(title='射线检测评片记录', processor=report_generator))
+    base_ui_config = BaseUIConfig('射线检测评片记录', processor_widget)
+
+    return base_ui_config
+
+
+def build_record2_config():
+    divide_key = 'orderId'
+    filed_mapping = {
+        "orderDate": ExcelFiledProperty('A', cast_util.wrap_str, '委托日期'),
+        "completeDate": ExcelFiledProperty('B', cast_util.wrap_str, '完成时间'),
+        divide_key: ExcelFiledProperty('C', cast_util.wrap_str, '委托单编号'),
+        "sampleNo": ExcelFiledProperty('D', cast_util.wrap_str, '检件编号'),
+        "kindNo": ExcelFiledProperty('E', cast_util.wrap_str, '焊口编号', column_type=str),
+        "empId": ExcelFiledProperty('F', cast_util.wrap_int_str, '焊工号', column_type=str),
+        "specification": ExcelFiledProperty('G', cast_util.wrap_str, '规格(mm)'),
+        "material": ExcelFiledProperty('H', cast_util.wrap_str, '材质'),
+        "level": ExcelFiledProperty('I', cast_util.wrap_str, '合格级别'),
+        "checkRatioKind": ExcelFiledProperty('J', cast_util.wrap_percent, '检测比例'),
+        "isOk": ExcelFiledProperty('K', cast_util.wrap_str, '返修补片'),
+        "baseSpecificationAndCnt": ExcelFiledProperty('L', cast_util.wrap_str, '底片规格/张'),
+        "unitName": ExcelFiledProperty('Q', cast_util.wrap_str, '单元名称'),
+        "checkCount": ExcelFiledProperty('M', cast_util.wrap_int, '张数'),
+        "okCount": ExcelFiledProperty('N', cast_util.wrap_int, '合格数量'),
+        "ray": ExcelFiledProperty('P', cast_util.wrap_str, 'γ射线'),
+        "detectionCount": ExcelFiledProperty('U', cast_util.wrap_str, '检测数量(道/m/m2/点)'),
+
+    }
+    column_cell_resource_list = []
+
+    doc_global_data_param_config_list = []
+
+    cell_resource_list = [
+        DataListCellParagraphAddRunResource(table_index=0, row=0, column_view_index=2, paragraph_index=0,
+                                            mapping_key=divide_key, style=DocCellStyle(font_cn='楷体')),
+        DataListCellParagraphAddRunResource(table_index=0, row=1, column_view_index=2, paragraph_index=0,
+                                            mapping_key=divide_key, style=DocCellStyle(font_cn='楷体')),
+
+        DataListCellParagraphAddRunResource(table_index=0, row=5, column_view_index=1, paragraph_index=0,
+                                            mapping_key='specification', style=DocCellStyle(font_cn='楷体')),
+
+
+        # DataListCellParagraphAddRunResource(table_index=0, row=13, column_view_index=0, paragraph_index=0,
+        #                                     mapping_key='specification', style=DocCellStyle(font_cn='楷体')),
+    ]
+    template_path = os.path.join(os.getcwd(), 'template/rt_recod/ray_check_record.docx')
+    report_generator = SimpleTableDocGenerator(template_path=template_path, filed_mapping=filed_mapping,
+                                               divide_key=divide_key,
+                                               header_resource=None,
+                                               column_cell_resource_list=column_cell_resource_list,
+                                               cell_resource_list=cell_resource_list,
+                                               doc_global_data_param_config_list=doc_global_data_param_config_list,
+                                               merge_fun_dict={'completeDate': date_merge_fun})
+    processor_widget = ProcessorQWidget(ProcessorUIParam(title='射线检测拍片记录', processor=report_generator))
+    base_ui_config = BaseUIConfig('射线检测拍片记录', processor_widget)
 
     return base_ui_config
 
@@ -401,6 +454,7 @@ if __name__ == '__main__':
         build_rt_config(),
         build_surface_config(),
         build_record_config(),
+        build_record2_config(),
     ]
     ui = HomePageQWidget(ui_config_list)
     ui.show()
