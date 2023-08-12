@@ -9,7 +9,8 @@ import xlsxwriter
 from typing import List, Dict
 
 from docx import Document
-from openpyxl.workbook import Workbook
+from xlsxwriter import Workbook
+from xlsxwriter.worksheet import Worksheet
 
 from . import DEFAULT_SHEET
 from .util import excel_title_to_index
@@ -62,6 +63,22 @@ def default_on_finish_one(number: int, total_cnt: int, success: bool, exception)
     pass
 
 
+class ValueGetter(metaclass=ABCMeta):
+
+    @abstractmethod
+    def get_value(self, data:dict, data_list: List[dict], global_data: dict, merged_data: dict):
+        pass
+
+
+class Cursor:
+    def __init__(self, index_start=0):
+        self.index = index_start
+
+    def increase(self, num=1):
+        self.index = self.index + num
+
+
+
 class ReportGenerator(metaclass=ABCMeta):
     """
     Abstract excel to words report generator
@@ -75,8 +92,8 @@ class ReportGenerator(metaclass=ABCMeta):
     # args: number([0:N)), totalCount(N), success:bool, exception: BaseException
 
     def __init__(self, template_path: str, filed_mapping: Dict[str, ExcelFiledProperty], divide_key: str,
-                 divide_mode:DivideMode=DivideMode.DIVIDE_MODE_BY_KEY,
-                 output_file_mode:OutputFileMode=OutputFileMode.WORD,
+                 divide_mode: DivideMode = DivideMode.DIVIDE_MODE_BY_KEY,
+                 output_file_mode: OutputFileMode = OutputFileMode.WORD,
                  doc_global_data_param_config_list: List[DocGlobalParamConfig] = None,
                  merge_fun_dict: dict = None):
         """
@@ -101,7 +118,6 @@ class ReportGenerator(metaclass=ABCMeta):
             if property is not None and property.column_type is not None:
                 self.dtype[key] = property.column_type
 
-
     def execute(self, file_path: str, target_dir: str, sheet=DEFAULT_SHEET, global_param: dict = None,
                 on_finish_one=default_on_finish_one):
         """
@@ -112,6 +128,7 @@ class ReportGenerator(metaclass=ABCMeta):
         self._check_and_set_default_global_param(global_param)
         data_list = self.__read(file_path, sheet)
         merged_data = self._merge_data(data_list=data_list, merge_fun_dict=self.merge_fun_dict)
+        data_list = self._data_prepare(data_list)
 
         raw_data_map = {}
         for raw_data in data_list:
@@ -133,8 +150,9 @@ class ReportGenerator(metaclass=ABCMeta):
             try:
                 if self.output_file_mode == OutputFileMode.WORD or self.output_file_mode is None:
                     template_doc = docx.Document(self.template_path)
-                    doc = self._process_word(data_list=sub_data_list, template_doc=template_doc, global_param=global_param,
-                                    merged_data=merged_data)
+                    doc = self._process_word(data_list=sub_data_list, template_doc=template_doc,
+                                             global_param=global_param,
+                                             merged_data=merged_data)
                     file_name = self._get_file_name(key)
                     save_path = os.path.join(target_dir, file_name)
                     self._save(doc, file_path=save_path)
@@ -144,12 +162,13 @@ class ReportGenerator(metaclass=ABCMeta):
 
                     workbook = xlsxwriter.Workbook(save_path)
 
-                    workbook = self._process_excel(data_list=sub_data_list, work_book=workbook,
-                                             global_param=global_param,
-                                             merged_data=merged_data)
+                    worksheet = workbook.add_worksheet(name='sheet1')
+
+                    self._process_excel(data_list=sub_data_list, worksheet=worksheet,
+                                                   global_param=global_param,
+                                                   merged_data=merged_data)
 
                     self._save(workbook, file_path=save_path)
-
 
                 callback(p, len(raw_data_map.keys()), True, None)
             except BaseException as e:
@@ -157,6 +176,9 @@ class ReportGenerator(metaclass=ABCMeta):
                 callback(p, len(raw_data_map.keys()), False, e)
             finally:
                 p = p + 1
+
+    def _data_prepare(self, data_list:List[dict]):
+        return data_list
 
     def __read(self, file_path: str, sheet: str) -> List[dict]:
         raw_datas = pandas.read_excel(file_path, sheet, dtype=self.dtype)
@@ -197,13 +219,11 @@ class ReportGenerator(metaclass=ABCMeta):
 
     @abstractmethod
     def _process_word(self, data_list: list, template_doc: Document, global_param: dict, merged_data: dict) -> Document:
-        pass
-
+        raise Exception('Word not supported')
 
     @abstractmethod
-    def _process_excel(self, data_list: list, work_book: Workbook, global_param: dict, merged_data: dict) -> Workbook:
-        pass
-
+    def _process_excel(self, data_list: list, worksheet: Worksheet, global_param: dict, merged_data: dict):
+        raise Exception('Excel not supported')
 
     def _merge_data(self, data_list: List[dict], merge_fun_dict: dict) -> Dict[str, dict]:
         """
@@ -238,7 +258,7 @@ class ReportGenerator(metaclass=ABCMeta):
     def _get_file_name(self, key):
         suffix = '.docx'
         if self.output_file_mode == OutputFileMode.EXCEL:
-           suffix = '.xlsx'
+            suffix = '.xlsx'
 
         if self.divide_mode == DivideMode.DIVIDE_MODE_BY_KEY:
             return f'{key}{suffix}'

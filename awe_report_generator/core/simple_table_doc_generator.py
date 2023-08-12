@@ -6,6 +6,7 @@ from typing import Dict, List
 from docx.enum.table import WD_TABLE_ALIGNMENT
 from docx.shared import Pt
 from xlsxwriter import Workbook
+from xlsxwriter.worksheet import Worksheet
 
 from awe_report_generator.core.util import array_util
 from awe_report_generator.core.util import cast_util
@@ -199,17 +200,17 @@ class DataListCellParagraphAddRunResource(CellParagraphAddRunResource):
         return array_util.get_one_value(data_list, self.mapping_key)
 
 
-class MergedDataCellParagraphAddRunResource(CellParagraphAddRunResource):
-    def __init__(self, table_index: int, row: int, column_view_index: int, style: DocCellStyle = DocCellStyle(),
-                 paragraph_index: int = 0, cast_value_to_str=cast_util.wrap_str, mapping_key: str = None,
-                 run_index: int = None):
-        super().__init__(table_index, row, column_view_index, style, cast_value_to_str, paragraph_index, run_index)
-        self.mapping_key = mapping_key
-
-    def get_value(self, data_list: List[dict], global_data: dict, merged_data: dict):
-        if merged_data is None:
-            return None
-        return merged_data.get(self.mapping_key, None)
+# class MergedDataCellParagraphAddRunResource(CellParagraphAddRunResource):
+#     def __init__(self, table_index: int, row: int, column_view_index: int, style: DocCellStyle = DocCellStyle(),
+#                  paragraph_index: int = 0, cast_value_to_str=cast_util.wrap_str, mapping_key: str = None,
+#                  run_index: int = None):
+#         super().__init__(table_index, row, column_view_index, style, cast_value_to_str, paragraph_index, run_index)
+#         self.mapping_key = mapping_key
+#
+#     def get_value(self, data_list: List[dict], global_data: dict, merged_data: dict):
+#         if merged_data is None:
+#             return None
+#         return merged_data.get(self.mapping_key, None)
 
 
 class SimpleCalculationColumnCellsParagraphAddRunResource(ColumnCellsParagraphAddRunResource):
@@ -274,8 +275,9 @@ class SimpleTableDocGenerator(ReportGenerator):
 
         return template_doc
 
-    def _process_excel(self, data_list: list, work_book: Workbook, global_param: dict, merged_data: dict) -> Workbook:
-        raise Exception('Excel not supported.')
+    def _process_excel(self, data_list: list, worksheet: Worksheet, global_param: dict, merged_data: dict):
+        super()._process_excel(data_list=data_list, worksheet=worksheet, global_param=global_param, merged_data=merged_data)
+
 
     def _build_template_doc_table_index_zips(self, doc: Document):
         """
