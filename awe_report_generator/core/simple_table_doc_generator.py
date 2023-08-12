@@ -251,8 +251,8 @@ class SimpleTableDocGenerator(ReportGenerator):
     def __init__(self, template_path: str, filed_mapping: Dict[str, ExcelFiledProperty], divide_key: str, divide_mode:DivideMode=DivideMode.DIVIDE_MODE_BY_KEY,
                  header_resource: HeaderResource=None, column_cell_resource_list=None,
                  cell_resource_list: List[CellResource]=None, doc_global_data_param_config_list=None,
-                 merge_fun_dict: dict = None):
-        super().__init__(template_path=template_path, filed_mapping=filed_mapping, divide_key=divide_key, divide_mode=divide_mode, output_file_mode=OutputFileMode.WORD, doc_global_data_param_config_list=doc_global_data_param_config_list, merge_fun_dict=merge_fun_dict)
+                 merge_fun_dict: dict = None, data_preparer=None):
+        super().__init__(template_path=template_path, filed_mapping=filed_mapping, divide_key=divide_key, divide_mode=divide_mode, output_file_mode=OutputFileMode.WORD, doc_global_data_param_config_list=doc_global_data_param_config_list, merge_fun_dict=merge_fun_dict, data_preparer=data_preparer)
         if column_cell_resource_list is None:
             column_cell_resource_list = []
         self.header_resource = header_resource

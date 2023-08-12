@@ -362,7 +362,7 @@ def build_record_config():
     }
     column_cell_resource_list = [
         MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=4, column_view_index=0,
-                                                  mapping_data_key='sampleNo', style=DocCellStyle(font_cn='楷体')),
+                                                  mapping_data_key='_pieceNo', style=DocCellStyle(font_cn='楷体')),
 
         MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=4, column_view_index=1,
                                                   mapping_data_key='empId', style=DocCellStyle(font_cn='楷体')),
@@ -386,6 +386,56 @@ def build_record_config():
         DataListCellParagraphAddRunResource(table_index=0, row=2, column_view_index=5, paragraph_index=0,
                                             mapping_key='specification', style=DocCellStyle(font_cn='楷体')),
     ]
+
+    def data_preparer(data_list: List[dict], context: GeneratorExecuteContext):
+        new_data_list = []
+
+        data_list_map: Dict[str, List[dict]] = {}
+        for data in data_list:
+            order_id = data.get('orderId', None)
+            if order_id == '' or order_id is None:
+                continue
+            if order_id not in data_list_map:
+                data_list_map[order_id] = []
+            data_list_map[order_id].append(data)
+
+        for order_id, order_data_list in data_list_map.items():
+            temp_list = []
+            valid = True
+            for data in order_data_list:
+                if data.get('isOk') == '合格' or data.get('isOk') == '不合格':
+                    check_count = data.get('checkCount', 0)
+                    if check_count is None or check_count <= 0:
+                        continue
+                    temp_list.append(data)
+
+                    kindNo = data.get('kindNo', None)
+
+                    if check_count == 6:
+                        data['_pieceNo'] = f'{kindNo}# 1-2'
+                        for i in range(2, 7):
+                            new_data = data.copy()
+                            if i == 6:
+                                new_data['_pieceNo'] = f'{kindNo}# 6-1'
+                            else:
+                                new_data['_pieceNo'] = f'{kindNo}# {i}-{(i + 1)}'
+                            temp_list.append(new_data)
+                    else:
+                        data['_pieceNo'] = f'{kindNo}# 1'
+                        for i in range(0, check_count - 1):
+                            new_data = data.copy()
+                            new_data['_pieceNo'] = f'{kindNo}# {i + 2}'
+                            temp_list.append(new_data)
+                else:
+                    valid = False
+                    break
+            if valid and len(temp_list) > 0:
+                for _ in temp_list:
+                    new_data_list.append(_)
+        return new_data_list
+
+
+
     template_path = os.path.join(os.getcwd(), 'template/rt_record/TEMPLATE.docx')
     report_generator = SimpleTableDocGenerator(template_path=template_path, filed_mapping=filed_mapping,
                                                divide_key=divide_key,
@@ -393,7 +443,7 @@ def build_record_config():
                                                column_cell_resource_list=column_cell_resource_list,
                                                cell_resource_list=cell_resource_list,
                                                doc_global_data_param_config_list=doc_global_data_param_config_list,
-                                               merge_fun_dict={'completeDate': date_merge_fun})
+                                               merge_fun_dict={'completeDate': date_merge_fun}, data_preparer=data_preparer)
     processor_widget = ProcessorQWidget(
         ProcessorUIParam(title='射线检测评片记录', processor=report_generator, biz_code='rt_record'))
     base_ui_config = BaseUIConfig('射线检测评片记录', processor_widget)
