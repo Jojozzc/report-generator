@@ -6,7 +6,9 @@ from docx.enum.table import WD_TABLE_ALIGNMENT
 
 from awe_report_generator.biz.rt.base import RTHeaderResource, RTSummaryCellResource2, RecordHeaderResource
 from awe_report_generator.biz.rt.base import RTSummaryCellResource
-from awe_report_generator.core.base import ExcelFiledProperty, DocGlobalParamConfig
+from awe_report_generator.core.base import ExcelFiledProperty, DocGlobalParamConfig, ConstantValueGetter, \
+    DataListMappingValueGetter
+from awe_report_generator.core.merged_excel_generator import MergedExcelGenerator, ExcelColumnsValueSetter
 from awe_report_generator.core.simple_table_doc_generator import (
     SimpleTableDocGenerator, MappingColumnCellsParagraphAddRunResource,
     SimpleCalculationColumnCellsParagraphAddRunResource,
@@ -363,7 +365,9 @@ def build_record_config():
     ]
 
     doc_global_data_param_config_list = [
-        DocGlobalParamConfig('projectName', '内蒙古宝丰煤基新材料有限公司4×100万吨/年煤制烯烃示范项目一期260万吨/年项目', '工程名称', False),
+        DocGlobalParamConfig('projectName',
+                             '内蒙古宝丰煤基新材料有限公司4×100万吨/年煤制烯烃示范项目一期260万吨/年项目', '工程名称',
+                             False),
         DocGlobalParamConfig('customerCompany', None, '委托单位', False),
     ]
 
@@ -426,7 +430,6 @@ def build_record2_config():
         DataListCellParagraphAddRunResource(table_index=0, row=5, column_view_index=1, paragraph_index=0,
                                             mapping_key='specification', style=DocCellStyle(font_cn='楷体')),
 
-
         # DataListCellParagraphAddRunResource(table_index=0, row=13, column_view_index=0, paragraph_index=0,
         #                                     mapping_key='specification', style=DocCellStyle(font_cn='楷体')),
     ]
@@ -444,6 +447,79 @@ def build_record2_config():
     return base_ui_config
 
 
+def build_record_excel_config():
+    divide_key = ''
+    filed_mapping = {
+        "orderDate": ExcelFiledProperty('A', cast_util.wrap_str, '委托日期'),
+        "completeDate": ExcelFiledProperty('B', cast_util.wrap_str, '完成时间'),
+        'orderId': ExcelFiledProperty('C', cast_util.wrap_str, '委托单编号'),
+        "sampleNo": ExcelFiledProperty('D', cast_util.wrap_str, '检件编号'),
+        "kindNo": ExcelFiledProperty('E', cast_util.wrap_str, '焊口编号', column_type=str),
+        "empId": ExcelFiledProperty('F', cast_util.wrap_int_str, '焊工号', column_type=str),
+        "specification": ExcelFiledProperty('G', cast_util.wrap_str, '规格(mm)'),
+        "material": ExcelFiledProperty('H', cast_util.wrap_str, '材质'),
+        "level": ExcelFiledProperty('I', cast_util.wrap_str, '合格级别'),
+        "checkRatioKind": ExcelFiledProperty('J', cast_util.wrap_percent, '检测比例'),
+        "isOk": ExcelFiledProperty('K', cast_util.wrap_str, '返修补片'),
+        "baseSpecificationAndCnt": ExcelFiledProperty('L', cast_util.wrap_str, '底片规格/张'),
+        "unitName": ExcelFiledProperty('Q', cast_util.wrap_str, '单元名称'),
+        "checkCount": ExcelFiledProperty('M', cast_util.wrap_int, '张数'),
+        "okCount": ExcelFiledProperty('N', cast_util.wrap_int, '合格数量'),
+        "ray": ExcelFiledProperty('P', cast_util.wrap_str, 'γ射线'),
+        "detectionCount": ExcelFiledProperty('U', cast_util.wrap_str, '检测数量(道/m/m2/点)'),
+
+    }
+
+    doc_global_data_param_config_list = []
+
+    excel_header_value_setter_list = [
+        ExcelColumnsValueSetter(column='A', value_getter=ConstantValueGetter('委托编号')),
+        ExcelColumnsValueSetter(column='B', value_getter=ConstantValueGetter('检件编号')),
+        ExcelColumnsValueSetter(column='C', value_getter=ConstantValueGetter('焊口号')),
+        ExcelColumnsValueSetter(column='D', value_getter=ConstantValueGetter('焊工号')),
+        ExcelColumnsValueSetter(column='E', value_getter=ConstantValueGetter('片号')),
+        ExcelColumnsValueSetter(column='F', value_getter=ConstantValueGetter('缺陷性质')),
+        ExcelColumnsValueSetter(column='G', value_getter=ConstantValueGetter('缺陷定量')),
+        ExcelColumnsValueSetter(column='H', value_getter=ConstantValueGetter('缺陷定量')),
+        ExcelColumnsValueSetter(column='I', value_getter=ConstantValueGetter('评定级别')),
+        ExcelColumnsValueSetter(column='J', value_getter=ConstantValueGetter('透照方式')),
+        ExcelColumnsValueSetter(column='K', value_getter=ConstantValueGetter('像质计灵敏度')),
+        ExcelColumnsValueSetter(column='L', value_getter=ConstantValueGetter('焦距（mm）')),
+        ExcelColumnsValueSetter(column='M', value_getter=ConstantValueGetter('有效片长')),
+        ExcelColumnsValueSetter(column='N', value_getter=ConstantValueGetter('源强（管电压）')),
+        ExcelColumnsValueSetter(column='O', value_getter=ConstantValueGetter('管电流源活度')),
+        ExcelColumnsValueSetter(column='P', value_getter=ConstantValueGetter('曝光量时间')),
+        ExcelColumnsValueSetter(column='Q', value_getter=ConstantValueGetter('设备型号射源种类')),
+        ExcelColumnsValueSetter(column='R', value_getter=ConstantValueGetter('焦点尺寸')),
+        ExcelColumnsValueSetter(column='S', value_getter=ConstantValueGetter('增感方式')),
+        ExcelColumnsValueSetter(column='T', value_getter=ConstantValueGetter('胶片牌号')),
+        ExcelColumnsValueSetter(column='U', value_getter=ConstantValueGetter('备注')),
+        ExcelColumnsValueSetter(column='V', value_getter=ConstantValueGetter('区号')),
+        ExcelColumnsValueSetter(column='W', value_getter=ConstantValueGetter('合格级别')),
+        ExcelColumnsValueSetter(column='X', value_getter=ConstantValueGetter('管道材质')),
+        ExcelColumnsValueSetter(column='Y', value_getter=ConstantValueGetter('焊接方法')),
+        ExcelColumnsValueSetter(column='Z', value_getter=ConstantValueGetter('检测比例')),
+        ExcelColumnsValueSetter(column='AA', value_getter=ConstantValueGetter('检测时机')),
+    ]
+
+    excel_columns_value_setter_list = [
+        ExcelColumnsValueSetter(column='A', value_getter=DataListMappingValueGetter('order_id')),
+
+    ]
+
+    report_generator = MergedExcelGenerator(template_path=None, filed_mapping=filed_mapping,
+                                            divide_key=divide_key,
+                                            doc_global_data_param_config_list=doc_global_data_param_config_list,
+                                            excel_header_value_setter_list=excel_header_value_setter_list,
+                                            excel_columns_value_setter_list=excel_columns_value_setter_list,
+                                            data_preparer=None,
+                                            merge_fun_dict={'completeDate': date_merge_fun})
+    processor_widget = ProcessorQWidget(ProcessorUIParam(title='质量评定台账Excel生成', processor=report_generator))
+    base_ui_config = BaseUIConfig('质量评定台账Excel生成', processor_widget)
+
+    return base_ui_config
+
+
 if __name__ == '__main__':
     # Must run before QWidgets init.
     print(os.getcwd())
@@ -455,6 +531,7 @@ if __name__ == '__main__':
         build_surface_config(),
         build_record_config(),
         build_record2_config(),
+        build_record_excel_config(),
     ]
     ui = HomePageQWidget(ui_config_list)
     ui.show()

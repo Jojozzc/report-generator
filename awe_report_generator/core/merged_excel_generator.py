@@ -9,13 +9,13 @@ from awe_report_generator.core.base import ReportGenerator, ExcelFiledProperty, 
 
 
 class ExcelColumnsValueSetter(metaclass=ABCMeta):
-    def __init__(self, value_getter: ValueGetter, column: str):
-        self.value_getter = value_getter
+    def __init__(self, column: str, value_getter: ValueGetter):
         self.column = column
+        self.value_getter = value_getter
 
     def set(self, worksheet: Worksheet, row: int, data: dict, data_list: List[dict], global_data: dict, merged_data: dict):
         val = self.value_getter.get_value(data=data, data_list=data_list, global_data=global_data, merged_data=merged_data)
-        if val is None:
+        if val is not None:
             worksheet.write(f'{self.column}{row}', val)
 
 
@@ -25,11 +25,13 @@ class MergedExcelGenerator(ReportGenerator):
                  merge_fun_dict: dict = None,
                  excel_header_value_setter_list:List[ExcelColumnsValueSetter]=None,
                  excel_columns_value_setter_list:List[ExcelColumnsValueSetter] = None,
+                 data_preparer=None,
                  ):
         super().__init__(template_path=template_path, filed_mapping=filed_mapping, divide_key=divide_key,
                          divide_mode=DivideMode.DIVIDE_MODE_NO_DIVIDE,
+                         output_file_mode=OutputFileMode.EXCEL,
                          doc_global_data_param_config_list=doc_global_data_param_config_list,
-                         merge_fun_dict=merge_fun_dict)
+                         merge_fun_dict=merge_fun_dict, data_preparer=data_preparer)
         self.excel_header_value_setter_list = excel_header_value_setter_list
         self.excel_columns_value_setter_list = excel_columns_value_setter_list
 

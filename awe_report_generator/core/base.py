@@ -66,8 +66,27 @@ def default_on_finish_one(number: int, total_cnt: int, success: bool, exception)
 class ValueGetter(metaclass=ABCMeta):
 
     @abstractmethod
-    def get_value(self, data:dict, data_list: List[dict], global_data: dict, merged_data: dict):
+    def get_value(self, data: dict, data_list: List[dict], global_data: dict, merged_data: dict):
         pass
+
+
+class ConstantValueGetter(ValueGetter):
+
+    def __init__(self, value):
+        self.value = value
+
+    def get_value(self, data: dict, data_list: List[dict], global_data: dict, merged_data: dict):
+        return self.value
+
+
+class DataListMappingValueGetter(ValueGetter):
+    def __init__(self, mapping_data_key: str):
+        self.mapping_data_key = mapping_data_key
+
+    def get_value(self, data: dict, data_list: List[dict], global_data: dict, merged_data: dict):
+        if data is None:
+            return None
+        return data.get(self.mapping_data_key, None)
 
 
 class Cursor:
@@ -76,7 +95,6 @@ class Cursor:
 
     def increase(self, num=1):
         self.index = self.index + num
-
 
 
 class ReportGenerator(metaclass=ABCMeta):
@@ -95,12 +113,12 @@ class ReportGenerator(metaclass=ABCMeta):
                  divide_mode: DivideMode = DivideMode.DIVIDE_MODE_BY_KEY,
                  output_file_mode: OutputFileMode = OutputFileMode.WORD,
                  doc_global_data_param_config_list: List[DocGlobalParamConfig] = None,
-                 merge_fun_dict: dict = None):
+                 merge_fun_dict: dict = None, data_preparer=None):
         """
         :param template_path: path to template docx file
         :param filed_mapping:
         :param divide_key: unique key
-        :param
+        :param data_preparer: function (data_list) -> data_list
 
         dtype: Data type for data or columns. E.g. {‘a’: np.float64, ‘b’: np.int32} Use object to preserve data as stored in Excel and not interpret dtype. If converters are specified, they will be applied INSTEAD of dtype conversion.
             https://pandas.pydata.org/docs/reference/api/pandas.read_excel.html
@@ -114,6 +132,7 @@ class ReportGenerator(metaclass=ABCMeta):
         self.doc_global_data_param_config_list = doc_global_data_param_config_list
         self.merge_fun_dict = merge_fun_dict
         self.dtype = {}
+        self.data_preparer = data_preparer
         for key, property in filed_mapping.items():
             if property is not None and property.column_type is not None:
                 self.dtype[key] = property.column_type
@@ -132,9 +151,14 @@ class ReportGenerator(metaclass=ABCMeta):
 
         raw_data_map = {}
         for raw_data in data_list:
-            u_val = raw_data[self.divide_key]
-            if u_val is None:
-                continue
+            u_val = ''
+            if self.divide_mode == DivideMode.DIVIDE_MODE_BY_KEY:
+                u_val = raw_data.get(self.divide_key, None)
+                if u_val is None:
+                    continue
+            elif self.divide_mode == DivideMode.DIVIDE_MODE_NO_DIVIDE:
+                u_val = 'AWE_REPORT_GENERATOR_GLOBAL_KEY'
+
             if u_val not in raw_data_map:
                 raw_data_map[u_val] = []
             raw_data_map[u_val].append(raw_data)
@@ -165,8 +189,8 @@ class ReportGenerator(metaclass=ABCMeta):
                     worksheet = workbook.add_worksheet(name='sheet1')
 
                     self._process_excel(data_list=sub_data_list, worksheet=worksheet,
-                                                   global_param=global_param,
-                                                   merged_data=merged_data)
+                                        global_param=global_param,
+                                        merged_data=merged_data)
 
                     self._save(workbook, file_path=save_path)
 
@@ -177,7 +201,9 @@ class ReportGenerator(metaclass=ABCMeta):
             finally:
                 p = p + 1
 
-    def _data_prepare(self, data_list:List[dict]):
+    def _data_prepare(self, data_list: List[dict]):
+        if self.data_preparer is not None:
+            return self.data_preparer(data_list)
         return data_list
 
     def __read(self, file_path: str, sheet: str) -> List[dict]:
@@ -198,7 +224,7 @@ class ReportGenerator(metaclass=ABCMeta):
                     if self.divide_key == k or filed_property.required:
                         valid = False
                         break
-                if filed_property.value_cast is not None:
+                if filed_property.valid_check is not None:
                     if not filed_property.valid_check(val):
                         valid = False
                         break
@@ -263,7 +289,7 @@ class ReportGenerator(metaclass=ABCMeta):
         if self.divide_mode == DivideMode.DIVIDE_MODE_BY_KEY:
             return f'{key}{suffix}'
         elif self.divide_mode == DivideMode.DIVIDE_MODE_NO_DIVIDE:
-            return '生成结果'
+            return f'生成结果{suffix}'
 
     def _castValue(self, value, cast):
         if cast is None:
