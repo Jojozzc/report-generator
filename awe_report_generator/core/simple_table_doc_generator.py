@@ -5,7 +5,6 @@ from typing import Dict, List
 
 from docx.enum.table import WD_TABLE_ALIGNMENT
 from docx.shared import Pt
-from xlsxwriter import Workbook
 from xlsxwriter.worksheet import Worksheet
 
 from awe_report_generator.core.util import array_util

@@ -3,7 +3,8 @@ from typing import List, Dict
 
 from docx import Document
 
-from awe_report_generator.core.simple_table_doc_generator import HeaderResource, CellResource
+from awe_report_generator.core.simple_table_doc_generator import HeaderResource, CellResource, \
+    CellParagraphAddRunResource
 from awe_report_generator.core.util import array_util, cast_util
 
 
@@ -63,6 +64,26 @@ class RTSummaryCellResource(CellResource):
 
         if ray > 0:
             val = val + self.SUMMARY_FORMAT_TWO.format(ray=ray)
+
+        return val
+
+
+class RTRecordSummaryCellParagraphAddRunResource(CellParagraphAddRunResource):
+    SUMMARY_FORMAT = '检测焊口（检件）数  {data_size} 道     底片数 {check_count} 张'
+
+    def get_value(self, data_list: List[dict], global_data: dict, merged_data: dict):
+        if data_list is None:
+            return None
+        data_size = len(data_list)
+
+        check_count = 0
+
+
+        for data in data_list:
+            check_c = data.get('checkCount', 0)
+            check_count += check_c
+
+        val = self.SUMMARY_FORMAT.format(data_size=data_size, check_count=check_count)
 
         return val
 

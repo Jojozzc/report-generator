@@ -5,7 +5,8 @@ from typing import List, Dict
 from PyQt5.QtWidgets import QApplication
 from docx.enum.table import WD_TABLE_ALIGNMENT
 
-from awe_report_generator.biz.rt.base import RTHeaderResource, RTSummaryCellResource2, RecordHeaderResource
+from awe_report_generator.biz.rt.base import RTHeaderResource, RTSummaryCellResource2, RecordHeaderResource, \
+    RTRecordSummaryCellParagraphAddRunResource
 from awe_report_generator.biz.rt.base import RTSummaryCellResource
 from awe_report_generator.core.base import ExcelFiledProperty, DocGlobalParamConfig, ConstantValueGetter, \
     DataListMappingValueGetter, GeneratorExecuteContext
@@ -486,8 +487,8 @@ def build_record_ray_config():
         DataListCellParagraphAddRunResource(table_index=0, row=5, column_view_index=1, paragraph_index=0,
                                             mapping_key='specification', style=DocCellStyle(font_cn='楷体')),
 
-        # DataListCellParagraphAddRunResource(table_index=0, row=13, column_view_index=0, paragraph_index=0,
-        #                                     mapping_key='specification', style=DocCellStyle(font_cn='楷体')),
+        RTRecordSummaryCellParagraphAddRunResource(table_index=0, row=13, column_view_index=0, style=DocCellStyle(),
+                                                   cast_value_to_str=cast_util.wrap_str, paragraph_index=2),
     ]
     template_path = os.path.join(os.getcwd(), 'template/rt_ray_record/TEMPLATE.docx')
     report_generator = SimpleTableDocGenerator(template_path=template_path, filed_mapping=filed_mapping,
