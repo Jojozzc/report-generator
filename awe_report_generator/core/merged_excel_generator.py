@@ -19,7 +19,7 @@ class ExcelColumnsValueSetter(metaclass=ABCMeta):
             worksheet.write(f'{self.column}{row}', val)
 
 
-class MergedExcelGenerator(ReportGenerator):
+class MergedExcelReportGenerator(ReportGenerator):
     def __init__(self, template_path: str, filed_mapping: Dict[str, ExcelFiledProperty], divide_key: str,
                  doc_global_data_param_config_list: List[DocGlobalParamConfig] = None,
                  merge_fun_dict: dict = None,

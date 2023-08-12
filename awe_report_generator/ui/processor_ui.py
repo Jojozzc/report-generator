@@ -5,12 +5,14 @@ from PyQt5.QtWidgets import (QWidget,
                              )
 
 from awe_report_generator.core.base import ReportGenerator
+from awe_report_generator.app import app_config
 
 
 class ProcessorUIParam:
-    def __init__(self, title, processor: ReportGenerator):
+    def __init__(self, title, processor: ReportGenerator, biz_code:str):
         self.title = title
         self.processor = processor
+        self.biz_code = biz_code
 
 
 class ProcessorQWidget(QWidget):
@@ -44,15 +46,18 @@ class ProcessorQWidget(QWidget):
                     qlabel.setText(f'{param_config.title}')
                 qline_edit = QLineEdit()
                 self.global_param_widget_dict[param_config.filed] = qline_edit
-                qline_edit.setText(param_config.default_value)
+                qline_edit.setText(app_config.get_setting(self.processor_ui_param.biz_code, param_config.filed, param_config.default_value))
                 grid.addWidget(qlabel, i, 0)
                 grid.addWidget(qline_edit, i, 1)
                 i = i + 1
 
         input_file_btn = QPushButton()
         input_file_btn.setText('选择输入文件(xlsx)*')
+        self.input_file_path = app_config.get_setting(self.processor_ui_param.biz_code, 'input_file_path', None)
+
         input_file_btn.clicked.connect(self.select_input_file)
         self.input_file_qlabel = QLabel()
+        self.input_file_qlabel.setText(self.input_file_path)
 
         grid.addWidget(input_file_btn, i, 0)
         grid.addWidget(self.input_file_qlabel, i, 1)
@@ -62,7 +67,9 @@ class ProcessorQWidget(QWidget):
         output_dir_btn.setText('选择输出文件夹*')
         output_dir_btn.clicked.connect(self.select_output_dir)
         grid.addWidget(output_dir_btn, i, 0)
+        self.output_dir_path = app_config.get_setting(self.processor_ui_param.biz_code, 'output_dir_path', None)
         self.output_dir_qlabel = QLabel()
+        self.output_dir_qlabel.setText(self.output_dir_path)
         grid.addWidget(self.output_dir_qlabel, i, 1)
         i = i + 1
 
@@ -98,6 +105,7 @@ class ProcessorQWidget(QWidget):
                     self.alert(f'请输入必填参数:{param_config.title}')
                     return
                 if val is not None:
+                    app_config.put_setting(self.processor_ui_param.biz_code, param_config.filed, val)
                     global_param[param_config.filed] = val
 
         if self.input_file_path is None or self.input_file_path == '':
@@ -107,6 +115,10 @@ class ProcessorQWidget(QWidget):
         if self.output_dir_path is None or self.output_dir_path is None:
             self.alert(f'请选择输出文件夹')
             return
+
+        app_config.put_setting(self.processor_ui_param.biz_code, 'input_file_path', self.input_file_path)
+        app_config.put_setting(self.processor_ui_param.biz_code, 'output_dir_path', self.output_dir_path)
+
 
         self.work_thread = threading.Thread(name=f'Processor-{self.processor_ui_param.title}', target=self.processor_ui_param.processor.execute, args=(
             self.input_file_path, self.output_dir_path, 0, global_param, self.on_finish_one))
