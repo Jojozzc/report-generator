@@ -526,7 +526,7 @@ def build_record_excel_config():
         ExcelColumnsValueSetter(column='M', value_getter=DataListMappingValueGetter('_guide.E')),
         ExcelColumnsValueSetter(column='N', value_getter=DataListMappingValueGetter('_guide.F')),
         ExcelColumnsValueSetter(column='O', value_getter=DataListMappingValueGetter('_guide.G')),
-        ExcelColumnsValueSetter(column='P', value_getter=DataListMappingValueGetter('_guide.I')),
+        ExcelColumnsValueSetter(column='P', value_getter=DataListMappingValueGetter('_guide.H')),
         ExcelColumnsValueSetter(column='Q', value_getter=DataListMappingValueGetter('_guide.J')),
         ExcelColumnsValueSetter(column='R', value_getter=DataListMappingValueGetter('_guide.K')),
         ExcelColumnsValueSetter(column='S', value_getter=DataListMappingValueGetter('_guide.L')),
@@ -625,12 +625,12 @@ def build_record_excel_config():
                             temp_list.append(new_data)
                     else:
                         data['_pieceNo'] = '1'
-                        for i in range(0, check_count - 2):
+                        for i in range(0, check_count - 1):
                             new_data = {'_pieceNo': f'{i + 2}'}
                             temp_list.append(new_data)
                 else:
                     valid = False
-                break
+                    break
             if valid and len(temp_list) > 0:
                 for _ in temp_list:
                     new_data_list.append(_)
