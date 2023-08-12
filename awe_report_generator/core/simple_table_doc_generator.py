@@ -5,10 +5,11 @@ from typing import Dict, List
 
 from docx.enum.table import WD_TABLE_ALIGNMENT
 from docx.shared import Pt
+from xlsxwriter.worksheet import Worksheet
 
 from awe_report_generator.core.util import array_util
 from awe_report_generator.core.util import cast_util
-from .base import ReportGenerator, ExcelFiledProperty
+from .base import ReportGenerator, ExcelFiledProperty, OutputFileMode, DivideMode
 from .style import DocCellStyle
 from docx.oxml.ns import qn
 
@@ -198,17 +199,17 @@ class DataListCellParagraphAddRunResource(CellParagraphAddRunResource):
         return array_util.get_one_value(data_list, self.mapping_key)
 
 
-class MergedDataCellParagraphAddRunResource(CellParagraphAddRunResource):
-    def __init__(self, table_index: int, row: int, column_view_index: int, style: DocCellStyle = DocCellStyle(),
-                 paragraph_index: int = 0, cast_value_to_str=cast_util.wrap_str, mapping_key: str = None,
-                 run_index: int = None):
-        super().__init__(table_index, row, column_view_index, style, cast_value_to_str, paragraph_index, run_index)
-        self.mapping_key = mapping_key
-
-    def get_value(self, data_list: List[dict], global_data: dict, merged_data: dict):
-        if merged_data is None:
-            return None
-        return merged_data.get(self.mapping_key, None)
+# class MergedDataCellParagraphAddRunResource(CellParagraphAddRunResource):
+#     def __init__(self, table_index: int, row: int, column_view_index: int, style: DocCellStyle = DocCellStyle(),
+#                  paragraph_index: int = 0, cast_value_to_str=cast_util.wrap_str, mapping_key: str = None,
+#                  run_index: int = None):
+#         super().__init__(table_index, row, column_view_index, style, cast_value_to_str, paragraph_index, run_index)
+#         self.mapping_key = mapping_key
+#
+#     def get_value(self, data_list: List[dict], global_data: dict, merged_data: dict):
+#         if merged_data is None:
+#             return None
+#         return merged_data.get(self.mapping_key, None)
 
 
 class SimpleCalculationColumnCellsParagraphAddRunResource(ColumnCellsParagraphAddRunResource):
@@ -246,18 +247,20 @@ class SimpleCalculationColumnCellsParagraphAddRunResource(ColumnCellsParagraphAd
 
 class SimpleTableDocGenerator(ReportGenerator):
 
-    def __init__(self, template_path: str, filed_mapping: Dict[str, ExcelFiledProperty], divide_key: str,
-                 header_resource: HeaderResource, column_cell_resource_list: List[ColumnCellsParagraphAddRunResource],
-                 cell_resource_list: List[CellResource], doc_global_data_param_config_list=None,
-                 merge_fun_dict: dict = None):
-        super().__init__(template_path, filed_mapping, divide_key, doc_global_data_param_config_list, merge_fun_dict)
+    def __init__(self, template_path: str, filed_mapping: Dict[str, ExcelFiledProperty], divide_key: str, divide_mode:DivideMode=DivideMode.DIVIDE_MODE_BY_KEY,
+                 header_resource: HeaderResource=None, column_cell_resource_list=None,
+                 cell_resource_list: List[CellResource]=None, doc_global_data_param_config_list=None,
+                 merge_fun_dict: dict = None, data_preparer=None):
+        super().__init__(template_path=template_path, filed_mapping=filed_mapping, divide_key=divide_key, divide_mode=divide_mode, output_file_mode=OutputFileMode.WORD, doc_global_data_param_config_list=doc_global_data_param_config_list, merge_fun_dict=merge_fun_dict, data_preparer=data_preparer)
+        if column_cell_resource_list is None:
+            column_cell_resource_list = []
         self.header_resource = header_resource
         self.column_cell_resource_list = column_cell_resource_list
         self.cell_resource_list = cell_resource_list
         template_doc = Document(template_path)
         self.table_row_index_zips = self._build_template_doc_table_index_zips(template_doc)
 
-    def _process(self, data_list: list, template_doc: Document, global_param: dict, merged_data: dict) -> Document:
+    def _process_word(self, data_list: list, template_doc: Document, global_param: dict, merged_data: dict) -> Document:
         if self.header_resource is not None:
             self.header_resource.set(doc=template_doc, data_list=data_list, global_data=global_param)
         if self.column_cell_resource_list is not None:
@@ -270,6 +273,10 @@ class SimpleTableDocGenerator(ReportGenerator):
                 cell_res.set(template_doc, data_list, global_param, self.table_row_index_zips, merged_data)
 
         return template_doc
+
+    def _process_excel(self, data_list: list, worksheet: Worksheet, global_param: dict, merged_data: dict):
+        super()._process_excel(data_list=data_list, worksheet=worksheet, global_param=global_param, merged_data=merged_data)
+
 
     def _build_template_doc_table_index_zips(self, doc: Document):
         """

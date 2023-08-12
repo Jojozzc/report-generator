@@ -1,12 +1,16 @@
 import os
 import sys
+from typing import List, Dict
 
 from PyQt5.QtWidgets import QApplication
 from docx.enum.table import WD_TABLE_ALIGNMENT
 
-from awe_report_generator.biz.rt.base import RTHeaderResource, RTSummaryCellResource2
+from awe_report_generator.biz.rt.base import RTHeaderResource, RTSummaryCellResource2, RecordHeaderResource, \
+    RTRecordSummaryCellParagraphAddRunResource
 from awe_report_generator.biz.rt.base import RTSummaryCellResource
-from awe_report_generator.core.base import ExcelFiledProperty, DocGlobalParamConfig
+from awe_report_generator.core.base import ExcelFiledProperty, DocGlobalParamConfig, ConstantValueGetter, \
+    DataListMappingValueGetter, GeneratorExecuteContext
+from awe_report_generator.core.merged_excel_generator import MergedExcelReportGenerator, ExcelColumnsValueSetter
 from awe_report_generator.core.simple_table_doc_generator import (
     SimpleTableDocGenerator, MappingColumnCellsParagraphAddRunResource,
     SimpleCalculationColumnCellsParagraphAddRunResource,
@@ -17,6 +21,7 @@ from awe_report_generator.core.simple_table_doc_generator import (
 from awe_report_generator.core.style import DocCellStyle
 from awe_report_generator.core.util import array_util
 from awe_report_generator.core.util import cast_util, date_util as awe_date_util
+from awe_report_generator.core.util import excel_util
 from awe_report_generator.ui import BaseUIConfig
 from awe_report_generator.ui.base import HomePageQWidget
 from awe_report_generator.ui.processor_ui import ProcessorQWidget, ProcessorUIParam
@@ -88,7 +93,8 @@ def build_rt_config():
                                                style=DocCellStyle(font_cn='楷体')),
         DataListCellParagraphAddRunResource(table_index=0, row=1, column_view_index=3, mapping_key='completeDate',
                                             style=DocCellStyle(font_cn='楷体'),
-                                            data_list_sort_func=awe_date_util.parse_dot_date_time, data_list_sort_reverse=True),
+                                            data_list_sort_func=awe_date_util.parse_dot_date_time,
+                                            data_list_sort_reverse=True),
         GlobalParamCellParagraphAddRunResource(table_index=0, row=2, column_view_index=1, mapping_key='detectionMethod',
                                                style=DocCellStyle(font_cn='楷体')),
         GlobalParamCellParagraphAddRunResource(table_index=0, row=2, column_view_index=3,
@@ -100,7 +106,9 @@ def build_rt_config():
         DataListCellParagraphAddRunResource(table_index=0, row=22, column_view_index=3,
                                             style=DocCellStyle(alignment=WD_TABLE_ALIGNMENT.RIGHT), paragraph_index=3,
                                             run_index=None, cast_value_to_str=awe_date_util.get_YYYYmmdd_cn,
-                                            mapping_key='completeDate', data_list_sort_func=awe_date_util.parse_dot_date_time, data_list_sort_reverse=True),
+                                            mapping_key='completeDate',
+                                            data_list_sort_func=awe_date_util.parse_dot_date_time,
+                                            data_list_sort_reverse=True),
     ]
     template_path = os.path.join(os.getcwd(), 'template/rt/TEMPLATE.docx')
     report_generator = SimpleTableDocGenerator(template_path=template_path, filed_mapping=filed_mapping,
@@ -108,8 +116,10 @@ def build_rt_config():
                                                header_resource=RTHeaderResource(),
                                                column_cell_resource_list=column_cell_resource_list,
                                                cell_resource_list=cell_resource_list,
-                                               doc_global_data_param_config_list=doc_global_data_param_config_list, merge_fun_dict={'completeDate' : date_merge_fun})
-    processor_widget = ProcessorQWidget(ProcessorUIParam(title='RT结果通知单台账', processor=report_generator))
+                                               doc_global_data_param_config_list=doc_global_data_param_config_list,
+                                               merge_fun_dict={'completeDate': date_merge_fun})
+    processor_widget = ProcessorQWidget(
+        ProcessorUIParam(title='RT结果通知单台账', processor=report_generator, biz_code='rt'))
     base_ui_config = BaseUIConfig('RT结果通知单台账', processor_widget)
 
     return base_ui_config
@@ -151,7 +161,8 @@ def build_ray_config():
         MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=7, column_view_index=4,
                                                   mapping_data_key='empId', style=DocCellStyle(font_cn='楷体')),
         MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=7, column_view_index=5,
-                                                  mapping_data_key='specification', style=DocCellStyle(font_cn='楷体', font_size=7.5)),
+                                                  mapping_data_key='specification',
+                                                  style=DocCellStyle(font_cn='楷体', font_size=7.5)),
         MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=7, column_view_index=6,
                                                   mapping_data_key='material', style=DocCellStyle(font_cn='楷体')),
     ]
@@ -198,13 +209,13 @@ def build_ray_config():
                                                style=DocCellStyle(font_cn='楷体')),
         # 检测时机
         DataListCellParagraphAddRunResource(table_index=0, row=3, column_view_index=5,
-                                               mapping_key='detectionOpportunity', style=DocCellStyle(font_cn='楷体')),
+                                            mapping_key='detectionOpportunity', style=DocCellStyle(font_cn='楷体')),
         # 检测技术等级
         GlobalParamCellParagraphAddRunResource(table_index=0, row=4, column_view_index=1,
                                                mapping_key='detectionTechLevel', style=DocCellStyle(font_cn='楷体')),
         # 检测比例
         DataListCellParagraphAddRunResource(table_index=0, row=4, column_view_index=3, mapping_key='checkRatioKind',
-                                               style=DocCellStyle(font_cn='楷体')),
+                                            style=DocCellStyle(font_cn='楷体')),
         # 合格级别
         DataListCellParagraphAddRunResource(table_index=0, row=4, column_view_index=5, mapping_key='level',
                                             style=DocCellStyle(font_cn='楷体')),
@@ -218,7 +229,8 @@ def build_ray_config():
         DataListCellParagraphAddRunResource(table_index=0, row=23, column_view_index=0,
                                             style=DocCellStyle(alignment=WD_TABLE_ALIGNMENT.RIGHT), paragraph_index=3,
                                             cast_value_to_str=awe_date_util.get_YYYYmmdd_cn, mapping_key='orderDate',
-                                            data_list_sort_func=awe_date_util.parse_dot_date_time, data_list_sort_reverse=True),
+                                            data_list_sort_func=awe_date_util.parse_dot_date_time,
+                                            data_list_sort_reverse=True),
         # 坡口形式
         GlobalParamCellParagraphAddRunResource(table_index=0, row=5, column_view_index=5, mapping_key='groove',
                                                style=DocCellStyle(font_cn='楷体')),
@@ -230,9 +242,11 @@ def build_ray_config():
                                                header_resource=HeaderResource(),
                                                column_cell_resource_list=column_cell_resource_list,
                                                cell_resource_list=cell_resource_list,
-                                               doc_global_data_param_config_list=doc_global_data_param_config_list, merge_fun_dict={'completeDate' : date_merge_fun})
+                                               doc_global_data_param_config_list=doc_global_data_param_config_list,
+                                               merge_fun_dict={'completeDate': date_merge_fun})
 
-    processor_widget = ProcessorQWidget(ProcessorUIParam(title='射线检测委托台账', processor=report_generator))
+    processor_widget = ProcessorQWidget(
+        ProcessorUIParam(title='射线检测委托台账', processor=report_generator, biz_code='ray'))
 
     base_ui_config = BaseUIConfig('射线检测委托台账', processor_widget)
 
@@ -293,7 +307,8 @@ def build_surface_config():
                                             mapping_key=divide_key, style=DocCellStyle(font_cn='楷体')),
         DataListCellParagraphAddRunResource(table_index=0, row=1, column_view_index=3, paragraph_index=0,
                                             mapping_key='completeDate', style=DocCellStyle(font_cn='楷体'),
-                                            data_list_sort_func=awe_date_util.parse_dot_date_time, data_list_sort_reverse=True),
+                                            data_list_sort_func=awe_date_util.parse_dot_date_time,
+                                            data_list_sort_reverse=True),
         GlobalParamCellParagraphAddRunResource(table_index=0, row=1, column_view_index=1, mapping_key='customerCompany',
                                                style=DocCellStyle(font_cn='楷体')),
         GlobalParamCellParagraphAddRunResource(table_index=0, row=2, column_view_index=1, mapping_key='detectionMethod',
@@ -315,9 +330,374 @@ def build_surface_config():
                                                header_resource=RTHeaderResource(),
                                                column_cell_resource_list=column_cell_resource_list,
                                                cell_resource_list=cell_resource_list,
-                                               doc_global_data_param_config_list=doc_global_data_param_config_list, merge_fun_dict={'completeDate' : date_merge_fun})
-    processor_widget = ProcessorQWidget(ProcessorUIParam(title='表面结果通知单台账', processor=report_generator))
+                                               doc_global_data_param_config_list=doc_global_data_param_config_list,
+                                               merge_fun_dict={'completeDate': date_merge_fun})
+    processor_widget = ProcessorQWidget(
+        ProcessorUIParam(title='表面结果通知单台账', processor=report_generator, biz_code='surface'))
     base_ui_config = BaseUIConfig('表面结果通知单台账', processor_widget)
+
+    return base_ui_config
+
+
+def build_record_config():
+    divide_key = 'orderId'
+    filed_mapping = {
+        "orderDate": ExcelFiledProperty('A', cast_util.wrap_str, '委托日期'),
+        "completeDate": ExcelFiledProperty('B', cast_util.wrap_str, '完成时间'),
+        divide_key: ExcelFiledProperty('C', cast_util.wrap_str, '委托单编号'),
+        "sampleNo": ExcelFiledProperty('D', cast_util.wrap_str, '检件编号'),
+        "kindNo": ExcelFiledProperty('E', cast_util.wrap_str, '焊口编号', column_type=str),
+        "empId": ExcelFiledProperty('F', cast_util.wrap_int_str, '焊工号', column_type=str),
+        "specification": ExcelFiledProperty('G', cast_util.wrap_str, '规格(mm)'),
+        "material": ExcelFiledProperty('H', cast_util.wrap_str, '材质'),
+        "level": ExcelFiledProperty('I', cast_util.wrap_str, '合格级别'),
+        "checkRatioKind": ExcelFiledProperty('J', cast_util.wrap_percent, '检测比例'),
+        "isOk": ExcelFiledProperty('K', cast_util.wrap_str, '返修补片'),
+        "baseSpecificationAndCnt": ExcelFiledProperty('L', cast_util.wrap_str, '底片规格/张'),
+        "unitName": ExcelFiledProperty('Q', cast_util.wrap_str, '单元名称'),
+        "checkCount": ExcelFiledProperty('M', cast_util.wrap_int, '张数'),
+        "okCount": ExcelFiledProperty('N', cast_util.wrap_int, '合格数量'),
+        "ray": ExcelFiledProperty('P', cast_util.wrap_str, 'γ射线'),
+        "detectionCount": ExcelFiledProperty('U', cast_util.wrap_str, '检测数量(道/m/m2/点)'),
+
+    }
+    column_cell_resource_list = [
+        MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=4, column_view_index=0,
+                                                  mapping_data_key='_pieceNo', style=DocCellStyle(font_cn='楷体')),
+
+        MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=4, column_view_index=1,
+                                                  mapping_data_key='empId', style=DocCellStyle(font_cn='楷体')),
+
+    ]
+
+    doc_global_data_param_config_list = [
+        DocGlobalParamConfig('projectName',
+                             '内蒙古宝丰煤基新材料有限公司4×100万吨/年煤制烯烃示范项目一期260万吨/年项目', '工程名称',
+                             False),
+        DocGlobalParamConfig('customerCompany', None, '委托单位', False),
+    ]
+
+    cell_resource_list = [
+        DataListCellParagraphAddRunResource(table_index=0, row=0, column_view_index=3, paragraph_index=0,
+                                            mapping_key=divide_key, style=DocCellStyle(font_cn='楷体')),
+        DataListCellParagraphAddRunResource(table_index=0, row=2, column_view_index=1, paragraph_index=0,
+                                            mapping_key='sampleNo', style=DocCellStyle(font_cn='楷体')),
+        DataListCellParagraphAddRunResource(table_index=0, row=2, column_view_index=3, paragraph_index=0,
+                                            mapping_key='material', style=DocCellStyle(font_cn='楷体')),
+        DataListCellParagraphAddRunResource(table_index=0, row=2, column_view_index=5, paragraph_index=0,
+                                            mapping_key='specification', style=DocCellStyle(font_cn='楷体')),
+    ]
+
+    def data_preparer(data_list: List[dict], context: GeneratorExecuteContext):
+        new_data_list = []
+
+        data_list_map: Dict[str, List[dict]] = {}
+        for data in data_list:
+            order_id = data.get('orderId', None)
+            if order_id == '' or order_id is None:
+                continue
+            if order_id not in data_list_map:
+                data_list_map[order_id] = []
+            data_list_map[order_id].append(data)
+
+        for order_id, order_data_list in data_list_map.items():
+            temp_list = []
+            valid = True
+            for data in order_data_list:
+                if data.get('isOk') == '合格' or data.get('isOk') == '不合格':
+                    check_count = data.get('checkCount', 0)
+                    if check_count is None or check_count <= 0:
+                        continue
+                    temp_list.append(data)
+
+                    kindNo = data.get('kindNo', None)
+
+                    if check_count == 6:
+                        data['_pieceNo'] = f'{kindNo}# 1-2'
+                        for i in range(2, 7):
+                            new_data = data.copy()
+                            if i == 6:
+                                new_data['_pieceNo'] = f'{kindNo}# 6-1'
+                            else:
+                                new_data['_pieceNo'] = f'{kindNo}# {i}-{(i + 1)}'
+                            temp_list.append(new_data)
+                    else:
+                        data['_pieceNo'] = f'{kindNo}# 1'
+                        for i in range(0, check_count - 1):
+                            new_data = data.copy()
+                            new_data['_pieceNo'] = f'{kindNo}# {i + 2}'
+                            temp_list.append(new_data)
+                else:
+                    valid = False
+                    break
+            if valid and len(temp_list) > 0:
+                for _ in temp_list:
+                    new_data_list.append(_)
+        return new_data_list
+
+
+
+    template_path = os.path.join(os.getcwd(), 'template/rt_record/TEMPLATE.docx')
+    report_generator = SimpleTableDocGenerator(template_path=template_path, filed_mapping=filed_mapping,
+                                               divide_key=divide_key,
+                                               header_resource=RecordHeaderResource(),
+                                               column_cell_resource_list=column_cell_resource_list,
+                                               cell_resource_list=cell_resource_list,
+                                               doc_global_data_param_config_list=doc_global_data_param_config_list,
+                                               merge_fun_dict={'completeDate': date_merge_fun}, data_preparer=data_preparer)
+    processor_widget = ProcessorQWidget(
+        ProcessorUIParam(title='射线检测评片记录', processor=report_generator, biz_code='rt_record'))
+    base_ui_config = BaseUIConfig('射线检测评片记录', processor_widget)
+
+    return base_ui_config
+
+
+def build_record_ray_config():
+    divide_key = 'orderId'
+    filed_mapping = {
+        "orderDate": ExcelFiledProperty('A', cast_util.wrap_str, '委托日期'),
+        "completeDate": ExcelFiledProperty('B', cast_util.wrap_str, '完成时间'),
+        divide_key: ExcelFiledProperty('C', cast_util.wrap_str, '委托单编号'),
+        "sampleNo": ExcelFiledProperty('D', cast_util.wrap_str, '检件编号'),
+        "kindNo": ExcelFiledProperty('E', cast_util.wrap_str, '焊口编号', column_type=str),
+        "empId": ExcelFiledProperty('F', cast_util.wrap_int_str, '焊工号', column_type=str),
+        "specification": ExcelFiledProperty('G', cast_util.wrap_str, '规格(mm)'),
+        "material": ExcelFiledProperty('H', cast_util.wrap_str, '材质'),
+        "level": ExcelFiledProperty('I', cast_util.wrap_str, '合格级别'),
+        "checkRatioKind": ExcelFiledProperty('J', cast_util.wrap_percent, '检测比例'),
+        "isOk": ExcelFiledProperty('K', cast_util.wrap_str, '返修补片'),
+        "baseSpecificationAndCnt": ExcelFiledProperty('L', cast_util.wrap_str, '底片规格/张'),
+        "unitName": ExcelFiledProperty('Q', cast_util.wrap_str, '单元名称'),
+        "checkCount": ExcelFiledProperty('M', cast_util.wrap_int, '张数'),
+        "okCount": ExcelFiledProperty('N', cast_util.wrap_int, '合格数量'),
+        "ray": ExcelFiledProperty('P', cast_util.wrap_str, 'γ射线'),
+        "detectionCount": ExcelFiledProperty('U', cast_util.wrap_str, '检测数量(道/m/m2/点)'),
+
+    }
+    column_cell_resource_list = []
+
+    doc_global_data_param_config_list = []
+
+    cell_resource_list = [
+        DataListCellParagraphAddRunResource(table_index=0, row=0, column_view_index=2, paragraph_index=0,
+                                            mapping_key=divide_key, style=DocCellStyle(font_cn='楷体')),
+        DataListCellParagraphAddRunResource(table_index=0, row=1, column_view_index=2, paragraph_index=0,
+                                            mapping_key=divide_key, style=DocCellStyle(font_cn='楷体')),
+
+        DataListCellParagraphAddRunResource(table_index=0, row=5, column_view_index=1, paragraph_index=0,
+                                            mapping_key='specification', style=DocCellStyle(font_cn='楷体')),
+
+        RTRecordSummaryCellParagraphAddRunResource(table_index=0, row=13, column_view_index=0, style=DocCellStyle(),
+                                                   cast_value_to_str=cast_util.wrap_str, paragraph_index=2),
+    ]
+    template_path = os.path.join(os.getcwd(), 'template/rt_ray_record/TEMPLATE.docx')
+    report_generator = SimpleTableDocGenerator(template_path=template_path, filed_mapping=filed_mapping,
+                                               divide_key=divide_key,
+                                               header_resource=None,
+                                               column_cell_resource_list=column_cell_resource_list,
+                                               cell_resource_list=cell_resource_list,
+                                               doc_global_data_param_config_list=doc_global_data_param_config_list,
+                                               merge_fun_dict={'completeDate': date_merge_fun})
+    processor_widget = ProcessorQWidget(
+        ProcessorUIParam(title='射线检测拍片记录', processor=report_generator, biz_code='rt_ray_record'))
+    base_ui_config = BaseUIConfig('射线检测拍片记录', processor_widget)
+
+    return base_ui_config
+
+
+def build_record_excel_config():
+    divide_key = ''
+    filed_mapping = {
+        "orderDate": ExcelFiledProperty('A', cast_util.wrap_str, '委托日期'),
+        "completeDate": ExcelFiledProperty('B', cast_util.wrap_str, '完成时间'),
+        'orderId': ExcelFiledProperty('C', cast_util.wrap_str, '委托单编号'),
+        "sampleNo": ExcelFiledProperty('D', cast_util.wrap_str, '检件编号'),
+        "kindNo": ExcelFiledProperty('E', cast_util.wrap_str, '焊口编号', column_type=str),
+        "empId": ExcelFiledProperty('F', cast_util.wrap_int_str, '焊工号', column_type=str),
+        "specification": ExcelFiledProperty('G', cast_util.wrap_str, '规格(mm)'),
+        "material": ExcelFiledProperty('H', cast_util.wrap_str, '材质', column_type=str),
+        "level": ExcelFiledProperty('I', cast_util.wrap_str, '合格级别'),
+        "checkRatioKind": ExcelFiledProperty('J', cast_util.wrap_percent, '检测比例'),
+        "isOk": ExcelFiledProperty('K', cast_util.wrap_str, '返修补片'),
+        "baseSpecificationAndCnt": ExcelFiledProperty('L', cast_util.wrap_str, '底片规格/张'),
+        "unitName": ExcelFiledProperty('Q', cast_util.wrap_str, '单元名称'),
+        "checkCount": ExcelFiledProperty('M', cast_util.wrap_int, '张数'),
+        "okCount": ExcelFiledProperty('N', cast_util.wrap_int, '合格数量'),
+        "ray": ExcelFiledProperty('P', cast_util.wrap_str, 'γ射线'),
+        "weldMethod": ExcelFiledProperty('R', cast_util.wrap_str, '焊接方法'),
+        "areaNo": ExcelFiledProperty('S', cast_util.wrap_str, '区号', column_type=str),
+        "detectionCount": ExcelFiledProperty('U', cast_util.wrap_str, '检测数量(道/m/m2/点)'),
+        "detectionOpportunity": ExcelFiledProperty('V', cast_util.wrap_str, '检测时机'),
+
+    }
+
+    doc_global_data_param_config_list = []
+
+    excel_header_value_setter_list = [
+        ExcelColumnsValueSetter(column='A', value_getter=ConstantValueGetter('委托编号')),
+        ExcelColumnsValueSetter(column='B', value_getter=ConstantValueGetter('检件编号')),
+        ExcelColumnsValueSetter(column='C', value_getter=ConstantValueGetter('焊口号')),
+        ExcelColumnsValueSetter(column='D', value_getter=ConstantValueGetter('焊工号')),
+        ExcelColumnsValueSetter(column='E', value_getter=ConstantValueGetter('焊口规格')),
+        ExcelColumnsValueSetter(column='F', value_getter=ConstantValueGetter('片号')),
+        ExcelColumnsValueSetter(column='G', value_getter=ConstantValueGetter('缺陷性质')),
+        ExcelColumnsValueSetter(column='H', value_getter=ConstantValueGetter('缺陷定量')),
+        ExcelColumnsValueSetter(column='I', value_getter=ConstantValueGetter('评定级别')),
+        ExcelColumnsValueSetter(column='J', value_getter=ConstantValueGetter('透照方式')),
+        ExcelColumnsValueSetter(column='K', value_getter=ConstantValueGetter('像质计灵敏度')),
+        ExcelColumnsValueSetter(column='L', value_getter=ConstantValueGetter('焦距（mm）')),
+        ExcelColumnsValueSetter(column='M', value_getter=ConstantValueGetter('有效片长')),
+        ExcelColumnsValueSetter(column='N', value_getter=ConstantValueGetter('源强（管电压）')),
+        ExcelColumnsValueSetter(column='O', value_getter=ConstantValueGetter('管电流源活度')),
+        ExcelColumnsValueSetter(column='P', value_getter=ConstantValueGetter('曝光量时间')),
+        ExcelColumnsValueSetter(column='Q', value_getter=ConstantValueGetter('设备型号射源种类')),
+        ExcelColumnsValueSetter(column='R', value_getter=ConstantValueGetter('焦点尺寸')),
+        ExcelColumnsValueSetter(column='S', value_getter=ConstantValueGetter('增感方式')),
+        ExcelColumnsValueSetter(column='T', value_getter=ConstantValueGetter('胶片牌号')),
+        ExcelColumnsValueSetter(column='U', value_getter=ConstantValueGetter('备注')),
+        ExcelColumnsValueSetter(column='V', value_getter=ConstantValueGetter('区号')),
+        ExcelColumnsValueSetter(column='W', value_getter=ConstantValueGetter('合格级别')),
+        ExcelColumnsValueSetter(column='X', value_getter=ConstantValueGetter('管道材质')),
+        ExcelColumnsValueSetter(column='Y', value_getter=ConstantValueGetter('焊接方法')),
+        ExcelColumnsValueSetter(column='Z', value_getter=ConstantValueGetter('检测比例')),
+        ExcelColumnsValueSetter(column='AA', value_getter=ConstantValueGetter('检测比例')),
+    ]
+
+    excel_columns_value_setter_list = [
+        ExcelColumnsValueSetter(column='A', value_getter=DataListMappingValueGetter('orderId')),
+        ExcelColumnsValueSetter(column='B', value_getter=DataListMappingValueGetter('sampleNo')),
+        ExcelColumnsValueSetter(column='C', value_getter=DataListMappingValueGetter('kindNo')),
+        ExcelColumnsValueSetter(column='D', value_getter=DataListMappingValueGetter('empId')),
+        ExcelColumnsValueSetter(column='E', value_getter=DataListMappingValueGetter('specification')),
+        ExcelColumnsValueSetter(column='F', value_getter=DataListMappingValueGetter('_pieceNo')),
+
+        ExcelColumnsValueSetter(column='J', value_getter=DataListMappingValueGetter('_guide.B')),
+        ExcelColumnsValueSetter(column='K', value_getter=DataListMappingValueGetter('_guide.C')),
+        ExcelColumnsValueSetter(column='L', value_getter=DataListMappingValueGetter('_guide.D')),
+        ExcelColumnsValueSetter(column='M', value_getter=DataListMappingValueGetter('_guide.E')),
+        ExcelColumnsValueSetter(column='N', value_getter=DataListMappingValueGetter('_guide.F')),
+        ExcelColumnsValueSetter(column='O', value_getter=DataListMappingValueGetter('_guide.G')),
+        ExcelColumnsValueSetter(column='P', value_getter=DataListMappingValueGetter('_guide.H')),
+        ExcelColumnsValueSetter(column='Q', value_getter=DataListMappingValueGetter('_guide.J')),
+        ExcelColumnsValueSetter(column='R', value_getter=DataListMappingValueGetter('_guide.K')),
+        ExcelColumnsValueSetter(column='S', value_getter=DataListMappingValueGetter('_guide.L')),
+        ExcelColumnsValueSetter(column='T', value_getter=DataListMappingValueGetter('_guide.M')),
+
+        ExcelColumnsValueSetter(column='V', value_getter=DataListMappingValueGetter('areaNo')),
+        ExcelColumnsValueSetter(column='W', value_getter=DataListMappingValueGetter('level')),
+        ExcelColumnsValueSetter(column='X', value_getter=DataListMappingValueGetter('material')),
+        ExcelColumnsValueSetter(column='Y', value_getter=DataListMappingValueGetter('weldMethod')),
+        ExcelColumnsValueSetter(column='Z', value_getter=DataListMappingValueGetter('checkRatioKind')),
+        ExcelColumnsValueSetter(column='AA', value_getter=DataListMappingValueGetter('detectionOpportunity')),
+
+    ]
+
+    def data_preparer(data_list: List[dict], context: GeneratorExecuteContext):
+        new_data_list = []
+
+        guide_data_map = context.get_data('GUIDE_DATA')
+
+        if guide_data_map is None:
+            guide_filed_mapping = {
+                "A": ExcelFiledProperty('A', cast_util.wrap_str, '规格', column_type=str),
+                "B": ExcelFiledProperty('B', cast_util.wrap_str, '透照方式', column_type=str),
+                "C": ExcelFiledProperty('C', cast_util.wrap_str, '像质计灵敏度', column_type=str),
+                "D": ExcelFiledProperty('D', cast_util.wrap_str, '焦距（mm）', column_type=str),
+                "E": ExcelFiledProperty('E', cast_util.wrap_str, '有效片长', column_type=str),
+                "F": ExcelFiledProperty('F', cast_util.wrap_str, '源强（管电压）', column_type=str),
+                "G": ExcelFiledProperty('G', cast_util.wrap_str, '管电流源活度', column_type=str),
+                "H": ExcelFiledProperty('H', cast_util.wrap_str, '曝光量时间', column_type=str),
+                "I": ExcelFiledProperty('I', cast_util.wrap_str, '射源种类', column_type=str),
+                "J": ExcelFiledProperty('J', cast_util.wrap_str, '设备型号射源种类', column_type=str),
+                "K": ExcelFiledProperty('K', cast_util.wrap_str, '焦点尺寸', column_type=str),
+                "L": ExcelFiledProperty('L', cast_util.wrap_str, '增感方式', column_type=str),
+                "M": ExcelFiledProperty('M', cast_util.wrap_str, '胶片牌号', column_type=str),
+            }
+            guide_data_list = excel_util.read_data_list(file_path=context.input_file_path, sheet=1,
+                                                        filed_mapping=guide_filed_mapping)
+            guide_data_map = {}
+            for guide_d in guide_data_list:
+                guide_specification = guide_d['A']
+                if guide_specification is None:
+                    guide_specification = ''
+
+                guide_specification = guide_specification.replace('×', '*')
+                guide_specification = guide_specification.replace('Φ', 'φ')
+
+                guide_data_map[guide_specification] = guide_d
+
+        data_list_map: Dict[str, List[dict]] = {}
+        for data in data_list:
+            order_id = data.get('orderId', None)
+            if order_id == '' or order_id is None:
+                continue
+            if order_id not in data_list_map:
+                data_list_map[order_id] = []
+            data_list_map[order_id].append(data)
+
+        for order_id, order_data_list in data_list_map.items():
+            temp_list = []
+            valid = True
+            for data in order_data_list:
+                if data.get('isOk') == '合格' or data.get('isOk') == '不合格':
+                    check_count = data.get('checkCount', 0)
+                    if check_count is None or check_count <= 0:
+                        continue
+                    temp_list.append(data)
+
+                    specification = data.get('specification', None)
+                    if specification is None:
+                        specification = ''
+
+                    specification = specification.replace('×', '*')
+                    specification = specification.replace('Φ', 'φ')
+
+                    data['_guide.A'] = guide_data_map.get(specification, {}).get('A', None)
+                    data['_guide.B'] = guide_data_map.get(specification, {}).get('B', None)
+                    data['_guide.C'] = guide_data_map.get(specification, {}).get('C', None)
+                    data['_guide.D'] = guide_data_map.get(specification, {}).get('D', None)
+                    data['_guide.E'] = guide_data_map.get(specification, {}).get('E', None)
+                    data['_guide.F'] = guide_data_map.get(specification, {}).get('F', None)
+                    data['_guide.G'] = guide_data_map.get(specification, {}).get('G', None)
+                    data['_guide.H'] = guide_data_map.get(specification, {}).get('H', None)
+                    data['_guide.I'] = guide_data_map.get(specification, {}).get('I', None)
+                    data['_guide.J'] = guide_data_map.get(specification, {}).get('J', None)
+                    data['_guide.K'] = guide_data_map.get(specification, {}).get('K', None)
+                    data['_guide.L'] = guide_data_map.get(specification, {}).get('L', None)
+                    data['_guide.M'] = guide_data_map.get(specification, {}).get('M', None)
+
+                    if check_count == 6:
+                        data['_pieceNo'] = '1-2'
+                        for i in range(2, 7):
+                            if i == 6:
+                                new_data = {'_pieceNo': '6-1'}
+                            else:
+                                new_data = {'_pieceNo': f'{i}-{(i + 1)}'}
+                            temp_list.append(new_data)
+                    else:
+                        data['_pieceNo'] = '1'
+                        for i in range(0, check_count - 1):
+                            new_data = {'_pieceNo': f'{i + 2}'}
+                            temp_list.append(new_data)
+                else:
+                    valid = False
+                    break
+            if valid and len(temp_list) > 0:
+                for _ in temp_list:
+                    new_data_list.append(_)
+        return new_data_list
+
+    report_generator = MergedExcelReportGenerator(template_path=None, filed_mapping=filed_mapping,
+                                                  divide_key=divide_key,
+                                                  doc_global_data_param_config_list=doc_global_data_param_config_list,
+                                                  excel_header_value_setter_list=excel_header_value_setter_list,
+                                                  excel_columns_value_setter_list=excel_columns_value_setter_list,
+                                                  data_preparer=data_preparer,
+                                                  merge_fun_dict={'completeDate': date_merge_fun}
+                                                  )
+    processor_widget = ProcessorQWidget(
+        ProcessorUIParam(title='质量评定台账Excel生成', processor=report_generator, biz_code='rt_excel'))
+    base_ui_config = BaseUIConfig('质量评定台账Excel生成', processor_widget)
 
     return base_ui_config
 
@@ -331,6 +711,9 @@ if __name__ == '__main__':
         build_ray_config(),
         build_rt_config(),
         build_surface_config(),
+        build_record_config(),
+        build_record_ray_config(),
+        build_record_excel_config(),
     ]
     ui = HomePageQWidget(ui_config_list)
     ui.show()
