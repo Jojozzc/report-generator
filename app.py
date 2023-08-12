@@ -8,7 +8,7 @@ from docx.enum.table import WD_TABLE_ALIGNMENT
 from awe_report_generator.biz.rt.base import RTHeaderResource, RTSummaryCellResource2, RecordHeaderResource
 from awe_report_generator.biz.rt.base import RTSummaryCellResource
 from awe_report_generator.core.base import ExcelFiledProperty, DocGlobalParamConfig, ConstantValueGetter, \
-    DataListMappingValueGetter
+    DataListMappingValueGetter, GeneratorExecuteContext
 from awe_report_generator.core.merged_excel_generator import MergedExcelReportGenerator, ExcelColumnsValueSetter
 from awe_report_generator.core.simple_table_doc_generator import (
     SimpleTableDocGenerator, MappingColumnCellsParagraphAddRunResource,
@@ -20,6 +20,7 @@ from awe_report_generator.core.simple_table_doc_generator import (
 from awe_report_generator.core.style import DocCellStyle
 from awe_report_generator.core.util import array_util
 from awe_report_generator.core.util import cast_util, date_util as awe_date_util
+from awe_report_generator.core.util import excel_util
 from awe_report_generator.ui import BaseUIConfig
 from awe_report_generator.ui.base import HomePageQWidget
 from awe_report_generator.ui.processor_ui import ProcessorQWidget, ProcessorUIParam
@@ -518,21 +519,19 @@ def build_record_excel_config():
         ExcelColumnsValueSetter(column='D', value_getter=DataListMappingValueGetter('empId')),
         ExcelColumnsValueSetter(column='E', value_getter=DataListMappingValueGetter('specification')),
         ExcelColumnsValueSetter(column='F', value_getter=DataListMappingValueGetter('_pieceNo')),
-        # ExcelColumnsValueSetter(column='G', value_getter=ConstantValueGetter('缺陷性质')),
-        # ExcelColumnsValueSetter(column='H', value_getter=ConstantValueGetter('缺陷定量')),
-        # ExcelColumnsValueSetter(column='I', value_getter=ConstantValueGetter('评定级别')),
-        # ExcelColumnsValueSetter(column='J', value_getter=ConstantValueGetter('透照方式')),
-        # ExcelColumnsValueSetter(column='K', value_getter=ConstantValueGetter('像质计灵敏度')),
-        # ExcelColumnsValueSetter(column='L', value_getter=ConstantValueGetter('焦距（mm）')),
-        # ExcelColumnsValueSetter(column='M', value_getter=ConstantValueGetter('有效片长')),
-        # ExcelColumnsValueSetter(column='N', value_getter=ConstantValueGetter('源强（管电压）')),
-        # ExcelColumnsValueSetter(column='O', value_getter=ConstantValueGetter('管电流源活度')),
-        # ExcelColumnsValueSetter(column='P', value_getter=ConstantValueGetter('曝光量时间')),
-        # ExcelColumnsValueSetter(column='Q', value_getter=ConstantValueGetter('设备型号射源种类')),
-        # ExcelColumnsValueSetter(column='R', value_getter=ConstantValueGetter('焦点尺寸')),
-        # ExcelColumnsValueSetter(column='S', value_getter=ConstantValueGetter('增感方式')),
-        # ExcelColumnsValueSetter(column='T', value_getter=ConstantValueGetter('胶片牌号')),
-        # ExcelColumnsValueSetter(column='U', value_getter=ConstantValueGetter('备注')),
+
+        ExcelColumnsValueSetter(column='J', value_getter=DataListMappingValueGetter('_guide.B')),
+        ExcelColumnsValueSetter(column='K', value_getter=DataListMappingValueGetter('_guide.C')),
+        ExcelColumnsValueSetter(column='L', value_getter=DataListMappingValueGetter('_guide.D')),
+        ExcelColumnsValueSetter(column='M', value_getter=DataListMappingValueGetter('_guide.E')),
+        ExcelColumnsValueSetter(column='N', value_getter=DataListMappingValueGetter('_guide.F')),
+        ExcelColumnsValueSetter(column='O', value_getter=DataListMappingValueGetter('_guide.G')),
+        ExcelColumnsValueSetter(column='P', value_getter=DataListMappingValueGetter('_guide.I')),
+        ExcelColumnsValueSetter(column='Q', value_getter=DataListMappingValueGetter('_guide.J')),
+        ExcelColumnsValueSetter(column='R', value_getter=DataListMappingValueGetter('_guide.K')),
+        ExcelColumnsValueSetter(column='S', value_getter=DataListMappingValueGetter('_guide.L')),
+        ExcelColumnsValueSetter(column='T', value_getter=DataListMappingValueGetter('_guide.M')),
+
         ExcelColumnsValueSetter(column='V', value_getter=DataListMappingValueGetter('areaNo')),
         ExcelColumnsValueSetter(column='W', value_getter=DataListMappingValueGetter('level')),
         ExcelColumnsValueSetter(column='X', value_getter=DataListMappingValueGetter('material')),
@@ -542,8 +541,40 @@ def build_record_excel_config():
 
     ]
 
-    def data_preparer(data_list: List[dict]):
+    def data_preparer(data_list: List[dict], context: GeneratorExecuteContext):
         new_data_list = []
+
+        guide_data_map = context.get_data('GUIDE_DATA')
+
+        if guide_data_map is None:
+            guide_filed_mapping = {
+                "A": ExcelFiledProperty('A', cast_util.wrap_str, '规格', column_type=str),
+                "B": ExcelFiledProperty('B', cast_util.wrap_str, '透照方式', column_type=str),
+                "C": ExcelFiledProperty('C', cast_util.wrap_str, '像质计灵敏度', column_type=str),
+                "D": ExcelFiledProperty('D', cast_util.wrap_str, '焦距（mm）', column_type=str),
+                "E": ExcelFiledProperty('E', cast_util.wrap_str, '有效片长', column_type=str),
+                "F": ExcelFiledProperty('F', cast_util.wrap_str, '源强（管电压）', column_type=str),
+                "G": ExcelFiledProperty('G', cast_util.wrap_str, '管电流源活度', column_type=str),
+                "H": ExcelFiledProperty('H', cast_util.wrap_str, '曝光量时间', column_type=str),
+                "I": ExcelFiledProperty('I', cast_util.wrap_str, '射源种类', column_type=str),
+                "J": ExcelFiledProperty('J', cast_util.wrap_str, '设备型号射源种类', column_type=str),
+                "K": ExcelFiledProperty('K', cast_util.wrap_str, '焦点尺寸', column_type=str),
+                "L": ExcelFiledProperty('L', cast_util.wrap_str, '增感方式', column_type=str),
+                "M": ExcelFiledProperty('M', cast_util.wrap_str, '胶片牌号', column_type=str),
+            }
+            guide_data_list = excel_util.read_data_list(file_path=context.input_file_path, sheet=1,
+                                                        filed_mapping=guide_filed_mapping)
+            guide_data_map = {}
+            for guide_d in guide_data_list:
+                guide_specification = guide_d['A']
+                if guide_specification is None:
+                    guide_specification = ''
+
+                guide_specification = guide_specification.replace('×', '*')
+                guide_specification = guide_specification.replace('Φ', 'φ')
+
+                guide_data_map[guide_specification] = guide_d
+
         data_list_map: Dict[str, List[dict]] = {}
         for data in data_list:
             order_id = data.get('orderId', None)
@@ -562,6 +593,27 @@ def build_record_excel_config():
                     if check_count is None or check_count <= 0:
                         continue
                     temp_list.append(data)
+
+                    specification = data.get('specification', None)
+                    if specification is None:
+                        specification = ''
+
+                    specification = specification.replace('×', '*')
+                    specification = specification.replace('Φ', 'φ')
+
+                    data['_guide.A'] = guide_data_map.get(specification, {}).get('A', None)
+                    data['_guide.B'] = guide_data_map.get(specification, {}).get('B', None)
+                    data['_guide.C'] = guide_data_map.get(specification, {}).get('C', None)
+                    data['_guide.D'] = guide_data_map.get(specification, {}).get('D', None)
+                    data['_guide.E'] = guide_data_map.get(specification, {}).get('E', None)
+                    data['_guide.F'] = guide_data_map.get(specification, {}).get('F', None)
+                    data['_guide.G'] = guide_data_map.get(specification, {}).get('G', None)
+                    data['_guide.H'] = guide_data_map.get(specification, {}).get('H', None)
+                    data['_guide.I'] = guide_data_map.get(specification, {}).get('I', None)
+                    data['_guide.J'] = guide_data_map.get(specification, {}).get('J', None)
+                    data['_guide.K'] = guide_data_map.get(specification, {}).get('K', None)
+                    data['_guide.L'] = guide_data_map.get(specification, {}).get('L', None)
+                    data['_guide.M'] = guide_data_map.get(specification, {}).get('M', None)
 
                     if check_count == 6:
                         data['_pieceNo'] = '1-2'

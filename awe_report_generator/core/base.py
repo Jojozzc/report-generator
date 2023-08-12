@@ -97,6 +97,19 @@ class Cursor:
         self.index = self.index + num
 
 
+class GeneratorExecuteContext:
+
+    def __init__(self, input_file_path: str):
+        self.input_file_path = input_file_path
+        self.biz_data = {}
+
+    def put_data(self, key: str, value):
+        self.biz_data[key] = value
+
+    def get_data(self, key: str, default_value=None):
+        return self.biz_data.get(key, default_value)
+
+
 class ReportGenerator(metaclass=ABCMeta):
     """
     Abstract excel to words report generator
@@ -118,7 +131,7 @@ class ReportGenerator(metaclass=ABCMeta):
         :param template_path: path to template docx file
         :param filed_mapping:
         :param divide_key: unique key
-        :param data_preparer: function (data_list) -> data_list
+        :param data_preparer: function (data_list, GeneratorExecuteContext) -> data_list
 
         dtype: Data type for data or columns. E.g. {‘a’: np.float64, ‘b’: np.int32} Use object to preserve data as stored in Excel and not interpret dtype. If converters are specified, they will be applied INSTEAD of dtype conversion.
             https://pandas.pydata.org/docs/reference/api/pandas.read_excel.html
@@ -147,7 +160,8 @@ class ReportGenerator(metaclass=ABCMeta):
         self._check_and_set_default_global_param(global_param)
         data_list = self.__read(file_path, sheet)
         merged_data = self._merge_data(data_list=data_list, merge_fun_dict=self.merge_fun_dict)
-        data_list = self._data_prepare(data_list)
+        context = GeneratorExecuteContext(input_file_path=file_path)
+        data_list = self._data_prepare(data_list, context)
 
         raw_data_map = {}
         for raw_data in data_list:
@@ -201,9 +215,9 @@ class ReportGenerator(metaclass=ABCMeta):
             finally:
                 p = p + 1
 
-    def _data_prepare(self, data_list: List[dict]):
+    def _data_prepare(self, data_list: List[dict], context:GeneratorExecuteContext):
         if self.data_preparer is not None:
-            return self.data_preparer(data_list)
+            return self.data_preparer(data_list, context)
         return data_list
 
     def __read(self, file_path: str, sheet: str) -> List[dict]:
