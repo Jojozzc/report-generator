@@ -4,7 +4,7 @@
 ## New App
 1. app.py
 2. 模板：template/*
-3. 执行 pyinstaller -F --noconsole app.py
+3. 执行 pyinstaller -F --noconsole --hidden-import openpyxl.cell._writer app.py
 
 ## mode1
 1. 代码入口：main.py
