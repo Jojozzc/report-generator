@@ -8,7 +8,7 @@ If(!(test-path -PathType container $templatePath))
 {
       New-Item -ItemType Directory -Path $templatePath
 }
-pyinstaller -F --noconsole app.py
+pyinstaller -F --noconsole --hidden-import openpyxl.cell._writer app.py
 Copy-Item "./dist/app.exe" -Destination $path
 Copy-Item -Path "./template" -Destination $templatePath -Recurse
 
