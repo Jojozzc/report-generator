@@ -1,2 +1,2 @@
 conda activate p38
-pyinstaller -F --noconsole app.py
+pyinstaller -F --noconsole --hidden-import openpyxl.cell._writer app.py
