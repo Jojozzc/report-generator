@@ -531,7 +531,7 @@ def build_record_excel_config():
 
     }
 
-    doc_global_data_param_config_list = []
+    doc_global_data_param_config_list = [DocGlobalParamConfig('filterDate', None, '生成时间', True, 'date')]
 
     excel_header_value_setter_list = [
         ExcelColumnsValueSetter(column='A', value_getter=ConstantValueGetter('委托编号')),

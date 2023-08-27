@@ -52,11 +52,20 @@ class ExcelFiledProperty:
 
 
 class DocGlobalParamConfig:
-    def __init__(self, filed: str, default_value=None, title: str = None, required: bool = False):
+    def __init__(self, filed: str, default_value=None, title: str = None, required: bool = False, input_type: str='line'):
+        """
+
+        :param filed:
+        :param default_value:
+        :param title:
+        :param required:
+        :param input_type: line(default)/date
+        """
         self.filed = filed
         self.title = title
         self.required = required
         self.default_value = default_value
+        self.input_type = input_type
 
 
 def default_on_finish_one(number: int, total_cnt: int, success: bool, exception):
