@@ -9,7 +9,7 @@ from xlsxwriter.worksheet import Worksheet
 
 from awe_report_generator.core.util import array_util
 from awe_report_generator.core.util import cast_util
-from .base import ReportGenerator, ExcelFiledProperty, OutputFileMode, DivideMode
+from .base import ReportGenerator, ExcelFiledProperty, OutputFileMode, DivideMode, ValueGetter
 from .style import DocCellStyle
 from docx.oxml.ns import qn
 
@@ -170,6 +170,17 @@ class CellParagraphAddRunResource(CellResource):
             run.font.size = Pt(self.style.font_size)
 
 
+class CellParagraphAddRunValueSetter(CellParagraphAddRunResource):
+    def __init__(self, table_index: int, row: int, column_view_index: int, style: DocCellStyle = DocCellStyle(),
+                 cast_value_to_str=cast_util.wrap_str, paragraph_index: int = 0, run_index: int = None, value_getter:ValueGetter=None):
+        super().__init__(table_index, row, column_view_index, style, cast_value_to_str, paragraph_index, run_index)
+        self.value_getter = value_getter
+
+
+    def get_value(self, data_list: List[dict], global_data: dict, merged_data: dict):
+        return self.value_getter.get_value(data=None, data_list=data_list, global_data=global_data, merged_data=merged_data)
+
+
 class GlobalParamCellParagraphAddRunResource(CellParagraphAddRunResource):
     def __init__(self, table_index: int, row: int, column_view_index: int, style: DocCellStyle = DocCellStyle(),
                  paragraph_index: int = 0, cast_value_to_str=cast_util.wrap_str, mapping_key: str = None,
@@ -247,11 +258,15 @@ class SimpleCalculationColumnCellsParagraphAddRunResource(ColumnCellsParagraphAd
 
 class SimpleTableDocGenerator(ReportGenerator):
 
-    def __init__(self, template_path: str, filed_mapping: Dict[str, ExcelFiledProperty], divide_key: str, divide_mode:DivideMode=DivideMode.DIVIDE_MODE_BY_KEY,
-                 header_resource: HeaderResource=None, column_cell_resource_list=None,
-                 cell_resource_list: List[CellResource]=None, doc_global_data_param_config_list=None,
+    def __init__(self, template_path: str, filed_mapping: Dict[str, ExcelFiledProperty], divide_key: str,
+                 divide_mode: DivideMode = DivideMode.DIVIDE_MODE_BY_KEY,
+                 header_resource: HeaderResource = None, column_cell_resource_list=None,
+                 cell_resource_list: List[CellResource] = None, doc_global_data_param_config_list=None,
                  merge_fun_dict: dict = None, data_preparer=None):
-        super().__init__(template_path=template_path, filed_mapping=filed_mapping, divide_key=divide_key, divide_mode=divide_mode, output_file_mode=OutputFileMode.WORD, doc_global_data_param_config_list=doc_global_data_param_config_list, merge_fun_dict=merge_fun_dict, data_preparer=data_preparer)
+        super().__init__(template_path=template_path, filed_mapping=filed_mapping, divide_key=divide_key,
+                         divide_mode=divide_mode, output_file_mode=OutputFileMode.WORD,
+                         doc_global_data_param_config_list=doc_global_data_param_config_list,
+                         merge_fun_dict=merge_fun_dict, data_preparer=data_preparer)
         if column_cell_resource_list is None:
             column_cell_resource_list = []
         self.header_resource = header_resource
@@ -275,8 +290,8 @@ class SimpleTableDocGenerator(ReportGenerator):
         return template_doc
 
     def _process_excel(self, data_list: list, worksheet: Worksheet, global_param: dict, merged_data: dict):
-        super()._process_excel(data_list=data_list, worksheet=worksheet, global_param=global_param, merged_data=merged_data)
-
+        super()._process_excel(data_list=data_list, worksheet=worksheet, global_param=global_param,
+                               merged_data=merged_data)
 
     def _build_template_doc_table_index_zips(self, doc: Document):
         """

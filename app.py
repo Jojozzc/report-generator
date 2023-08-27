@@ -9,19 +9,20 @@ from awe_report_generator.biz.rt.base import RTHeaderResource, RTSummaryCellReso
     RTRecordSummaryCellParagraphAddRunResource
 from awe_report_generator.biz.rt.base import RTSummaryCellResource
 from awe_report_generator.core.base import ExcelFiledProperty, DocGlobalParamConfig, ConstantValueGetter, \
-    DataListMappingValueGetter, GeneratorExecuteContext
+    DataListMappingValueGetter, GeneratorExecuteContext, FunctionValueGetter
 from awe_report_generator.core.merged_excel_generator import MergedExcelReportGenerator, ExcelColumnsValueSetter
 from awe_report_generator.core.simple_table_doc_generator import (
     SimpleTableDocGenerator, MappingColumnCellsParagraphAddRunResource,
     SimpleCalculationColumnCellsParagraphAddRunResource,
     HeaderResource,
     GlobalParamCellParagraphAddRunResource,
-    DataListCellParagraphAddRunResource
+    DataListCellParagraphAddRunResource, CellParagraphAddRunValueSetter
 )
 from awe_report_generator.core.style import DocCellStyle
 from awe_report_generator.core.util import array_util
 from awe_report_generator.core.util import cast_util, date_util as awe_date_util
 from awe_report_generator.core.util import excel_util
+from awe_report_generator.core.util import map_util
 from awe_report_generator.ui import BaseUIConfig
 from awe_report_generator.ui.base import HomePageQWidget
 from awe_report_generator.ui.processor_ui import ProcessorQWidget, ProcessorUIParam
@@ -375,11 +376,18 @@ def build_record_config():
                              '内蒙古宝丰煤基新材料有限公司4×100万吨/年煤制烯烃示范项目一期260万吨/年项目', '工程名称',
                              False),
         DocGlobalParamConfig('customerCompany', None, '委托单位', False),
+        DocGlobalParamConfig('orderIdPrefix', None, '委托编号生成前缀', False),
     ]
 
+    def get_order_cell_value(data: dict, data_list: List[dict], global_data: dict, merged_data: dict):
+        prefix = map_util.get(global_data, 'orderIdPrefix')
+        if prefix is None:
+            return array_util.get_one_value(data_list, divide_key)
+        return prefix + array_util.get_one_value(data_list, divide_key)
+
     cell_resource_list = [
-        DataListCellParagraphAddRunResource(table_index=0, row=0, column_view_index=3, paragraph_index=0,
-                                            mapping_key=divide_key, style=DocCellStyle(font_cn='楷体')),
+        CellParagraphAddRunValueSetter(table_index=0, row=0, column_view_index=3, paragraph_index=0,
+                                       style=DocCellStyle(font_cn='楷体'), value_getter=FunctionValueGetter(get_value_function=get_order_cell_value)),
         DataListCellParagraphAddRunResource(table_index=0, row=2, column_view_index=1, paragraph_index=0,
                                             mapping_key='sampleNo', style=DocCellStyle(font_cn='楷体')),
         DataListCellParagraphAddRunResource(table_index=0, row=2, column_view_index=3, paragraph_index=0,
@@ -476,11 +484,20 @@ def build_record_ray_config():
     }
     column_cell_resource_list = []
 
-    doc_global_data_param_config_list = []
+    doc_global_data_param_config_list = [
+        DocGlobalParamConfig('orderIdPrefix', None, '委托编号生成前缀', False),
+    ]
+
+    def get_order_cell_value(data: dict, data_list: List[dict], global_data: dict, merged_data: dict):
+        prefix = map_util.get(global_data, 'orderIdPrefix')
+        if prefix is None:
+            return array_util.get_one_value(data_list, divide_key)
+        return prefix + array_util.get_one_value(data_list, divide_key)
 
     cell_resource_list = [
-        DataListCellParagraphAddRunResource(table_index=0, row=0, column_view_index=2, paragraph_index=0,
-                                            mapping_key=divide_key, style=DocCellStyle(font_cn='楷体')),
+        CellParagraphAddRunValueSetter(table_index=0, row=0, column_view_index=2, paragraph_index=0,
+                                         style=DocCellStyle(font_cn='楷体'), value_getter=FunctionValueGetter(get_value_function=get_order_cell_value)),
+
         DataListCellParagraphAddRunResource(table_index=0, row=1, column_view_index=2, paragraph_index=0,
                                             mapping_key=divide_key, style=DocCellStyle(font_cn='楷体')),
 
@@ -531,7 +548,7 @@ def build_record_excel_config():
 
     }
 
-    doc_global_data_param_config_list = []
+    doc_global_data_param_config_list = [DocGlobalParamConfig('expectDate', None, '生成时间', True, 'date')]
 
     excel_header_value_setter_list = [
         ExcelColumnsValueSetter(column='A', value_getter=ConstantValueGetter('委托编号')),
@@ -639,6 +656,16 @@ def build_record_excel_config():
             temp_list = []
             valid = True
             for data in order_data_list:
+                expect_date_str = map_util.get(context.global_param, 'expectDate')
+                expect_date = awe_date_util.parse_dot_date_time(expect_date_str)
+
+                date_str = map_util.get(data, 'completeDate')
+                date = awe_date_util.parse_dot_date_time(date_str)
+
+                if (date is None and expect_date is None) or date > expect_date:
+                    valid = False
+                    break
+
                 if data.get('isOk') == '合格' or data.get('isOk') == '不合格':
                     check_count = data.get('checkCount', 0)
                     if check_count is None or check_count <= 0:
@@ -674,10 +701,18 @@ def build_record_excel_config():
                             else:
                                 new_data = {'_pieceNo': f'{i}-{(i + 1)}'}
                             temp_list.append(new_data)
+                            new_data['orderId'] = data.get('orderId', None)
+                            new_data['sampleNo'] = data.get('sampleNo', None)
+                            new_data['kindNo'] = data.get('kindNo', None)
+                            new_data['empId'] = data.get('empId', None)
+                            new_data['specification'] = data.get('specification', None)
                     else:
                         data['_pieceNo'] = '1'
                         for i in range(0, check_count - 1):
-                            new_data = {'_pieceNo': f'{i + 2}'}
+                            new_data = {'_pieceNo': f'{i + 2}', 'orderId': data.get('orderId', None),
+                                        'sampleNo': data.get('sampleNo', None), 'kindNo': data.get('kindNo', None),
+                                        'empId': data.get('empId', None),
+                                        'specification': data.get('specification', None)}
                             temp_list.append(new_data)
                 else:
                     valid = False

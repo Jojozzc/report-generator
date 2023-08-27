@@ -1,11 +1,14 @@
 import threading
 
+from PyQt5.QtCore import QDate, QCalendar
 from PyQt5.QtWidgets import (QWidget,
                              QPushButton, QGridLayout, QLineEdit, QLabel, QFileDialog, QMessageBox, QProgressBar,
+                             QDateEdit, QDateTimeEdit
                              )
 
-from awe_report_generator.core.base import ReportGenerator
 from awe_report_generator.app import app_config
+from awe_report_generator.core.base import ReportGenerator
+from awe_report_generator.core.util import map_util, date_util
 
 
 class ProcessorUIParam:
@@ -44,12 +47,30 @@ class ProcessorQWidget(QWidget):
                     qlabel.setText(f'{param_config.title}*')
                 else:
                     qlabel.setText(f'{param_config.title}')
-                qline_edit = QLineEdit()
-                self.global_param_widget_dict[param_config.filed] = qline_edit
-                qline_edit.setText(app_config.get_setting(self.processor_ui_param.biz_code, param_config.filed, param_config.default_value))
-                grid.addWidget(qlabel, i, 0)
-                grid.addWidget(qline_edit, i, 1)
+
+                if param_config.input_type == 'line':
+                    qline_edit = QLineEdit()
+                    self.global_param_widget_dict[param_config.filed] = qline_edit
+                    qline_edit.setText(app_config.get_setting(self.processor_ui_param.biz_code, param_config.filed, param_config.default_value))
+                    grid.addWidget(qlabel, i, 0)
+                    grid.addWidget(qline_edit, i, 1)
+                elif param_config.input_type == 'date':
+                    default_date_str = app_config.get_setting(self.processor_ui_param.biz_code, param_config.filed, param_config.default_value)
+                    default_date = date_util.parse_dot_date_time(default_date_str)
+                    q_date_edit = QDateEdit()
+                    if default_date is None:
+                        q_date_edit.setDate(QDate.currentDate())
+                    else:
+                        q_date_edit.setDate(default_date)
+
+                    q_date_edit.setDisplayFormat('yyyy.MM.dd')
+                    q_date_edit.setCalendarPopup(True)
+                    self.global_param_widget_dict[param_config.filed] = q_date_edit
+                    grid.addWidget(qlabel, i, 0)
+                    grid.addWidget(q_date_edit, i, 1)
+
                 i = i + 1
+
 
         input_file_btn = QPushButton()
         input_file_btn.setText('选择输入文件(xlsx)*')
@@ -99,8 +120,14 @@ class ProcessorQWidget(QWidget):
 
         if doc_global_data_param_config_list is not None:
             for param_config in doc_global_data_param_config_list:
-                qline_edit: QLineEdit = self.global_param_widget_dict[param_config.filed]
-                val = qline_edit.text()
+                val = None
+                if param_config.input_type == 'line':
+                    qline_edit: QLineEdit = self.global_param_widget_dict[param_config.filed]
+                    val = qline_edit.text()
+                elif param_config.input_type == 'date':
+                    q_date_edit:QDateEdit = self.global_param_widget_dict[param_config.filed]
+                    val = q_date_edit.text()
+
                 if param_config.required and (val is None or val == ''):
                     self.alert(f'请输入必填参数:{param_config.title}')
                     return
