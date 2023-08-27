@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import (QWidget,
 
 from awe_report_generator.app import app_config
 from awe_report_generator.core.base import ReportGenerator
+from awe_report_generator.core.util import map_util, date_util
 
 
 class ProcessorUIParam:
@@ -54,7 +55,14 @@ class ProcessorQWidget(QWidget):
                     grid.addWidget(qlabel, i, 0)
                     grid.addWidget(qline_edit, i, 1)
                 elif param_config.input_type == 'date':
-                    q_date_edit = QDateEdit(QDate.currentDate())
+                    default_date_str = app_config.get_setting(self.processor_ui_param.biz_code, param_config.filed, param_config.default_value)
+                    default_date = date_util.parse_dot_date_time(default_date_str)
+                    q_date_edit = QDateEdit()
+                    if default_date is None:
+                        q_date_edit.setDate(QDate.currentDate())
+                    else:
+                        q_date_edit.setDate(default_date)
+
                     q_date_edit.setDisplayFormat('yyyy.MM.dd')
                     q_date_edit.setCalendarPopup(True)
                     self.global_param_widget_dict[param_config.filed] = q_date_edit

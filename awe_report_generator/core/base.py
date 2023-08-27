@@ -108,8 +108,9 @@ class Cursor:
 
 class GeneratorExecuteContext:
 
-    def __init__(self, input_file_path: str):
+    def __init__(self, input_file_path: str, global_param:dict):
         self.input_file_path = input_file_path
+        self.global_param = global_param
         self.biz_data = {}
 
     def put_data(self, key: str, value):
@@ -169,7 +170,7 @@ class ReportGenerator(metaclass=ABCMeta):
         self._check_and_set_default_global_param(global_param)
         data_list = self.__read(file_path, sheet)
         merged_data = self._merge_data(data_list=data_list, merge_fun_dict=self.merge_fun_dict)
-        context = GeneratorExecuteContext(input_file_path=file_path)
+        context = GeneratorExecuteContext(input_file_path=file_path, global_param=global_param)
         data_list = self._data_prepare(data_list, context)
 
         raw_data_map = {}

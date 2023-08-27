@@ -22,6 +22,7 @@ from awe_report_generator.core.style import DocCellStyle
 from awe_report_generator.core.util import array_util
 from awe_report_generator.core.util import cast_util, date_util as awe_date_util
 from awe_report_generator.core.util import excel_util
+from awe_report_generator.core.util import map_util
 from awe_report_generator.ui import BaseUIConfig
 from awe_report_generator.ui.base import HomePageQWidget
 from awe_report_generator.ui.processor_ui import ProcessorQWidget, ProcessorUIParam
@@ -531,7 +532,7 @@ def build_record_excel_config():
 
     }
 
-    doc_global_data_param_config_list = [DocGlobalParamConfig('filterDate', None, '生成时间', True, 'date')]
+    doc_global_data_param_config_list = [DocGlobalParamConfig('expectDate', None, '生成时间', True, 'date')]
 
     excel_header_value_setter_list = [
         ExcelColumnsValueSetter(column='A', value_getter=ConstantValueGetter('委托编号')),
@@ -639,6 +640,16 @@ def build_record_excel_config():
             temp_list = []
             valid = True
             for data in order_data_list:
+                expect_date_str = map_util.get(context.global_param, 'expectDate')
+                expect_date = awe_date_util.parse_dot_date_time(expect_date_str)
+
+                date_str = map_util.get(data, 'completeDate')
+                date = awe_date_util.parse_dot_date_time(date_str)
+
+                if (date is None and expect_date is None) or date > expect_date:
+                    valid = False
+                    break
+
                 if data.get('isOk') == '合格' or data.get('isOk') == '不合格':
                     check_count = data.get('checkCount', 0)
                     if check_count is None or check_count <= 0:
