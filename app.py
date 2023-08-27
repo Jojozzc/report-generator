@@ -674,10 +674,18 @@ def build_record_excel_config():
                             else:
                                 new_data = {'_pieceNo': f'{i}-{(i + 1)}'}
                             temp_list.append(new_data)
+                            new_data['orderId'] = data.get('orderId', None)
+                            new_data['sampleNo'] = data.get('sampleNo', None)
+                            new_data['kindNo'] = data.get('kindNo', None)
+                            new_data['empId'] = data.get('empId', None)
+                            new_data['specification'] = data.get('specification', None)
                     else:
                         data['_pieceNo'] = '1'
                         for i in range(0, check_count - 1):
-                            new_data = {'_pieceNo': f'{i + 2}'}
+                            new_data = {'_pieceNo': f'{i + 2}', 'orderId': data.get('orderId', None),
+                                        'sampleNo': data.get('sampleNo', None), 'kindNo': data.get('kindNo', None),
+                                        'empId': data.get('empId', None),
+                                        'specification': data.get('specification', None)}
                             temp_list.append(new_data)
                 else:
                     valid = False
