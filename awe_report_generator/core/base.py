@@ -88,6 +88,14 @@ class ConstantValueGetter(ValueGetter):
         return self.value
 
 
+class FunctionValueGetter(ValueGetter):
+    def __init__(self, get_value_function):
+        self.get_value_function = get_value_function
+
+    def get_value(self, data: dict, data_list: List[dict], global_data: dict, merged_data: dict):
+        return self.get_value_function(data=data, data_list=data_list, global_data=global_data, merged_data=merged_data)
+
+
 class DataListMappingValueGetter(ValueGetter):
     def __init__(self, mapping_data_key: str):
         self.mapping_data_key = mapping_data_key
