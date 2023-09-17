@@ -37,7 +37,7 @@ class ExcelFiledProperty:
     value_cast is a function: val = value_cast(value)
     """
 
-    def __init__(self, column_title, value_cast, desc: str, required=False, column_type=None, valid_check=None) -> None:
+    def __init__(self, column_title:str, value_cast, desc: str, required=False, column_type=None, valid_check=None, converter=None) -> None:
         '''
         :param column_type: see dtype in https://pandas.pydata.org/docs/reference/api/pandas.read_excel.html
         :param valid_check: function valid(value_cast(value))
@@ -166,7 +166,7 @@ class ReportGenerator(metaclass=ABCMeta):
         self.data_preparer = data_preparer
         for key, property in filed_mapping.items():
             if property is not None and property.column_type is not None:
-                self.dtype[key] = property.column_type
+                self.dtype[property.column_title.lower()] = property.column_type
 
     def execute(self, file_path: str, target_dir: str, sheet=DEFAULT_SHEET, global_param: dict = None,
                 on_finish_one=default_on_finish_one):
@@ -239,7 +239,7 @@ class ReportGenerator(metaclass=ABCMeta):
         return data_list
 
     def __read(self, file_path: str, sheet: str) -> List[dict]:
-        raw_datas = pandas.read_excel(file_path, sheet, dtype=self.dtype)
+        raw_datas = pandas.read_excel(file_path, sheet, dtype=str)
         data_list = []
         for i in range(raw_datas.shape[0]):
             row = raw_datas.iloc[i]
