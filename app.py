@@ -232,6 +232,29 @@ def build_ray_config():
                                             cast_value_to_str=awe_date_util.get_YYYYmmdd_cn, mapping_key='orderDate',
                                             data_list_sort_func=awe_date_util.parse_dot_date_time,
                                             data_list_sort_reverse=True),
+
+        # 监理单位时间
+        DataListCellParagraphAddRunResource(table_index=0, row=23, column_view_index=1,
+                                            style=DocCellStyle(alignment=WD_TABLE_ALIGNMENT.RIGHT), paragraph_index=3,
+                                            cast_value_to_str=awe_date_util.get_YYYYmmdd_cn, mapping_key='orderDate',
+                                            data_list_sort_func=awe_date_util.parse_dot_date_time,
+                                            data_list_sort_reverse=True),
+
+        # 项目部/装置时间
+        DataListCellParagraphAddRunResource(table_index=0, row=23, column_view_index=2,
+                                            style=DocCellStyle(alignment=WD_TABLE_ALIGNMENT.RIGHT), paragraph_index=3,
+                                            cast_value_to_str=awe_date_util.get_YYYYmmdd_cn, mapping_key='orderDate',
+                                            data_list_sort_func=awe_date_util.parse_dot_date_time,
+                                            data_list_sort_reverse=True),
+
+        # 检测单位：（签章）时间
+        DataListCellParagraphAddRunResource(table_index=0, row=23, column_view_index=3,
+                                            style=DocCellStyle(alignment=WD_TABLE_ALIGNMENT.RIGHT), paragraph_index=3,
+                                            cast_value_to_str=awe_date_util.get_YYYYmmdd_cn, mapping_key='orderDate',
+                                            data_list_sort_func=awe_date_util.parse_dot_date_time,
+                                            data_list_sort_reverse=True),
+
+
         # 坡口形式
         GlobalParamCellParagraphAddRunResource(table_index=0, row=5, column_view_index=5, mapping_key='groove',
                                                style=DocCellStyle(font_cn='楷体')),
