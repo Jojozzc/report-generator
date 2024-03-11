@@ -19,6 +19,17 @@ class RTHeaderResource(HeaderResource, ABC):
             doc.paragraphs[2].add_run(unit_name)
 
 
+
+class RayAdditionalHeaderResource(HeaderResource, ABC):
+
+    def set(self, doc: Document, data_list: List[Dict], global_data: dict):
+        project_name = global_data.get('projectName', '')
+        customorCompany = global_data.get('customorCompany', '')
+        doc.paragraphs[2].add_run(f'工程名称：{project_name}                         委托单位：{customorCompany}')
+
+
+
+
 class RecordHeaderResource(HeaderResource, ABC):
 
     def set(self, doc: Document, data_list: List[Dict], global_data: dict):
