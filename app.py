@@ -620,7 +620,7 @@ def build_ray_dect_record_20240310_config():
         "checkRatioKind": ExcelFiledProperty('K', cast_util.wrap_percent, '检测比例'),
         "level": ExcelFiledProperty('J', cast_util.wrap_str, '合格级别'),
 
-        "completeDate": ExcelFiledProperty('C', cast_util.wrap_str_no_none, '完成日期'),
+        "completeDate": ExcelFiledProperty('C', cast_util.wrap_str, '完成日期'),
 
         "sampleNo": ExcelFiledProperty('E', cast_util.wrap_str, '检件编号'),
         "kindNo": ExcelFiledProperty('F', cast_util.wrap_str, '焊口编号', column_type=str),
@@ -830,7 +830,7 @@ def build_ray_dect_record_con_20240310_config():
         divide_key: ExcelFiledProperty('D', cast_util.wrap_str, '委托单编号'),
         "checkRatioKind": ExcelFiledProperty('K', cast_util.wrap_percent, '检测比例'),
         "level": ExcelFiledProperty('J', cast_util.wrap_str, '合格级别'),
-        "completeDate": ExcelFiledProperty('C', cast_util.wrap_str_no_none, '完成日期'),
+        "completeDate": ExcelFiledProperty('C', cast_util.wrap_str, '完成日期'),
     }
 
     column_cell_resource_list = [
