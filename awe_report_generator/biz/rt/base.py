@@ -1,6 +1,7 @@
 from abc import ABC
 from typing import List, Dict
 
+from _decimal import Decimal
 from docx import Document
 
 from awe_report_generator.core.simple_table_doc_generator import HeaderResource, CellResource, \
@@ -111,8 +112,8 @@ class RTSummaryCellResource2(CellResource):
         check_count = 0
         ok_check_count = 0
 
-        meter_sum = 0
-        line_sum = 0
+        meter_sum = Decimal('0')
+        line_sum = Decimal('0')
 
         for data in data_list:
             check_c = data.get('checkCount', 0)
@@ -128,12 +129,12 @@ class RTSummaryCellResource2(CellResource):
             if detection_count is None:
                 pass
             else:
-                detection_count_num = cast_util.wrap_float(detection_count[:-1])
+                detection_count_num = cast_util.check_ret_float_str(detection_count[:-1])
                 if detection_count_num is not None:
                     if detection_count.endswith('m'):
-                        meter_sum += detection_count_num
+                        meter_sum = meter_sum + Decimal(detection_count_num)
                     elif detection_count.endswith('道'):
-                        line_sum += detection_count_num
+                        line_sum += line_sum + Decimal(detection_count_num)
 
         agg_val: str
         if meter_sum <= 0 and line_sum <= 0:
@@ -141,9 +142,9 @@ class RTSummaryCellResource2(CellResource):
         elif meter_sum <= 0:
             agg_val = f'共计{cast_util.wrap_int_str(line_sum)}道'
         elif line_sum <= 0:
-            agg_val = f'共计{round(meter_sum, 2)}米'
+            agg_val = f'共计{meter_sum}米'
         else:
-            agg_val = f'共计{cast_util.wrap_int_str(line_sum)}道，{round(meter_sum, 2)}米'
+            agg_val = f'共计{cast_util.wrap_int_str(line_sum)}道，{meter_sum}米'
         val = self.SUMMARY_FORMAT_ONE.format(data_size=data_size, ok_data_size=ok_data_size,
                                              bad_data_size=data_size - ok_data_size) + '，' + agg_val
 

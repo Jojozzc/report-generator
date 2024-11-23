@@ -36,6 +36,12 @@ def wrap_float(obj):
     return None
 
 
+def check_ret_float_str(obj):
+    if _is_float(obj):
+        return str(obj)
+    return None
+
+
 def wrap_percent(obj):
     if obj is None:
         return None
