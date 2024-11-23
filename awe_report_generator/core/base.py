@@ -177,9 +177,9 @@ class ReportGenerator(metaclass=ABCMeta):
             global_param = {}
         self._check_and_set_default_global_param(global_param)
         data_list = self.__read(file_path, sheet)
-        merged_data = self._merge_data(data_list=data_list, merge_fun_dict=self.merge_fun_dict)
         context = GeneratorExecuteContext(input_file_path=file_path, global_param=global_param)
         data_list = self._data_prepare(data_list, context)
+        merged_data = self._merge_data(data_list=data_list, merge_fun_dict=self.merge_fun_dict)
 
         raw_data_map = {}
         for raw_data in data_list:

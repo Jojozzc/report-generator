@@ -1,7 +1,7 @@
 from abc import ABCMeta, abstractmethod
 
 from docx import Document
-from typing import Dict, List
+from typing import Dict, List, Callable
 
 from docx.enum.table import WD_TABLE_ALIGNMENT
 from docx.shared import Pt
@@ -122,6 +122,15 @@ class MappingColumnCellsParagraphAddRunResource(ColumnCellsParagraphAddRunResour
         if self.mapping_data_key in data:
             return data[self.mapping_data_key]
         return None
+
+class FuncColumnCellsParagraphAddRunResource(ColumnCellsParagraphAddRunResource):
+    def __init__(self, table_index: int, table_data_start_row, column_view_index: int,
+                 paragraph_index=0, style=DocCellStyle(), func:Callable=None):
+        super().__init__(table_index, table_data_start_row, column_view_index, paragraph_index, style)
+        self.func = func
+
+    def get_value(self, data: dict, global_data: dict, merged_data: dict):
+        return self.func(data, global_data, merged_data)
 
 
 class CellParagraphAddRunResource(CellResource):

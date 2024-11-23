@@ -1,3 +1,4 @@
+import datetime
 import os
 import sys
 from typing import List, Dict
@@ -16,7 +17,7 @@ from awe_report_generator.core.simple_table_doc_generator import (
     SimpleCalculationColumnCellsParagraphAddRunResource,
     HeaderResource,
     GlobalParamCellParagraphAddRunResource,
-    DataListCellParagraphAddRunResource, CellParagraphAddRunValueSetter
+    DataListCellParagraphAddRunResource, CellParagraphAddRunValueSetter, FuncColumnCellsParagraphAddRunResource
 )
 from awe_report_generator.core.style import DocCellStyle
 from awe_report_generator.core.util import array_util
@@ -319,6 +320,48 @@ def build_surface_config():
         "detectionCount": ExcelFiledProperty('U', cast_util.wrap_str, '检测数量(道/m/m2/点)'),
 
     }
+
+    def surface_data_preparer(data_list: List[dict], context: GeneratorExecuteContext):
+        if data_list is None:
+            return data_list
+        for data in data_list:
+            od = cast_util.to_datetime(data['orderDate'])
+            cd = cast_util.to_datetime(data['completeDate'])
+            if od is None and cd is None:
+                continue
+            if od is None:
+                data['_recordDate'] = data['completeDate']
+            elif cd is None:
+                data['_recordDate'] = data['orderDate']
+            else:
+                if od > cd:
+                    data['_recordDate'] = data['orderDate']
+                else:
+                    data['_recordDate'] = data['completeDate']
+
+        return data_list
+
+
+    def ok_func(data: dict, global_data: dict, merged_data: dict):
+        if data is None:
+            return None
+        if data['isOk'] == '合格':
+            return data['detectionCount']
+        elif data['isOk'] == '不合格':
+            return '0'
+        else:
+            return None
+
+    def not_ok_func(data: dict, global_data: dict, merged_data: dict):
+        if data is None:
+            return None
+        if data['isOk'] == '合格':
+            return '0'
+        elif data['isOk'] == '不合格':
+            return data['detectionCount']
+        else:
+            return None
+
     column_cell_resource_list = [
         MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=5, column_view_index=0,
                                                   mapping_data_key='sampleNo', style=DocCellStyle(font_cn='楷体')),
@@ -331,12 +374,15 @@ def build_surface_config():
         MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=5, column_view_index=4,
                                                   mapping_data_key='detectionCount',
                                                   style=DocCellStyle(font_cn='楷体')),
-        MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=5, column_view_index=5,
-                                                  mapping_data_key='okCount', style=DocCellStyle(font_cn='楷体')),
-        SimpleCalculationColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=5, column_view_index=6,
-                                                            mapping_data_key_1='checkCount',
-                                                            mapping_data_key_2='okCount',
-                                                            operation='-', style=DocCellStyle(font_cn='楷体')),
+        # MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=5, column_view_index=5,
+        #                                           mapping_data_key='okCount', style=DocCellStyle(font_cn='楷体')),
+        # SimpleCalculationColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=5, column_view_index=6,
+        #                                                     mapping_data_key_1='checkCount',
+        #                                                     mapping_data_key_2='okCount',
+        #                                                     operation='-', style=DocCellStyle(font_cn='楷体')),
+
+        FuncColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=5, column_view_index=5, style=DocCellStyle(font_cn='楷体'), func=ok_func),
+        FuncColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=5, column_view_index=6, style=DocCellStyle(font_cn='楷体'), func=not_ok_func),
     ]
 
     doc_global_data_param_config_list = [
@@ -361,10 +407,22 @@ def build_surface_config():
                                                mapping_key='testingStandards', style=DocCellStyle(font_cn='楷体')),
         DataListCellParagraphAddRunResource(table_index=0, row=2, column_view_index=5, paragraph_index=0,
                                             mapping_key='level', style=DocCellStyle(font_cn='楷体')),
+        DataListCellParagraphAddRunResource(table_index=0, row=25, column_view_index=0,
+                                            style=DocCellStyle(alignment=WD_TABLE_ALIGNMENT.RIGHT), paragraph_index=4,
+                                            cast_value_to_str=awe_date_util.get_YYYYmmdd_cn,
+                                            mapping_key='_recordDate'),
+        DataListCellParagraphAddRunResource(table_index=0, row=25, column_view_index=1,
+                                            style=DocCellStyle(alignment=WD_TABLE_ALIGNMENT.RIGHT), paragraph_index=4,
+                                            cast_value_to_str=awe_date_util.get_YYYYmmdd_cn,
+                                            mapping_key='_recordDate'),
+        DataListCellParagraphAddRunResource(table_index=0, row=25, column_view_index=2,
+                                            style=DocCellStyle(alignment=WD_TABLE_ALIGNMENT.RIGHT), paragraph_index=4,
+                                            cast_value_to_str=awe_date_util.get_YYYYmmdd_cn,
+                                            mapping_key='_recordDate'),
         DataListCellParagraphAddRunResource(table_index=0, row=25, column_view_index=3,
                                             style=DocCellStyle(alignment=WD_TABLE_ALIGNMENT.RIGHT), paragraph_index=4,
                                             cast_value_to_str=awe_date_util.get_YYYYmmdd_cn,
-                                            mapping_key='completeDate'),
+                                            mapping_key='_recordDate'),
         RTSummaryCellResource2(table_index=0, row=24, column_view_index=0,
                                style=DocCellStyle(alignment=WD_TABLE_ALIGNMENT.LEFT, font_cn='楷体')),
     ]
@@ -375,7 +433,9 @@ def build_surface_config():
                                                column_cell_resource_list=column_cell_resource_list,
                                                cell_resource_list=cell_resource_list,
                                                doc_global_data_param_config_list=doc_global_data_param_config_list,
-                                               merge_fun_dict={'completeDate': date_merge_fun})
+                                               merge_fun_dict={'_recordDate': date_merge_fun},
+                                               data_preparer=surface_data_preparer)
+
     processor_widget = ProcessorQWidget(
         ProcessorUIParam(title='表面结果通知单台账', processor=report_generator, biz_code='surface'))
     base_ui_config = BaseUIConfig('表面结果通知单台账', processor_widget)
