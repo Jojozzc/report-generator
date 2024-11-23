@@ -321,16 +321,24 @@ def build_surface_config():
     }
 
     def ok_func(data: dict, global_data: dict, merged_data: dict):
+        if data is None:
+            return None
         if data['isOk'] == '合格':
             return data['detectionCount']
         elif data['isOk'] == '不合格':
             return '0'
+        else:
+            return None
 
     def not_ok_func(data: dict, global_data: dict, merged_data: dict):
+        if data is None:
+            return None
         if data['isOk'] == '合格':
             return '0'
         elif data['isOk'] == '不合格':
             return data['detectionCount']
+        else:
+            return None
 
     column_cell_resource_list = [
         MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=5, column_view_index=0,
