@@ -16,7 +16,7 @@ from awe_report_generator.core.simple_table_doc_generator import (
     SimpleCalculationColumnCellsParagraphAddRunResource,
     HeaderResource,
     GlobalParamCellParagraphAddRunResource,
-    DataListCellParagraphAddRunResource, CellParagraphAddRunValueSetter
+    DataListCellParagraphAddRunResource, CellParagraphAddRunValueSetter, FuncColumnCellsParagraphAddRunResource
 )
 from awe_report_generator.core.style import DocCellStyle
 from awe_report_generator.core.util import array_util
@@ -319,6 +319,19 @@ def build_surface_config():
         "detectionCount": ExcelFiledProperty('U', cast_util.wrap_str, '检测数量(道/m/m2/点)'),
 
     }
+
+    def ok_func(data: dict, global_data: dict, merged_data: dict):
+        if data['isOk'] == '合格':
+            return data['detectionCount']
+        elif data['isOk'] == '不合格':
+            return '0'
+
+    def not_ok_func(data: dict, global_data: dict, merged_data: dict):
+        if data['isOk'] == '合格':
+            return '0'
+        elif data['isOk'] == '不合格':
+            return data['detectionCount']
+
     column_cell_resource_list = [
         MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=5, column_view_index=0,
                                                   mapping_data_key='sampleNo', style=DocCellStyle(font_cn='楷体')),
@@ -331,12 +344,15 @@ def build_surface_config():
         MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=5, column_view_index=4,
                                                   mapping_data_key='detectionCount',
                                                   style=DocCellStyle(font_cn='楷体')),
-        MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=5, column_view_index=5,
-                                                  mapping_data_key='okCount', style=DocCellStyle(font_cn='楷体')),
-        SimpleCalculationColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=5, column_view_index=6,
-                                                            mapping_data_key_1='checkCount',
-                                                            mapping_data_key_2='okCount',
-                                                            operation='-', style=DocCellStyle(font_cn='楷体')),
+        # MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=5, column_view_index=5,
+        #                                           mapping_data_key='okCount', style=DocCellStyle(font_cn='楷体')),
+        # SimpleCalculationColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=5, column_view_index=6,
+        #                                                     mapping_data_key_1='checkCount',
+        #                                                     mapping_data_key_2='okCount',
+        #                                                     operation='-', style=DocCellStyle(font_cn='楷体')),
+
+        FuncColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=5, column_view_index=5, style=DocCellStyle(font_cn='楷体'), func=ok_func),
+        FuncColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=5, column_view_index=6, style=DocCellStyle(font_cn='楷体'), func=not_ok_func),
     ]
 
     doc_global_data_param_config_list = [
