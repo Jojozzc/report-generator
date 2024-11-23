@@ -1,3 +1,4 @@
+import datetime
 import os
 import sys
 from typing import List, Dict
@@ -320,6 +321,27 @@ def build_surface_config():
 
     }
 
+    def surface_data_preparer(data_list: List[dict], context: GeneratorExecuteContext):
+        if data_list is None:
+            return data_list
+        for data in data_list:
+            od = cast_util.to_datetime(data['orderDate'])
+            cd = cast_util.to_datetime(data['completeDate'])
+            if od is None and cd is None:
+                continue
+            if od is None:
+                data['_recordDate'] = data['completeDate']
+            elif cd is None:
+                data['_recordDate'] = data['orderDate']
+            else:
+                if od > cd:
+                    data['_recordDate'] = data['orderDate']
+                else:
+                    data['_recordDate'] = data['completeDate']
+
+        return data_list
+
+
     def ok_func(data: dict, global_data: dict, merged_data: dict):
         if data is None:
             return None
@@ -388,19 +410,19 @@ def build_surface_config():
         DataListCellParagraphAddRunResource(table_index=0, row=25, column_view_index=0,
                                             style=DocCellStyle(alignment=WD_TABLE_ALIGNMENT.RIGHT), paragraph_index=4,
                                             cast_value_to_str=awe_date_util.get_YYYYmmdd_cn,
-                                            mapping_key='completeDate'),
+                                            mapping_key='_recordDate'),
         DataListCellParagraphAddRunResource(table_index=0, row=25, column_view_index=1,
                                             style=DocCellStyle(alignment=WD_TABLE_ALIGNMENT.RIGHT), paragraph_index=4,
                                             cast_value_to_str=awe_date_util.get_YYYYmmdd_cn,
-                                            mapping_key='completeDate'),
+                                            mapping_key='_recordDate'),
         DataListCellParagraphAddRunResource(table_index=0, row=25, column_view_index=2,
                                             style=DocCellStyle(alignment=WD_TABLE_ALIGNMENT.RIGHT), paragraph_index=4,
                                             cast_value_to_str=awe_date_util.get_YYYYmmdd_cn,
-                                            mapping_key='completeDate'),
+                                            mapping_key='_recordDate'),
         DataListCellParagraphAddRunResource(table_index=0, row=25, column_view_index=3,
                                             style=DocCellStyle(alignment=WD_TABLE_ALIGNMENT.RIGHT), paragraph_index=4,
                                             cast_value_to_str=awe_date_util.get_YYYYmmdd_cn,
-                                            mapping_key='completeDate'),
+                                            mapping_key='_recordDate'),
         RTSummaryCellResource2(table_index=0, row=24, column_view_index=0,
                                style=DocCellStyle(alignment=WD_TABLE_ALIGNMENT.LEFT, font_cn='楷体')),
     ]
@@ -411,7 +433,9 @@ def build_surface_config():
                                                column_cell_resource_list=column_cell_resource_list,
                                                cell_resource_list=cell_resource_list,
                                                doc_global_data_param_config_list=doc_global_data_param_config_list,
-                                               merge_fun_dict={'completeDate': date_merge_fun})
+                                               merge_fun_dict={'_recordDate': date_merge_fun},
+                                               data_preparer=surface_data_preparer)
+
     processor_widget = ProcessorQWidget(
         ProcessorUIParam(title='表面结果通知单台账', processor=report_generator, biz_code='surface'))
     base_ui_config = BaseUIConfig('表面结果通知单台账', processor_widget)

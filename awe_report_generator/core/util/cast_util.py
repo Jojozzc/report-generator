@@ -1,7 +1,20 @@
+import datetime
+
+
 def wrap_str(obj):
     if obj is None or str(obj) == 'nan' or str(obj) == 'None':
         return None
     return str(obj)
+
+
+def to_datetime(obj):
+    if obj is None:
+        return None
+    try:
+        s = str(obj)
+        return datetime.datetime.strptime(s, "%Y.%m.%d")
+    except Exception as e:
+        return None
 
 
 def wrap_int(obj):
