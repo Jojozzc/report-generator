@@ -112,8 +112,11 @@ class RTSummaryCellResource2(CellResource):
         check_count = 0
         ok_check_count = 0
 
-        meter_sum = Decimal('0')
-        line_sum = Decimal('0')
+        sum_map = {
+            '道': Decimal('0'),
+            '米': Decimal('0'),
+            '点': Decimal('0'),
+        }
 
         for data in data_list:
             check_c = data.get('checkCount', 0)
@@ -132,19 +135,37 @@ class RTSummaryCellResource2(CellResource):
                 detection_count_num = cast_util.check_ret_float_str(detection_count[:-1])
                 if detection_count_num is not None:
                     if detection_count.endswith('m'):
-                        meter_sum = meter_sum + Decimal(detection_count_num)
+                        sum_map['米'] = sum_map['米'] + Decimal(detection_count_num)
                     elif detection_count.endswith('道'):
-                        line_sum += line_sum + Decimal(detection_count_num)
+                        sum_map['道'] = sum_map['道'] + Decimal(detection_count_num)
+                    elif detection_count.endswith('点'):
+                        sum_map['点'] = sum_map['点'] + Decimal(detection_count_num)
+        agg_val = ''
 
-        agg_val: str
-        if meter_sum <= 0 and line_sum <= 0:
-            agg_val = f'共计{data_size}道'
-        elif meter_sum <= 0:
-            agg_val = f'共计{cast_util.wrap_int_str(line_sum)}道'
-        elif line_sum <= 0:
-            agg_val = f'共计{meter_sum}米'
-        else:
-            agg_val = f'共计{cast_util.wrap_int_str(line_sum)}道，{meter_sum}米'
+        for kv in sum_map.items():
+            if kv[1] <= Decimal('0'):
+                continue
+            if agg_val == '':
+                agg_val = '共计'
+            else:
+                agg_val = agg_val + '，'
+
+            val = kv[1]
+
+            if kv[0] == '道':
+                val = cast_util.wrap_int_str(val)
+
+            agg_val = agg_val + str(val) + kv[0]
+
+
+        # if meter_sum <= 0 and line_sum <= 0:
+        #     agg_val = f'共计{data_size}道'
+        # elif meter_sum <= 0:
+        #     agg_val = f'共计{cast_util.wrap_int_str(line_sum)}道'
+        # elif line_sum <= 0:
+        #     agg_val = f'共计{meter_sum}米'
+        # else:
+        #     agg_val = f'共计{cast_util.wrap_int_str(line_sum)}道，{meter_sum}米'
         val = self.SUMMARY_FORMAT_ONE.format(data_size=data_size, ok_data_size=ok_data_size,
                                              bad_data_size=data_size - ok_data_size) + '，' + agg_val
 
