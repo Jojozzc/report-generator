@@ -23,3 +23,6 @@ app.py文件为入口，可以直接运行该文件进行debug。
 - awe_report_generotor/biz：该文件夹主要包含业务自定义的数据格式转换类。
 - awe_report_generotor/utils：该文件夹包含了工具类代码。
 - template文件夹：存放Word报表的模板文件。属于重要的资源文件。
+
+### awe_report_generotor/core
+最基础的是base.py文件，定义了核心抽象类ReportGenerator，目前项目里的两个处理类都是继承了该类，即同目录下的merged_excel_generator.py和simple_table_doc_generator.py。
