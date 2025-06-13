@@ -148,7 +148,11 @@ def build_rt_config():
 
 # 射线检测委托台账
 def build_ray_config():
+    # 按照orderId进行分组，相同的orderId数据行会被汇总到同一个Word文件中。
     divide_key = 'orderId'
+
+    # 字段映射，也就是读取Excel后，将具体的列映射为自定义的key
+    # ExcelFiledProperty就是规定了对应的Excel列、数据转换方法和该列的描述
     filed_mapping = {
         "orderDate": ExcelFiledProperty('A', cast_util.wrap_str, '委托日期'),
         "completeDate": ExcelFiledProperty('B', cast_util.wrap_str, '完成时间'),
@@ -173,6 +177,8 @@ def build_ray_config():
 
     }
 
+    # 定义了Excel的列，是如何映射到Word文档里的表格的
+    # 例如sampleNo映射到Word文档的第一个表格的第7行第一列
     column_cell_resource_list = [
         MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=7, column_view_index=1,
                                                   mapping_data_key='sampleNo', style=DocCellStyle(font_cn='楷体')),
@@ -189,6 +195,7 @@ def build_ray_config():
                                                   mapping_data_key='material', style=DocCellStyle(font_cn='楷体')),
     ]
 
+    # 定义了需要用户输入哪些全局的字段
     doc_global_data_param_config_list = [
         DocGlobalParamConfig('projectName', None, '工程名称', False),
         DocGlobalParamConfig('customorCompany', None, '委托单位', False),
@@ -200,6 +207,7 @@ def build_ray_config():
         DocGlobalParamConfig('groove', 'V', '坡口形式', False),
     ]
 
+    # 定义了全局变量如何映射到Word里
     cell_resource_list = [
         # 工程名称
         GlobalParamCellParagraphAddRunResource(table_index=0, row=0, column_view_index=2,
@@ -281,7 +289,10 @@ def build_ray_config():
                                                style=DocCellStyle(font_cn='楷体')),
     ]
 
+    # 定义了目标目标的位置
     template_path = os.path.join(os.getcwd(), 'template/ray/TEMPLATE.docx')
+
+    # 生成处理器
     report_generator = SimpleTableDocGenerator(template_path=template_path, filed_mapping=filed_mapping,
                                                divide_key=divide_key,
                                                header_resource=HeaderResource(),
@@ -883,6 +894,7 @@ if __name__ == '__main__':
     print(os.getcwd())
     app = QApplication(sys.argv)
 
+    # 主要做不同处理流程的绑定
     ui_config_list = [
         build_ray_config(),
         build_rt_config(),
@@ -892,6 +904,8 @@ if __name__ == '__main__':
         build_ray_dect_record_con_20240310_config(),
 
     ]
+
+    # 这里的HomePageQWidget是核心界面
     ui = HomePageQWidget(ui_config_list)
     ui.show()
 
