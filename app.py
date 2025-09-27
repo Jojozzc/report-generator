@@ -333,22 +333,26 @@ def build_surface_config():
     }
 
     def surface_data_preparer(data_list: List[dict], context: GeneratorExecuteContext):
-        if data_list is None:
+        if data_list is None or len(data_list) == 0:
             return data_list
+
+        # 第一步：计算每个orderId的最大completeDate
+        max_dates_by_order = {}
+        max_dates_by_order_ori = {}
+
         for data in data_list:
-            od = cast_util.to_datetime(data['orderDate'])
+            order_id = data['orderId']
             cd = cast_util.to_datetime(data['completeDate'])
-            if od is None and cd is None:
-                continue
-            if od is None:
-                data['_recordDate'] = data['completeDate']
-            elif cd is None:
-                data['_recordDate'] = data['orderDate']
-            else:
-                if od > cd:
-                    data['_recordDate'] = data['orderDate']
-                else:
-                    data['_recordDate'] = data['completeDate']
+
+            # 如果这个order_id还没有记录，或者当前日期更大，则更新最大值
+            if order_id not in max_dates_by_order or cd > max_dates_by_order[order_id]:
+                max_dates_by_order_ori[order_id] = data['completeDate']
+                max_dates_by_order[order_id] = cd
+
+        # 第二步：为每个数据项添加max_date字段
+        for data in data_list:
+            order_id = data['orderId']
+            data['max_date'] = max_dates_by_order_ori[order_id]
 
         return data_list
 
@@ -407,7 +411,7 @@ def build_surface_config():
         DataListCellParagraphAddRunResource(table_index=0, row=0, column_view_index=3, paragraph_index=0,
                                             mapping_key=divide_key, style=DocCellStyle(font_cn='楷体')),
         DataListCellParagraphAddRunResource(table_index=0, row=1, column_view_index=3, paragraph_index=0,
-                                            mapping_key='completeDate', style=DocCellStyle(font_cn='楷体'),
+                                            mapping_key='max_date', style=DocCellStyle(font_cn='楷体'),
                                             data_list_sort_func=awe_date_util.parse_dot_date_time,
                                             data_list_sort_reverse=True),
         GlobalParamCellParagraphAddRunResource(table_index=0, row=1, column_view_index=1, mapping_key='customerCompany',
@@ -421,19 +425,19 @@ def build_surface_config():
         DataListCellParagraphAddRunResource(table_index=0, row=25, column_view_index=0,
                                             style=DocCellStyle(alignment=WD_TABLE_ALIGNMENT.RIGHT), paragraph_index=4,
                                             cast_value_to_str=awe_date_util.get_YYYYmmdd_cn,
-                                            mapping_key='_recordDate'),
+                                            mapping_key='max_date'),
         DataListCellParagraphAddRunResource(table_index=0, row=25, column_view_index=1,
                                             style=DocCellStyle(alignment=WD_TABLE_ALIGNMENT.RIGHT), paragraph_index=4,
                                             cast_value_to_str=awe_date_util.get_YYYYmmdd_cn,
-                                            mapping_key='_recordDate'),
+                                            mapping_key='max_date'),
         DataListCellParagraphAddRunResource(table_index=0, row=25, column_view_index=2,
                                             style=DocCellStyle(alignment=WD_TABLE_ALIGNMENT.RIGHT), paragraph_index=4,
                                             cast_value_to_str=awe_date_util.get_YYYYmmdd_cn,
-                                            mapping_key='_recordDate'),
+                                            mapping_key='max_date'),
         DataListCellParagraphAddRunResource(table_index=0, row=25, column_view_index=3,
                                             style=DocCellStyle(alignment=WD_TABLE_ALIGNMENT.RIGHT), paragraph_index=4,
                                             cast_value_to_str=awe_date_util.get_YYYYmmdd_cn,
-                                            mapping_key='_recordDate'),
+                                            mapping_key='max_date'),
         RTSummaryCellResource2(table_index=0, row=24, column_view_index=0,
                                style=DocCellStyle(alignment=WD_TABLE_ALIGNMENT.LEFT, font_cn='楷体')),
     ]
