@@ -181,18 +181,18 @@ def build_ray_config():
     # 例如sampleNo映射到Word文档的第一个表格的第7行第一列
     column_cell_resource_list = [
         MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=7, column_view_index=1,
-                                                  mapping_data_key='sampleNo', style=DocCellStyle(font_cn='楷体')),
+                                                  mapping_data_key='sampleNo', style=DocCellStyle(font_cn='楷体', font_size=7.5)),
         MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=7, column_view_index=2,
-                                                  mapping_data_key='lineNo', style=DocCellStyle(font_cn='楷体')),
+                                                  mapping_data_key='lineNo', style=DocCellStyle(font_cn='楷体', font_size=7.5)),
         MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=7, column_view_index=3,
-                                                  mapping_data_key='kindNo', style=DocCellStyle(font_cn='楷体')),
+                                                  mapping_data_key='kindNo', style=DocCellStyle(font_cn='楷体', font_size=7.5)),
         MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=7, column_view_index=4,
-                                                  mapping_data_key='empId', style=DocCellStyle(font_cn='楷体')),
+                                                  mapping_data_key='empId', style=DocCellStyle(font_cn='楷体', font_size=7.5)),
         MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=7, column_view_index=5,
                                                   mapping_data_key='specification',
                                                   style=DocCellStyle(font_cn='楷体', font_size=7.5)),
         MappingColumnCellsParagraphAddRunResource(table_index=0, table_data_start_row=7, column_view_index=6,
-                                                  mapping_data_key='material', style=DocCellStyle(font_cn='楷体')),
+                                                  mapping_data_key='material', style=DocCellStyle(font_cn='楷体', font_size=7.5)),
     ]
 
     # 定义了需要用户输入哪些全局的字段
@@ -216,15 +216,15 @@ def build_ray_config():
                                                mapping_key='projectName'),
         # 单位工程名称
         DataListCellParagraphAddRunResource(table_index=0, row=0, column_view_index=2,
-                                            style=DocCellStyle(alignment=WD_TABLE_ALIGNMENT.LEFT, font_cn='楷体'),
+                                            style=DocCellStyle(alignment=WD_TABLE_ALIGNMENT.LEFT, font_cn='楷体', font_size=7.5),
                                             paragraph_index=1, cast_value_to_str=cast_util.wrap_str,
                                             mapping_key='unitName'),
         # 委托单位
         GlobalParamCellParagraphAddRunResource(table_index=0, row=1, column_view_index=1, mapping_key='customorCompany',
-                                               style=DocCellStyle(font_cn='楷体')),
+                                               style=DocCellStyle(font_cn='楷体', font_size=7.5)),
         # 委托单编号
         DataListCellParagraphAddRunResource(table_index=0, row=1, column_view_index=3, mapping_key=divide_key,
-                                            style=DocCellStyle(font_cn='楷体')),
+                                            style=DocCellStyle(font_cn='楷体', font_size=7.5)),
         # 区号
         DataListCellParagraphAddRunResource(table_index=0, row=2, column_view_index=3, mapping_key='areaNo',
                                             style=DocCellStyle(font_cn='楷体')),
